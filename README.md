@@ -1,6 +1,8 @@
 # effectsong
 effectsong.com
 
+https://discord.gg/Em6nXUnQ
+
 오디오 비주얼라이저 및 편집기
 
 목표: 오디오 인터랙티브 쉐이더 아트의 대중화
