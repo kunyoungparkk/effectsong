@@ -7,6 +7,7 @@
 [xX][dD][eE][bB][uU][gG]/
 [xX][rR][eE][lL][eE][aA][sS][eE]/
 build/
+Win32/
 x64/
 x86/
 ARM/
@@ -15,8 +16,9 @@ ARM64/
 # exception
 !thirdparty/
 !thirdparty/**/
-!thirdparty/**/*.a
-!thirdparty/**/*.so
-!thirdparty/**/*.dll
-!thirdparty/**/*.lib
-!thirdparty/**/*.exe
+!thirdparty/**/build/
+!thirdparty/**/Win32/
+!thirdparty/**/x64/
+!thirdparty/**/x86/
+!thirdparty/**/ARM/
+!thirdparty/**/ARM64/
