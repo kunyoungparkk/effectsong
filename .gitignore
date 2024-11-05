@@ -1,0 +1,13 @@
+# User-specific folders
+.vs/
+.idea/
+.vscode/
+
+# Build results
+[xX][dD][eE][bB][uU][gG]/
+[xX][rR][eE][lL][eE][aA][sS][eE]/
+build/
+x64/
+x86/
+ARM/
+ARM64/
