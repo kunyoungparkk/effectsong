@@ -11,6 +11,12 @@ x64/
 x86/
 ARM/
 ARM64/
+
 # exception
 !thirdparty/
-!thirdparty/**/*
+!thirdparty/**/
+!thirdparty/**/build/
+!thirdparty/**/x64/
+!thirdparty/**/x86/
+!thirdparty/**/ARM/
+!thirdparty/**/ARM64/
