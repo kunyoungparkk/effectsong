@@ -1,7 +1,3 @@
-# exception
-!thirdparty/
-!thirdparty/**/*
-
 # User-specific folders
 .vs/
 .idea/
@@ -15,3 +11,6 @@ x64/
 x86/
 ARM/
 ARM64/
+# exception
+!thirdparty/
+!thirdparty/**/*
