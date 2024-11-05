@@ -37,7 +37,8 @@ int main(int argc, char* argv[]) {
 
 	Renderer* renderer = Renderer::getInstance();
 
-	util::loadGLTFData("../../res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf");
+	//util::loadGLTFData("../../res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf");
+	util::loadGLTFData("../../res/2.0/NewFolder/untitled.gltf");
 
 	SDL_Event event;
 	bool running = true;
@@ -57,7 +58,7 @@ int main(int argc, char* argv[]) {
 		last_time = current_time;
 
 		const uint8_t* state = SDL_GetKeyboardState(nullptr);
-		Camera* activeCam = renderer->getActiveScene()->getActiveCamera();
+		Node* activeCam = renderer->getActiveScene()->getActiveCamera()->getNode();
 		if (state[SDL_SCANCODE_W]) {
 			activeCam->setPosition(activeCam->getPosition() +
 				-1.0f * cam_speed * delta_time *
@@ -95,7 +96,6 @@ int main(int argc, char* argv[]) {
 				break;
 			case SDL_MOUSEMOTION:
 				if (b_mouse_pressed) {
-					Camera* activeCam = renderer->getActiveScene()->getActiveCamera();
 					cam_xRot += event.button.y - prev_mouse_coord[1];
 					//TODO: 45도쯤 넘어가면 이상하게 흔들리는 현상 해결
 					cam_xRot = glm::clamp(cam_xRot, -40.0f, 40.0f);
@@ -116,6 +116,7 @@ int main(int argc, char* argv[]) {
 				break;
 			}
 		}
+		renderer->update();
 		// render
 		renderer->render();
 		SDL_GL_SwapWindow(window);

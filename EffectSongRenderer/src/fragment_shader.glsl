@@ -2,17 +2,18 @@
 precision mediump float;
 
 struct Material {
-    float ambient;
-    float diffuse;
-    float specular;
-    float emission;
-    sampler2D diffuseTexture;
+    vec4 baseColor;
+    vec3 specularColor;
+    vec3 emissionColor;
 };
+sampler2D baseColorTexture;
+sampler2D emissiveTexture;
 
 struct DirectionalLight {
     vec3 position;
     float intensity;
     vec3 color;
+    vec3 direction;
 };
 struct PointLight {
     vec3 position;
@@ -25,6 +26,7 @@ struct SpotLight {
     float intensity;
     vec3 color;
     float range;
+    vec3 direction;
     float innerConeAngle;
     float outerConeAngle;
 };
@@ -34,10 +36,12 @@ const int MAX_POINT_LIGHTS = 10;
 const int MAX_SPOT_LIGHTS = 10;
 
 uniform Material material;
-uniform DirectionalLight[MAX_DIRECTIONAL_LIGHTS];
-uniform PointLight[MAX_POINT_LIGHTS];
-uniform SpotLight[MAX_SPOT_LIGHTS];
-uniform vec3 cameraPos;
+
+uniform DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
+uniform PointLight pointLights[MAX_POINT_LIGHTS];
+uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
+
+uniform vec3 cameraWorldPos;
 
 in vec3 fragPos;
 in vec3 fragNormal;
@@ -63,12 +67,28 @@ vec3 calculateSpotLight(SpotLight light)
 }
 
 void main() {
-    vec3 texColor = texture(material.diffuseTexture, fragTexcoord).rgb;
-
-    vec3 lightPower = vec3(0,0,0);
+    vec3 texColor = texture(baseColorTexture, fragTexcoord).rgb;
     
+    vec3 lightPower = vec3(0.0, 0.0, 0.0);
+    
+    for(int i=0; i<numDirectionalLights; i++)
+    {
+        vec3 currentLightPower = vec3(0.0, 0.0, 0.0);
+        //ambient
 
+        //diffuse
+        
+        //specular
+        vec3 view = normalize(cameraWorldPos - fragPos);
+        vec3 reflection = reflect(-normalize(directionalLights[i].direction), normalize(fragNormal));
+        float specularFactor = pow(max(dot(view, reflection), 0.0), 30.0);
+        currentLightPower += vec3(1.0, 1.0, 1.0) * specularFactor;
 
-	FragColor = vec4(texColor, 1.0);
-    //FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+        //emission
+        //currentLightPower += material.emissionColor;
+
+        lightPower += currentLightPower;
+    }
+
+	FragColor = vec4(lightPower * texColor, 1.0);
 }

@@ -18,6 +18,7 @@ class Renderer {
     return instance;
   }
 
+  void update();
   void render();
   void addScene(Scene* scene);
   void removeScene(Scene* scene);
@@ -34,6 +35,7 @@ class Renderer {
  private:
   Renderer();
   static Renderer* instance;
+  GLuint m_shaderProgram;
 
   std::list<Scene*> m_scenes;
   std::unordered_map<std::string, Material*> m_materials;

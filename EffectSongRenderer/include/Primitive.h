@@ -12,8 +12,7 @@ class Primitive {
  public:
   Primitive(cgltf_primitive* cgltfPrimitive);
 
-  void render(glm::mat4 modelMatrix, glm::mat4 projectionMatrix,
-              glm::mat4 viewMatrix);
+  void render(GLuint shaderProgram);
 
  private:
   std::vector<Vertex> m_vertices;

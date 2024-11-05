@@ -1,39 +1,34 @@
 #pragma once
-#include "Node.h"
+#include "common.h"
+class Node;
 
-class Camera : public Node {
+enum class ProjectionType {
+	PERSPECTIVE,
+	ORTHOGRAPHIC
+};
+class Camera {
  public:
-  Camera(cgltf_node* cgltfNode, Node* parent, Scene* scene);     
-  glm::mat4 getViewMatrix();
+  Camera(Node* node, cgltf_camera* cgltf_camera);
+  Camera(Node* node);
 
-  float getAspectRatio();
-  float getFov();
-  float getWidth();
-  float getHeight();
-  float getFar();
-  float getNear();
-
-  void setAspectRatio(float aspectRatio);
-  void setFov(float fov);
-  void setWidth(float width);
-  void setHeight(float height);
-  void setFar(float far);
-  void setNear(float near);
-
- private:
-  bool m_isPerspective = true;
+  ProjectionType projectionType = ProjectionType::PERSPECTIVE;
   
   //perspective property
-  float m_aspectRatio = 0.0f;
-  float m_yFov = 45.0f;
+  float aspectRatio = 0.0f;
+  float fov = 45.0f;
 
   //orthographic property
-  float m_xMag = 0.0f;
-  float m_yMag = 0.0f;
+  float xMag = 0.0f;
+  float yMag = 0.0f;
 
   //common
-  float m_zFar = 1000.0f;
-  float m_zNear = 0.1f;
+  float zFar = 1000.0f;
+  float zNear = 0.1f;
  
+  std::string name;
+
+  Node* getNode();
+private:
   cgltf_camera* m_cgltf_camera = nullptr;
+  Node* m_node;
 };

@@ -1,62 +1,55 @@
 #include "Camera.h"
+#include "Node.h"
 
-Camera::Camera(cgltf_node* cgltfNode, Node* parent, Scene* scene)
-    : Node(cgltfNode, parent, scene) {
-  if (cgltfNode) {
-    m_cgltf_camera = cgltfNode->camera;
-    if (!cgltfNode->camera) {
-      // ERROR!
-      return;
-    }
-    if (cgltfNode->camera->type != cgltf_camera_type_perspective &&
-        cgltfNode->camera->type != cgltf_camera_type_orthographic) {
-      // ERROR!
-      return;
-    }
+Camera::Camera(Node* node, cgltf_camera* cgltf_camera)
+{
+	m_cgltf_camera = cgltf_camera;
+	m_node = node;
 
-    m_isPerspective = cgltfNode->camera->type == cgltf_camera_type_perspective;
+	if (!m_cgltf_camera) {
+		// TODO: ERROR!
+		exit(0);
+	}
+	if (m_cgltf_camera->type != cgltf_camera_type_perspective &&
+		m_cgltf_camera->type != cgltf_camera_type_orthographic) {
+		// TODO: ERROR!
+		exit(0);
+	}
 
-    if (cgltfNode->camera->type == cgltf_camera_type_perspective) {
-      m_zFar = m_cgltf_camera->data.perspective.zfar;
-      m_zNear = m_cgltf_camera->data.perspective.znear;
-      if (m_cgltf_camera->data.perspective.has_aspect_ratio) {
-        m_aspectRatio = m_cgltf_camera->data.perspective.aspect_ratio;
-      }
-      m_yFov = m_cgltf_camera->data.perspective.yfov;
-    } else if (cgltfNode->camera->type == cgltf_camera_type_perspective) {
-      m_zFar = m_cgltf_camera->data.orthographic.zfar;
-      m_zNear = m_cgltf_camera->data.orthographic.znear;
-      m_xMag = m_cgltf_camera->data.orthographic.xmag;
-      m_yMag = m_cgltf_camera->data.orthographic.ymag;
-    }
-  } else {
-    
-  }
+	name = m_cgltf_camera->name;
+
+	switch (m_cgltf_camera->type)
+	{
+	case cgltf_camera_type_perspective:
+		projectionType = ProjectionType::PERSPECTIVE;
+		zFar = m_cgltf_camera->data.perspective.zfar;
+		zNear = m_cgltf_camera->data.perspective.znear;
+		if (m_cgltf_camera->data.perspective.has_aspect_ratio) {
+			aspectRatio = m_cgltf_camera->data.perspective.aspect_ratio;
+		}
+		fov = m_cgltf_camera->data.perspective.yfov;
+		break;
+	case cgltf_camera_type_orthographic:
+		projectionType = ProjectionType::ORTHOGRAPHIC;
+		zFar = m_cgltf_camera->data.orthographic.zfar;
+		zNear = m_cgltf_camera->data.orthographic.znear;
+		xMag = m_cgltf_camera->data.orthographic.xmag;
+		yMag = m_cgltf_camera->data.orthographic.ymag;
+		break;
+	default:
+		//TODO: ERROR
+		exit(0);
+		break;
+	}
 }
 
-glm::mat4 Camera::getViewMatrix() {
-  return glm::inverse(getModelMatrix()); }
+Camera::Camera(Node* node)
+{
+	m_cgltf_camera = nullptr;
+	m_node = node;
+}
 
-float Camera::getAspectRatio() { return m_aspectRatio; }
-
-float Camera::getFov() { return m_yFov; }
-
-float Camera::getWidth() { return m_xMag; }
-
-float Camera::getHeight() { return m_yMag; }
-
-float Camera::getFar() { return m_zFar; }
-
-float Camera::getNear() { return m_zNear; }
-
-void Camera::setAspectRatio(float aspectRatio) { m_aspectRatio = aspectRatio; }
-
-void Camera::setFov(float fov) { m_yFov = fov; }
-
-void Camera::setWidth(float width) { m_xMag = width; }
-
-void Camera::setHeight(float height) { m_yMag = height; }
-
-void Camera::setFar(float far) { m_zFar = far; }
-
-void Camera::setNear(float near) { m_zNear = near; }
+Node* Camera::getNode()
+{
+	return m_node;
+}

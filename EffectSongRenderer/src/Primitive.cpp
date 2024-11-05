@@ -130,12 +130,11 @@ Primitive::Primitive(cgltf_primitive* cgltfPrimitive) {
   glBindVertexArray(0);
 }
 
-void Primitive::render(glm::mat4 modelMatrix, glm::mat4 projectionMatrix,
-                       glm::mat4 viewMatrix) {
+void Primitive::render(GLuint shaderProgram) {
   glBindVertexArray(VAO);
 
   if (m_material) {
-    m_material->bind(modelMatrix, projectionMatrix, viewMatrix);
+    m_material->bind(shaderProgram);
   }
 
   // Draw

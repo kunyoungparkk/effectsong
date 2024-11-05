@@ -154,6 +154,7 @@ copy "$(ProjectDir)..\..\thirdparty\SDL2-2.30.5\lib\x64\SDL2.dll" "$(ProjectDir)
   <ItemGroup>
     <ClCompile Include="..\..\src\Camera.cpp" />
     <ClCompile Include="..\..\src\GLTFLoader.cpp" />
+    <ClCompile Include="..\..\src\Light.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\Material.cpp" />
     <ClCompile Include="..\..\src\Node.cpp" />
@@ -166,6 +167,7 @@ copy "$(ProjectDir)..\..\thirdparty\SDL2-2.30.5\lib\x64\SDL2.dll" "$(ProjectDir)
     <ClInclude Include="..\..\include\Camera.h" />
     <ClInclude Include="..\..\include\common.h" />
     <ClInclude Include="..\..\include\GLTFLoader.h" />
+    <ClInclude Include="..\..\include\Light.h" />
     <ClInclude Include="..\..\include\Material.h" />
     <ClInclude Include="..\..\include\Node.h" />
     <ClInclude Include="..\..\include\Primitive.h" />
