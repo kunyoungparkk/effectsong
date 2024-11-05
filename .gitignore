@@ -1,3 +1,7 @@
+# exception
+!thirdparty/
+!thirdparty/**/*
+
 # User-specific folders
 .vs/
 .idea/
