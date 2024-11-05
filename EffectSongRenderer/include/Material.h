@@ -9,7 +9,7 @@ class Material {
  private:
   cgltf_material* m_material;
   Texture* m_baseColorTexture = nullptr;
+  Texture* m_emissiveTexture = nullptr;
   Texture* m_metallicRoughnessTexture = nullptr;
   Texture* m_normalTexture = nullptr;
-  Texture* m_aoTexture = nullptr;
 };

@@ -4,7 +4,7 @@
 
 #include "stb_image.h"
 
-Texture::Texture(std::string& gltfPath, cgltf_texture* cgltf_texture)
+Texture::Texture(std::string& gltfPath, cgltf_texture* cgltf_texture, bool bSRGB)
     : m_cgltfTexture(cgltf_texture) {
   int width, height, nrChannels;
   std::string combinedPath = gltfPath + cgltf_texture->image->uri;
@@ -30,7 +30,7 @@ Texture::Texture(std::string& gltfPath, cgltf_texture* cgltf_texture)
   
   // 咆胶贸 单捞磐 积己
   if (nrChannels == 3) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+    glTexImage2D(GL_TEXTURE_2D, 0, bSRGB ? GL_SRGB:GL_RGB, width, height, 0, GL_RGB,
                  GL_UNSIGNED_BYTE, m_data);
   } else if (nrChannels == 4) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
@@ -41,7 +41,7 @@ Texture::Texture(std::string& gltfPath, cgltf_texture* cgltf_texture)
 
 Texture::~Texture() { stbi_image_free(m_data); }
 
-void Texture::bind() {
-  glActiveTexture(GL_TEXTURE0);
+void Texture::bind(int texIdx) {
+  glActiveTexture(GL_TEXTURE0 + texIdx);
   glBindTexture(GL_TEXTURE_2D, m_textureID);
 }

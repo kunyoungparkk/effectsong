@@ -7,7 +7,9 @@ struct Material {
     vec3 emissionColor;
 };
 sampler2D baseColorTexture;
+sampler2D metallicRoughnessTexture;
 sampler2D emissiveTexture;
+sampler2D normalTexture;
 
 struct DirectionalLight {
     vec3 position;
@@ -46,6 +48,7 @@ uniform vec3 cameraWorldPos;
 in vec3 fragPos;
 in vec3 fragNormal;
 in vec2 fragTexcoord;
+in mat3 TBN;
 
 uniform int numDirectionalLights;
 uniform int numPointLights;
@@ -67,28 +70,33 @@ vec3 calculateSpotLight(SpotLight light)
 }
 
 void main() {
-    vec3 texColor = texture(baseColorTexture, fragTexcoord).rgb;
-    
     vec3 lightPower = vec3(0.0, 0.0, 0.0);
+    //TODO: normal texture 있다면.. 없으면 fragNormal 사용하기
     
+    vec3 normal = normalize(TBN * (2.0 * texture(normalTexture, fragTexcoord).rgb - 1.0));
+
     for(int i=0; i<numDirectionalLights; i++)
     {
         vec3 currentLightPower = vec3(0.0, 0.0, 0.0);
+        
+        vec3 lightDirection = normalize(-directionalLights[i].direction);
         //ambient
 
         //diffuse
-        
+        float diffuseFactor = max(dot(normal, lightDirection), 0.0);
+        currentLightPower += vec3(0.5, 0.5, 0.5) * diffuseFactor;
+
         //specular
         vec3 view = normalize(cameraWorldPos - fragPos);
-        vec3 reflection = reflect(-normalize(directionalLights[i].direction), normalize(fragNormal));
-        float specularFactor = pow(max(dot(view, reflection), 0.0), 30.0);
+        vec3 reflection = reflect(lightDirection, normal);
+        float specularFactor = pow(max(dot(view, reflection), 0.0), 50.0);
         currentLightPower += vec3(1.0, 1.0, 1.0) * specularFactor;
-
-        //emission
-        //currentLightPower += material.emissionColor;
 
         lightPower += currentLightPower;
     }
-
-	FragColor = vec4(lightPower * texColor, 1.0);
+    
+    vec3 baseColorTextureColor = texture(baseColorTexture, fragTexcoord).rgb;
+    vec3 emissiveTextureColor = texture(emissiveTexture, fragTexcoord).rgb;
+    
+	FragColor = vec4(lightPower * baseColorTextureColor + emissiveTextureColor * material.emissionColor, 1.0);
 }
