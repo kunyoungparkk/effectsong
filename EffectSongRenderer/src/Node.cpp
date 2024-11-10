@@ -51,9 +51,6 @@ void Node::update() {
 }
 
 void Node::render(GLuint shaderProgram) {
-  if (m_light) {
-
-  }
   //vertex shader
   GLint worldMatLoc = glGetUniformLocation(shaderProgram, "worldMat");
   glUniformMatrix4fv(worldMatLoc, 1, GL_FALSE, glm::value_ptr(getModelMatrix()));
@@ -88,11 +85,48 @@ void Node::setRotation(glm::quat rotation) { m_rotation = rotation; }
 
 void Node::setScale(glm::vec3 scale) { m_scale = scale; }
 
+glm::vec3 Node::getGlobalPosition() const
+{
+    glm::vec3 position = m_position;
+    if (m_parent) {
+        position = m_parent->getModelMatrix() * glm::vec4(m_position, 1.0);
+    }
+    return position;
+}
+
+glm::quat Node::getGlobalRotation() const
+{
+    glm::quat rotation = m_rotation;
+    if (m_parent) {
+        rotation = m_parent->getGlobalRotation() * rotation;
+    }
+    return rotation;
+}
+
+glm::vec3 Node::getGlobalScale() const
+{
+    glm::vec3 scale = m_scale;
+    if (m_parent) {
+        scale = m_parent->getGlobalScale() * scale;
+    }
+    return scale;
+}
+
 glm::vec3 Node::getFront() {
   return glm::rotate(m_rotation, glm::vec3(0, 0, 1));
 }
 
 glm::vec3 Node::getLeft() { return glm::normalize(glm::cross(glm::vec3(0, 1, 0), getFront())); }
+
+glm::vec3 Node::getGlobalFront()
+{
+    return glm::rotate(getGlobalRotation(), glm::vec3(0, 0, 1));
+}
+
+glm::vec3 Node::getGlobalLeft()
+{
+    return glm::normalize(glm::cross(glm::vec3(0, 1, 0), getGlobalFront()));
+}
 
 Light* Node::getLight()
 {

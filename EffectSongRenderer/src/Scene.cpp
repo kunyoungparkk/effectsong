@@ -55,6 +55,7 @@ void Scene::render(GLuint shaderProgram) {
 	int pointLightCnt = 0;
 	int spotLightCnt = 0;
 	std::string uniformName;
+	//TODO: Light의 Position은 global position을 넣어줘야 함.
 	for (auto iter = lights.begin(); iter != lights.end(); iter++) {
 		Light* light = (*iter);
 		switch (light->lightType) {
@@ -65,7 +66,7 @@ void Scene::render(GLuint shaderProgram) {
 			}
 			uniformName = "directionalLights[" + std::to_string(dirLightCnt) + "].position";
 			GLint lightPosLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glUniform3fv(lightPosLoc, 1, glm::value_ptr(light->getNode()->getPosition()));
+			glUniform3fv(lightPosLoc, 1, glm::value_ptr(light->getNode()->getGlobalPosition()));
 
 			uniformName = "directionalLights[" + std::to_string(dirLightCnt) + "].intensity";
 			GLint lightIntensityLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
@@ -77,8 +78,7 @@ void Scene::render(GLuint shaderProgram) {
 
 			uniformName = "directionalLights[" + std::to_string(dirLightCnt) + "].direction";
 			GLint lightDirLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glm::vec3 rotatedFront(glm::rotate(light->getNode()->getRotation(), glm::vec3(0.0f, 0.0f, -1.0f)));
-			glUniform3fv(lightDirLoc, 1, glm::value_ptr(glm::normalize(rotatedFront)));
+			glUniform3fv(lightDirLoc, 1, glm::value_ptr(glm::normalize(-1.0f * light->getNode()->getGlobalFront())));
 			
 			dirLightCnt++;
 			break;
@@ -90,7 +90,7 @@ void Scene::render(GLuint shaderProgram) {
 			}
 			uniformName = "pointLights[" + std::to_string(pointLightCnt) + "].position";
 			GLint lightPosLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glUniform3fv(lightPosLoc, 1, glm::value_ptr(light->getNode()->getPosition()));
+			glUniform3fv(lightPosLoc, 1, glm::value_ptr(light->getNode()->getGlobalPosition()));
 
 			uniformName = "pointLights[" + std::to_string(pointLightCnt) + "].intensity";
 			GLint lightIntensityLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
@@ -114,7 +114,7 @@ void Scene::render(GLuint shaderProgram) {
 			}
 			uniformName = "spotLights[" + std::to_string(spotLightCnt) + "].position";
 			GLint lightPosLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glUniform3fv(lightPosLoc, 1, glm::value_ptr(light->getNode()->getPosition()));
+			glUniform3fv(lightPosLoc, 1, glm::value_ptr(light->getNode()->getGlobalPosition()));
 
 			uniformName = "spotLights[" + std::to_string(spotLightCnt) + "].intensity";
 			GLint lightIntensityLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
@@ -130,8 +130,7 @@ void Scene::render(GLuint shaderProgram) {
 
 			uniformName = "spotLights[" + std::to_string(spotLightCnt) + "].direction";
 			GLint lightDirLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glm::vec3 rotatedFront(glm::rotate(light->getNode()->getRotation(), glm::vec3(0.0f, 0.0f, -1.0f)));
-			glUniform3fv(lightDirLoc, 1, glm::value_ptr(glm::normalize(rotatedFront)));
+			glUniform3fv(lightDirLoc, 1, glm::value_ptr(glm::normalize(-1.0f * light->getNode()->getGlobalFront())));
 
 			uniformName = "spotLights[" + std::to_string(spotLightCnt) + "].innerConeAngle";
 			GLint lightInnerConeAngleLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());

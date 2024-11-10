@@ -21,6 +21,30 @@
                     "intensity" : 1,
                     "type" : "directional",
                     "name" : "\ud0dc\uc591"
+                },
+                {
+                    "color" : [
+                        0.05847058445215225,
+                        1,
+                        0
+                    ],
+                    "intensity" : 1,
+                    "type" : "point",
+                    "name" : "\ud3ec\uc778\ud2b8"
+                },
+                {
+                    "color" : [
+                        0.10645367950201035,
+                        0.14763380587100983,
+                        1
+                    ],
+                    "intensity" : 10,
+                    "spot" : {
+                        "innerConeAngle" : 0.3337942263919169,
+                        "outerConeAngle" : 0.39269909262657166
+                    },
+                    "type" : "spot",
+                    "name" : "Spot"
                 }
             ]
         }
@@ -31,7 +55,9 @@
             "name" : "Scene",
             "nodes" : [
                 0,
-                2
+                4,
+                7,
+                9
             ]
         }
     ],
@@ -52,7 +78,7 @@
                     "light" : 0
                 }
             },
-            "name" : "\ud0dc\uc591_Orientation",
+            "name" : "\ud0dc\uc591_Orientation_Orientation_Orientation",
             "rotation" : [
                 -0.7071067690849304,
                 0,
@@ -63,6 +89,18 @@
         {
             "children" : [
                 1
+            ],
+            "name" : "\ud0dc\uc591_Orientation_Orientation"
+        },
+        {
+            "children" : [
+                2
+            ],
+            "name" : "\ud0dc\uc591_Orientation"
+        },
+        {
+            "children" : [
+                3
             ],
             "name" : "\ud0dc\uc591",
             "rotation" : [
@@ -75,6 +113,68 @@
                 0,
                 4.389998435974121,
                 -1.3799999952316284
+            ]
+        },
+        {
+            "extensions" : {
+                "KHR_lights_punctual" : {
+                    "light" : 1
+                }
+            },
+            "name" : "\ud3ec\uc778\ud2b8_Orientation_Orientation",
+            "rotation" : [
+                -0.7071067690849304,
+                0,
+                0,
+                0.7071067690849304
+            ]
+        },
+        {
+            "children" : [
+                5
+            ],
+            "name" : "\ud3ec\uc778\ud2b8_Orientation"
+        },
+        {
+            "children" : [
+                6
+            ],
+            "name" : "\ud3ec\uc778\ud2b8",
+            "translation" : [
+                0,
+                0.14512300491333008,
+                0.7374001741409302
+            ]
+        },
+        {
+            "extensions" : {
+                "KHR_lights_punctual" : {
+                    "light" : 2
+                }
+            },
+            "name" : "Spot_Orientation",
+            "rotation" : [
+                -0.7071067690849304,
+                0,
+                0,
+                0.7071067690849304
+            ]
+        },
+        {
+            "children" : [
+                8
+            ],
+            "name" : "Spot",
+            "rotation" : [
+                -0.027163460850715637,
+                -0.57664954662323,
+                -0.44915497303009033,
+                0.681907057762146
+            ],
+            "translation" : [
+                1.905745029449463,
+                1.1633424758911133,
+                0.5951357483863831
             ]
         }
     ],
@@ -165,7 +265,7 @@
         {
             "bufferView" : 0,
             "componentType" : 5126,
-            "count" : 14874,
+            "count" : 16433,
             "max" : [
                 0.9424954056739807,
                 0.8128451108932495,
@@ -181,13 +281,13 @@
         {
             "bufferView" : 1,
             "componentType" : 5126,
-            "count" : 14874,
+            "count" : 16433,
             "type" : "VEC3"
         },
         {
             "bufferView" : 2,
             "componentType" : 5126,
-            "count" : 14874,
+            "count" : 16433,
             "type" : "VEC2"
         },
         {
@@ -200,23 +300,23 @@
     "bufferViews" : [
         {
             "buffer" : 0,
-            "byteLength" : 178488,
+            "byteLength" : 197196,
             "byteOffset" : 0
         },
         {
             "buffer" : 0,
-            "byteLength" : 178488,
-            "byteOffset" : 178488
+            "byteLength" : 197196,
+            "byteOffset" : 197196
         },
         {
             "buffer" : 0,
-            "byteLength" : 118992,
-            "byteOffset" : 356976
+            "byteLength" : 131464,
+            "byteOffset" : 394392
         },
         {
             "buffer" : 0,
             "byteLength" : 92712,
-            "byteOffset" : 475968
+            "byteOffset" : 525856
         }
     ],
     "samplers" : [
@@ -227,7 +327,7 @@
     ],
     "buffers" : [
         {
-            "byteLength" : 568680,
+            "byteLength" : 618568,
             "uri" : "untitled.bin"
         }
     ]
