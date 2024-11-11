@@ -62,12 +62,16 @@ void main() {
     //TODO: normal texture 있다면.. 없으면 fragNormal 사용하기
     vec3 normal = normalize(TBN * (2.0 * texture(normalTexture, fragTexcoord).rgb - 1.0));
 
+    vec2 metallicRoughness = texture(metallicRoughnessTexture, fragTexcoord).rg;
+    float metallic = metallicRoughness.r;
+    float roughness = metallicRoughness.g;
+
     //Compute Directional Lights
     for(int i=0; i<numDirectionalLights; i++)
     {
-        vec3 currentLightPower = vec3(0.0, 0.0, 0.0);
-        
+        vec3 currentLightPower = vec3(0.0);
         vec3 lightDirection = normalize(-directionalLights[i].direction);
+        
         //diffuse
         float diffuseFactor = max(dot(normal, lightDirection), 0.0);
         currentLightPower += directionalLights[i].color * directionalLights[i].intensity * diffuseFactor;
@@ -84,23 +88,22 @@ void main() {
     //Compute Point Lights
     for(int i=0; i<numPointLights; i++)
     {
-        vec3 currentLightPower = vec3(0.0, 0.0, 0.0);
+        vec3 currentLightPower = vec3(0.0);
+        vec3 lightDirection = normalize(pointLights[i].position - fragPos);
 
         float distance = length(pointLights[i].position - fragPos);
         float range = 0.5;//TODO: pointLights[i].range;, 편집기에서 수정하도록. gltf로 안들어온다.
-
         float attenuation = clamp((range * range - distance * distance) / (range * range), 0.0, 1.0);
-
-        vec3 lightDirection = normalize(pointLights[i].position - fragPos);
         
         //diffuse
         float diffuseFactor = max(dot(normal, lightDirection), 0.0);
+        currentLightPower += diffuseFactor * pointLights[i].color * pointLights[i].intensity * attenuation;
+
         //specular
         vec3 view = normalize(cameraWorldPos - fragPos);
         vec3 reflection = reflect(-lightDirection, normal);
         float specularFactor = pow(max(dot(view, reflection), 0.0), 30.0);
-
-        currentLightPower += pointLights[i].color * pointLights[i].intensity * (diffuseFactor + specularFactor) * attenuation;
+        currentLightPower += specularFactor * pointLights[i].color * pointLights[i].intensity * attenuation;
         
         lightPower += currentLightPower;
     }
@@ -108,32 +111,27 @@ void main() {
     //Compute Spot Lights
     for(int i=0; i<numSpotLights; i++)
     {
-        vec3 currentLightPower = vec3(0.0, 0.0, 0.0);
+        vec3 currentLightPower = vec3(0.0);
+        vec3 lightDirection = normalize(spotLights[i].position - fragPos);
         
         float distance = length(spotLights[i].position - fragPos);
         float range = 3.0;//TODO: spotLights[i].range;
-        
         float attenuation = clamp((range * range - distance * distance) / (range * range), 0.0, 1.0);
-        
-        vec3 lightDirection = normalize(spotLights[i].position - fragPos);
-
         float spotEffect = dot(-lightDirection, normalize(spotLights[i].direction));
         float innerCutOff = cos(spotLights[i].innerConeAngle);
         float outerCutOff = cos(spotLights[i].outerConeAngle);
-
         float spotAttenuation = clamp((spotEffect - outerCutOff) / (innerCutOff - outerCutOff), 0.0, 1.0);
-        
         attenuation *= spotAttenuation;
         
         // Diffuse
         float diffuseFactor = max(dot(normal, lightDirection), 0.0);
+        currentLightPower += spotLights[i].color * spotLights[i].intensity * diffuseFactor * attenuation;
 
         // Specular
         vec3 view = normalize(cameraWorldPos - fragPos);
         vec3 reflection = reflect(-lightDirection, normal);
         float specularFactor = pow(max(dot(view, reflection), 0.0), 30.0);
-
-        currentLightPower += spotLights[i].color * spotLights[i].intensity * (diffuseFactor + specularFactor) * attenuation;
+        currentLightPower += spotLights[i].color * spotLights[i].intensity * specularFactor * attenuation;
 
         lightPower += currentLightPower;
     }
