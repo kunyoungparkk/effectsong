@@ -1,4 +1,5 @@
 #version 300 es
+#define MAX_MIP_LEVELS 5
 precision mediump float;
 
 struct Material {
@@ -47,10 +48,19 @@ uniform sampler2D emissiveTexture;
 uniform bool useNormalTexture;
 uniform sampler2D normalTexture;
 
+//Lights
+uniform sampler2D lutGGX;
+//uniform sampler2D lutCharlie;
+//uniform sampler2D lutSheen;
 
+uniform samplerCube specularIBLMap;
+uniform samplerCube diffuseIBLMap;
 uniform DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
+uniform int numDirectionalLights;
+uniform int numPointLights;
+uniform int numSpotLights;
 
 uniform vec3 cameraWorldPos;
 
@@ -59,12 +69,31 @@ in vec3 fragNormal;
 in vec2 fragTexcoord;
 in mat3 TBN;
 
-uniform int numDirectionalLights;
-uniform int numPointLights;
-uniform int numSpotLights;
-
 out vec4 FragColor;
 
+/*IBL*/
+
+vec3 calculateIBLDiffuse(vec3 N) {
+    return texture(diffuseIBLMap, N).rgb;
+}
+vec3 calculateIBLSpecular(vec3 N, vec3 V, float roughness, vec3 F0) {
+    vec3 R = reflect(-V, N);
+    
+    // roughness에 따른 두 MIP 수준을 선택하고 블렌딩
+    float mipLevel = roughness * float(MAX_MIP_LEVELS);
+    float mipLevelFloor = floor(mipLevel);
+    float mipLevelCeil = mipLevelFloor + 1.0;
+    float mipWeight = mipLevel - mipLevelFloor;
+
+    // 두 MIP 레벨의 색상을 가져와서 블렌딩
+    vec3 prefilteredColorLow = texture(specularIBLMap, R, mipLevelFloor).rgb;
+    vec3 prefilteredColorHigh = texture(specularIBLMap, R, mipLevelCeil).rgb;
+    vec3 prefilteredColor = mix(prefilteredColorLow, prefilteredColorHigh, mipWeight);
+
+    // LUT를 사용하여 BRDF를 보정
+    vec2 envBRDF = texture(lutGGX, vec2(max(dot(N, V), 0.0), roughness)).rg;
+    return prefilteredColor * (F0 * envBRDF.x + envBRDF.y);
+}
 /*BRDF 계산*/
 vec3 fresnelSchlick(float cosTheta, vec3 F0) {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
@@ -108,16 +137,17 @@ vec3 calculateBRDF(vec3 N, vec3 V, vec3 L, vec3 albedo, vec3 F0, float metallic,
 
     // Cook-Torrance BRDF 계산
     vec3 numerator = NDF * G * F;
-    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001; // 0으로 나누는 것을 방지
+    float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001;
     vec3 specular = numerator / denominator;
+    
+    // Diffuse IBL 적용
+    vec3 diffuseIBL = calculateIBLDiffuse(N) * (albedo / 3.141592);
 
-    // 반사 및 굴절을 계산
-    vec3 kS = F;
-    vec3 kD = vec3(1.0) - kS;
-    kD *= 1.0 - metallic;
+    // Specular IBL 적용
+    vec3 specularIBL = calculateIBLSpecular(N, V, roughness, F0);
 
-    float NdotL = max(dot(N, L), 0.0);
-    return (kD * albedo / 3.141592 + specular) * NdotL;
+    // 디퓨즈와 스페큘러 합산
+    return specular + specularIBL;
 }
 
 void main() {
@@ -156,7 +186,7 @@ void main() {
         vec3 lightDirection = normalize(pointLights[i].position - fragPos);
 
         float distance = length(pointLights[i].position - fragPos);
-        float range = 0.5;//TODO: pointLights[i].range;, 편집기에서 수정하도록. gltf로 안들어온다.
+        float range = 0.5;//TODO: pointLights[i].range;, 편집기에서 수정하도록. gltf로 안들어온다. 기본값 설정 필요?
         float attenuation = clamp((range * range - distance * distance) / (range * range), 0.0, 1.0);
         
         result += pointLights[i].color * pointLights[i].intensity * attenuation * calculateBRDF(normal, view, lightDirection, baseColorTextureColor, F0, metallic, roughness);

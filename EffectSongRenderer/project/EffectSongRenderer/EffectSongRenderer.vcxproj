@@ -154,6 +154,7 @@ copy "$(ProjectDir)..\..\thirdparty\SDL2-2.30.5\lib\x64\SDL2.dll" "$(ProjectDir)
   <ItemGroup>
     <ClCompile Include="..\..\src\Camera.cpp" />
     <ClCompile Include="..\..\src\GLTFLoader.cpp" />
+    <ClCompile Include="..\..\src\IBLPrimitive.cpp" />
     <ClCompile Include="..\..\src\Light.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\Material.cpp" />
@@ -164,9 +165,12 @@ copy "$(ProjectDir)..\..\thirdparty\SDL2-2.30.5\lib\x64\SDL2.dll" "$(ProjectDir)
     <ClCompile Include="..\..\src\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\ArtShader.hpp" />
     <ClInclude Include="..\..\include\Camera.h" />
     <ClInclude Include="..\..\include\common.h" />
     <ClInclude Include="..\..\include\GLTFLoader.h" />
+    <ClInclude Include="..\..\include\IBLPrimitive.h" />
+    <ClInclude Include="..\..\include\IBLTexture.h" />
     <ClInclude Include="..\..\include\Light.h" />
     <ClInclude Include="..\..\include\Material.h" />
     <ClInclude Include="..\..\include\Node.h" />
@@ -177,6 +181,8 @@ copy "$(ProjectDir)..\..\thirdparty\SDL2-2.30.5\lib\x64\SDL2.dll" "$(ProjectDir)
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\fragment_shader.glsl" />
+    <None Include="..\..\src\ibl_fragment_shader.glsl" />
+    <None Include="..\..\src\ibl_vertex_shader.glsl" />
     <None Include="..\..\src\vertex_shader.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

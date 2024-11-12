@@ -5,6 +5,8 @@
 #include <vector>
 #include "GLTFLoader.h"
 #include "Renderer.h"
+#include "Node.h"
+#include "Scene.h"
 
 int main(int argc, char* argv[]) {
 	SDL_Window* window = NULL;

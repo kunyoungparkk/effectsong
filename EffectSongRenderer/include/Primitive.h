@@ -12,7 +12,6 @@ struct Vertex {
 class Primitive {
  public:
   Primitive(cgltf_primitive* cgltfPrimitive);
-
   void render(GLuint shaderProgram);
 
  private:

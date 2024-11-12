@@ -23,8 +23,8 @@ Material::Material(cgltf_material* material) : m_material(material) {
 }
 
 void Material::bind(GLuint shaderProgram) {
-  //fragment shader
-  int textureIndex = 0;
+  //IBL 텍스처를 이미 추가한 뒤
+  int textureIndex = 3;
   
   if (m_baseColorTexture) {
       m_baseColorTexture->bind(textureIndex);

@@ -2,9 +2,13 @@
 #include <list>
 #include <unordered_map>
 #include "common.h"
-#include "Scene.h"
-#include "Material.h"
-#include "Texture.h"
+
+class Scene;
+class Material;
+class Texture;
+class IBLTexture;
+class Primitive;
+class IBLPrimitive;
 
 class Renderer {
  public:
@@ -36,10 +40,16 @@ class Renderer {
   Renderer();
   static Renderer* instance;
   GLuint m_shaderProgram;
+  GLuint m_iblShaderProgram;
 
   std::list<Scene*> m_scenes;
   std::unordered_map<std::string, Material*> m_materials;
   std::unordered_map<std::string, Texture*> m_textures;
 
   Scene* m_active_scene;
+  IBLPrimitive* m_skybox;
+
+  IBLTexture* m_specularIBLTexture = nullptr;
+  IBLTexture* m_diffuseIBLTexture = nullptr;
+  Texture* m_lut_ggx = nullptr;
 };
