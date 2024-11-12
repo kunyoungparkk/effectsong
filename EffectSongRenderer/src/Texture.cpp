@@ -19,14 +19,17 @@ Texture::Texture(std::string& gltfPath, cgltf_texture* cgltf_texture, bool bSRGB
   glBindTexture(GL_TEXTURE_2D, m_textureID);
   
   // 텍스처 설정
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
-                  cgltf_texture->sampler->wrap_s);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
-                  cgltf_texture->sampler->wrap_t);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                  cgltf_texture->sampler->min_filter);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-                  cgltf_texture->sampler->mag_filter);
+  if (cgltf_texture->sampler)
+  {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+          cgltf_texture->sampler->wrap_s);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+          cgltf_texture->sampler->wrap_t);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+          cgltf_texture->sampler->min_filter);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+          cgltf_texture->sampler->mag_filter);
+  }
   
   // 텍스처 데이터 생성
   if (nrChannels == 3) {

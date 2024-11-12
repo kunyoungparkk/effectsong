@@ -33,8 +33,10 @@ Light::Light(Node* node, cgltf_light* cgltf_light)
 	range = cgltf_light->range;
 	innerConeAngle = cgltf_light->spot_inner_cone_angle;
 	outerConeAngle = cgltf_light->spot_outer_cone_angle;
-
-	name = cgltf_light->name;
+	if (cgltf_light->name)
+	{
+		name = cgltf_light->name;
+	}
 }
 
 Node* Light::getNode()

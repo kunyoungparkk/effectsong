@@ -19,7 +19,7 @@ public:
 	float innerConeAngle = 0.0f;
 	float outerConeAngle = 0.0f;
 	LightType lightType = LightType::NONE;
-	std::string name;
+	std::string name = "";
 
 	Node* getNode();
 private:
