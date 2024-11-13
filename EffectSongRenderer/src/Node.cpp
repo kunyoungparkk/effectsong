@@ -47,6 +47,26 @@ Node::Node(Scene* scene, Node* parent)
 
 }
 
+Node::~Node()
+{
+    for (int i = 0; i < m_children.size(); i++) {
+        delete m_children[i];
+    }
+    for (int i = 0; i < m_primitives.size(); i++)
+    {
+        delete m_primitives[i];
+    }
+    if (m_camera) {
+        delete m_camera;
+    }
+    if (m_light) {
+        if (m_scene) {
+            m_scene->removeLight(m_light);
+        }
+        delete m_light;
+    }
+}
+
 void Node::update() { 
 }
 

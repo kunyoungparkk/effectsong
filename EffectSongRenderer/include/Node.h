@@ -9,6 +9,7 @@ class Node {
 public:
 	Node(cgltf_node* cgltfNode, Node* parent, Scene* scene);
 	Node(Scene* scene, Node* parent);
+	~Node();
 
 	void update();
 	void render(GLuint shaderProgram);

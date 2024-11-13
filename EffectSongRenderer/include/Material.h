@@ -12,4 +12,5 @@ class Material {
   Texture* m_emissiveTexture = nullptr;
   Texture* m_metallicRoughnessTexture = nullptr;
   Texture* m_normalTexture = nullptr;
+  Texture* m_occlusionTexture = nullptr;
 };

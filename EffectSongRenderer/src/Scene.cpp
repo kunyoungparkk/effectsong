@@ -18,6 +18,13 @@ Scene::Scene(cgltf_scene& cgltfScene) : m_cgltf_scene(cgltfScene) {
 	}
 }
 
+Scene::~Scene()
+{
+	for (int i = 0; i < nodes.size(); i++) {
+		delete nodes[i];
+	}
+}
+
 void Scene::update() {
 	for (int i = 0; i < nodes.size(); i++) {
 		nodes[i]->update();
@@ -165,4 +172,9 @@ Camera* Scene::getActiveCamera() { return m_active_camera; }
 void Scene::addLight(Light* light)
 {
 	lights.push_back(light);
+}
+
+void Scene::removeLight(Light* light)
+{
+	lights.remove(light);
 }

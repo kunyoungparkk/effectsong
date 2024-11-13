@@ -6,6 +6,8 @@ struct Material {
     vec4 baseColor;
     vec3 specularColor;
     vec3 emissionColor;
+    float metallic;
+    float roughness;
 };
 
 struct DirectionalLight {
@@ -47,6 +49,9 @@ uniform sampler2D emissiveTexture;
 
 uniform bool useNormalTexture;
 uniform sampler2D normalTexture;
+
+uniform bool useOcclusionTexture;
+uniform sampler2D occlusionTexture;
 
 //Lights
 uniform sampler2D lutGGX;
@@ -127,7 +132,7 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
 
     return ggx1 * ggx2;
 }
-vec3 calculateBRDF(vec3 N, vec3 V, vec3 L, vec3 albedo, vec3 F0, float metallic, float roughness) {
+vec3 calculateBRDF(vec3 N, vec3 V, vec3 L, vec3 albedo, vec3 F0, float metallic, float roughness, float ao) {
     vec3 H = normalize(V + L);
 
     // 각 구성 요소 계산
@@ -147,7 +152,7 @@ vec3 calculateBRDF(vec3 N, vec3 V, vec3 L, vec3 albedo, vec3 F0, float metallic,
     vec3 specularIBL = calculateIBLSpecular(N, V, roughness, F0);
 
     // 디퓨즈와 스페큘러 합산
-    return specular + specularIBL;
+    return specular + (diffuseIBL + specularIBL) * ao;
 }
 
 void main() {
@@ -164,12 +169,34 @@ void main() {
         normal = fragNormal;
     }
 
-    vec3 baseColorTextureColor = texture(baseColorTexture, fragTexcoord).rgb;
+    /*BaseColor*/
+    vec3 baseColorTextureColor = vec3(material.baseColor);
+    if(useBaseColorTexture){
+        baseColorTextureColor *= vec3(texture(baseColorTexture, fragTexcoord));
+    }
 
-    vec2 metallicRoughness = texture(metallicRoughnessTexture, fragTexcoord).rg;
-    float metallic = metallicRoughness.r;
-    float roughness = metallicRoughness.g;
-    
+    /*MetallicRoughness*/
+    float metallic = material.metallic;
+    float roughness = material.roughness;
+    if(useMetallicRoughnessTexture){
+        vec2 metallicRoughness = texture(metallicRoughnessTexture, fragTexcoord).gb;
+        metallic *= metallicRoughness.g;
+        roughness *= metallicRoughness.r;
+    }
+
+    /*Ambient Occlusion*/
+    float ao = 1.0;
+    if(useOcclusionTexture)
+    {
+        ao = texture(occlusionTexture, fragTexcoord).r;
+    }
+
+    /*Emission*/
+    vec3 emissiveTextureColor = material.emissionColor;
+    if(useEmissiveTexture){
+        emissiveTextureColor *= texture(emissiveTexture, fragTexcoord).rgb;
+    }
+
     vec3 F0 = mix(vec3(0.04), baseColorTextureColor, metallic);
 
     //Compute Directional Lights
@@ -177,7 +204,7 @@ void main() {
     {
         vec3 lightDirection = normalize(-directionalLights[i].direction);
         
-        result += directionalLights[i].color * directionalLights[i].intensity * calculateBRDF(normal, view, lightDirection, baseColorTextureColor, F0, metallic, roughness);
+        result += directionalLights[i].color * directionalLights[i].intensity * calculateBRDF(normal, view, lightDirection, baseColorTextureColor, F0, metallic, roughness, ao);
     }
 
     //Compute Point Lights
@@ -189,7 +216,7 @@ void main() {
         float range = 0.5;//TODO: pointLights[i].range;, 편집기에서 수정하도록. gltf로 안들어온다. 기본값 설정 필요?
         float attenuation = clamp((range * range - distance * distance) / (range * range), 0.0, 1.0);
         
-        result += pointLights[i].color * pointLights[i].intensity * attenuation * calculateBRDF(normal, view, lightDirection, baseColorTextureColor, F0, metallic, roughness);
+        result += pointLights[i].color * pointLights[i].intensity * attenuation * calculateBRDF(normal, view, lightDirection, baseColorTextureColor, F0, metallic, roughness, ao);
     }
 
     //Compute Spot Lights
@@ -206,10 +233,8 @@ void main() {
         float spotAttenuation = clamp((spotEffect - outerCutOff) / (innerCutOff - outerCutOff), 0.0, 1.0);
         attenuation *= spotAttenuation;
         
-        result += spotLights[i].color * spotLights[i].intensity * attenuation * calculateBRDF(normal, view, lightDirection, baseColorTextureColor, F0, metallic, roughness);
+        result += spotLights[i].color * spotLights[i].intensity * attenuation * calculateBRDF(normal, view, lightDirection, baseColorTextureColor, F0, metallic, roughness, ao);
     }
     
-    vec3 emissiveTextureColor = texture(emissiveTexture, fragTexcoord).rgb;
-    
-	FragColor = vec4(result + emissiveTextureColor * material.emissionColor, 1.0);
+	FragColor = vec4(result + emissiveTextureColor, 1.0);
 }

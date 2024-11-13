@@ -20,6 +20,10 @@ Material::Material(cgltf_material* material) : m_material(material) {
       m_normalTexture = Renderer::getInstance()->getTexture(
           m_material->normal_texture.texture->image->uri);
   }
+  if (m_material->occlusion_texture.texture) {
+      m_occlusionTexture = Renderer::getInstance()->getTexture(
+          m_material->occlusion_texture.texture->image->uri);
+  }
 }
 
 void Material::bind(GLuint shaderProgram) {
@@ -68,6 +72,16 @@ void Material::bind(GLuint shaderProgram) {
   else {
       glUniform1i(glGetUniformLocation(shaderProgram, "useNormalTexture"), GL_FALSE);
   }
+  if (m_occlusionTexture) {
+      m_occlusionTexture->bind(textureIndex);
+      GLint occlusionTexLoc = glGetUniformLocation(shaderProgram, "occlusionTexture");
+      glUniform1i(occlusionTexLoc, textureIndex);
+      textureIndex++;
+      glUniform1i(glGetUniformLocation(shaderProgram, "useOcclusionTexture"), GL_TRUE);
+  }
+  else {
+      glUniform1i(glGetUniformLocation(shaderProgram, "useOcclusionTexture"), GL_FALSE);
+  }
 
   GLint baseColorLoc = glGetUniformLocation(shaderProgram, "material.baseColor");
   glUniform4fv(baseColorLoc, 1, m_material->pbr_metallic_roughness.base_color_factor);
@@ -77,5 +91,11 @@ void Material::bind(GLuint shaderProgram) {
 
   GLint emissionColorLoc = glGetUniformLocation(shaderProgram, "material.emissionColor");
   glUniform3fv(emissionColorLoc, 1, m_material->emissive_factor);
+  
+  GLint metallicLoc = glGetUniformLocation(shaderProgram, "material.metallic");
+  glUniform1f(metallicLoc, m_material->pbr_metallic_roughness.metallic_factor);
+  
+  GLint roughnessLoc = glGetUniformLocation(shaderProgram, "material.roughness");
+  glUniform1f(roughnessLoc, m_material->pbr_metallic_roughness.roughness_factor);
 
 }

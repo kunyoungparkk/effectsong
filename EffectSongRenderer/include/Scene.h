@@ -7,12 +7,14 @@
 class Scene {
  public:
   Scene(cgltf_scene& cgltfScene);
+  ~Scene();
   void update();
   void render(GLuint shaderProgram);
   void setActiveCamera(Camera* camera);
   Camera* getActiveCamera();
 
   void addLight(Light* light);
+  void removeLight(Light* light);
 
  private:
   Camera* m_active_camera = nullptr;

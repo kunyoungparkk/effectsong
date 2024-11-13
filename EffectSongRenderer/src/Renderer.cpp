@@ -101,7 +101,29 @@ Renderer::Renderer()
 }
 
 Renderer::~Renderer() {
-	delete m_skybox;
+	//일단 GLTF 관련도 여기서 해제
+	for (auto iter = m_scenes.begin(); iter != m_scenes.end(); iter++) {
+		delete *iter;
+	}
+	for (auto iter = m_materials.begin(); iter != m_materials.end(); iter++) {
+		delete iter->second;
+	}
+	for (auto iter = m_textures.begin(); iter != m_textures.end(); iter++) {
+		delete iter->second;
+	}
+
+	if (m_skybox){
+		delete m_skybox;
+	}
+	if (m_lut_ggx) {
+		delete m_lut_ggx;
+	}
+	if (m_specularIBLTexture) {
+		delete m_specularIBLTexture;
+	}
+	if (m_diffuseIBLTexture) {
+		delete m_diffuseIBLTexture;
+	}
 }
 
 void Renderer::update() {

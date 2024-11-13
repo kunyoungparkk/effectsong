@@ -40,8 +40,8 @@ int main(int argc, char* argv[]) {
 	Renderer* renderer = Renderer::getInstance();
 
 	//util::loadGLTFData("../../res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf");
-	//util::loadGLTFData("../../res/2.0/Lantern/glTF/Lantern.gltf");
-	util::loadGLTFData("../../res/2.0/NewFolder/untitled.gltf");
+	util::loadGLTFData("../../res/2.0/Lantern/glTF/Lantern.gltf");
+	//util::loadGLTFData("../../res/2.0/NewFolder/untitled.gltf");
 	//util::loadGLTFData("../../res/car_gltf/ioniq.gltf");
 
 	SDL_Event event;

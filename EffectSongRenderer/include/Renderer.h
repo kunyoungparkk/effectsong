@@ -46,8 +46,8 @@ class Renderer {
   std::unordered_map<std::string, Material*> m_materials;
   std::unordered_map<std::string, Texture*> m_textures;
 
-  Scene* m_active_scene;
-  IBLPrimitive* m_skybox;
+  Scene* m_active_scene = nullptr;
+  IBLPrimitive* m_skybox = nullptr;
 
   IBLTexture* m_specularIBLTexture = nullptr;
   IBLTexture* m_diffuseIBLTexture = nullptr;
