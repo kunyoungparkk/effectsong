@@ -2,6 +2,7 @@
 precision mediump float;
 
 uniform mat4 worldMat, viewMat, projMat;
+uniform mat3 normalMat;
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
@@ -15,11 +16,11 @@ out mat3 TBN;
 
 void main(){
 	fragPos = vec3(worldMat * vec4(position, 1.0));
-	fragNormal = mat3(transpose(inverse(worldMat))) * normal;
+	fragNormal = normalize(normalMat * normal);
 	fragTexcoord = texcoord;
 
 	vec3 T = normalize(mat3(worldMat) * tangent.xyz);
-	vec3 N = normalize(mat3(inverse(transpose(worldMat))) * normal);
+	vec3 N = fragNormal;
 	vec3 B = cross(N, T) * tangent.w; // ∫Ò∆Æ≈ƒ¡®∆Æ πÊ«‚ ¡∂¡§
 	TBN = mat3(T, B, N);
 	

@@ -154,21 +154,21 @@ void Renderer::render() {
 
 			m_skybox->render(m_iblShaderProgram);
 		}
+
 		glDepthMask(GL_TRUE);
 		glUseProgram(m_shaderProgram);
-
-		//IBL
 		m_specularIBLTexture->bind(0);
 		GLint specularIBLTexLoc = glGetUniformLocation(m_shaderProgram, "specularIBLMap");
 		glUniform1i(specularIBLTexLoc, 0);
-
 		m_diffuseIBLTexture->bind(1);
 		GLint diffuseIBLTexLoc = glGetUniformLocation(m_shaderProgram, "diffuseIBLMap");
 		glUniform1i(diffuseIBLTexLoc, 1);
-
 		m_lut_ggx->bind(2);
 		GLint lutGGXTexLoc = glGetUniformLocation(m_shaderProgram, "lutGGX");
 		glUniform1i(lutGGXTexLoc, 2);
+
+		GLint iblItensityLoc = glGetUniformLocation(m_shaderProgram, "iblIntensity");
+		glUniform1f(iblItensityLoc, 1.0f);
 		//scene
 		(*iter)->render(m_shaderProgram);
 

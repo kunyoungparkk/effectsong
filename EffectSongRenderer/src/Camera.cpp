@@ -16,7 +16,9 @@ Camera::Camera(Node* node, cgltf_camera* cgltf_camera)
 		exit(0);
 	}
 
-	name = m_cgltf_camera->name;
+	if (m_cgltf_camera->name) {
+		name = m_cgltf_camera->name;
+	}
 
 	switch (m_cgltf_camera->type)
 	{

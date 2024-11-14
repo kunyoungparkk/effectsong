@@ -7,7 +7,7 @@ Scene::Scene(cgltf_scene& cgltfScene) : m_cgltf_scene(cgltfScene) {
 		nodes.push_back(node);
 	}
 	//TODO: modify required about temp camera
-	if (!m_active_camera) {
+	//if (!m_active_camera) {
 		Node* emptyNode = new Node(this, nullptr);
 		Camera* camera = new Camera(emptyNode);
 		setActiveCamera(camera);
@@ -15,7 +15,7 @@ Scene::Scene(cgltf_scene& cgltfScene) : m_cgltf_scene(cgltfScene) {
 		emptyNode->setRotation(
 			glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 		nodes.push_back(emptyNode);
-	}
+	//}
 }
 
 Scene::~Scene()

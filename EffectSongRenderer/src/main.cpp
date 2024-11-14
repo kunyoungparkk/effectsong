@@ -17,16 +17,10 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	// OpenGL 속성 설정 (깊이 버퍼 포함)
-	// SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	// SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-	// SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
-	// SDL_GL_CONTEXT_PROFILE_CORE);
-	// 깊이 버퍼의 크기를 설정 (일반적으로 24비트)
-	// SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	// 더블 버퍼링 활성화 (권장)
-	// SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
@@ -40,8 +34,15 @@ int main(int argc, char* argv[]) {
 	Renderer* renderer = Renderer::getInstance();
 
 	//util::loadGLTFData("../../res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf");
-	util::loadGLTFData("../../res/2.0/Lantern/glTF/Lantern.gltf");
+	//util::loadGLTFData("../../res/2.0/Fox/glTF/Fox.gltf");
+	util::loadGLTFData("../../res/2.0/Duck/glTF/Duck.gltf");
+	//util::loadGLTFData("../../res/2.0/Box/glTF/Box.gltf");
+	//util::loadGLTFData("../../res/2.0/ToyCar/glTF/ToyCar.gltf");
+	//util::loadGLTFData("../../res/2.0/WaterBottle/glTF/WaterBottle.gltf");
+	//util::loadGLTFData("../../res/2.0/Lantern/glTF/Lantern.gltf");
+	//util::loadGLTFData("../../res/2.0/Suzanne/glTF/Suzanne.gltf");
 	//util::loadGLTFData("../../res/2.0/NewFolder/untitled.gltf");
+	//util::loadGLTFData("../../res/2.0/NewNewFolder/untitled.gltf");
 	//util::loadGLTFData("../../res/car_gltf/ioniq.gltf");
 
 	SDL_Event event;

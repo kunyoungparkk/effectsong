@@ -54,6 +54,7 @@ private:
 	glm::vec3 m_position = glm::vec3(0, 0, 0);
 	glm::quat m_rotation = glm::quat(1, 0, 0, 0);
 	glm::vec3 m_scale = glm::vec3(1, 1, 1);
+	std::string m_name = "";
 
 	cgltf_node* m_cgltf_node;
 };
