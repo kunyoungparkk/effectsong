@@ -27,8 +27,8 @@ Material::Material(cgltf_material* material) : m_material(material) {
 }
 
 void Material::bind(GLuint shaderProgram) {
-  //초기화시 텍스처(2) + IBL 텍스처를 이미 추가한 뒤
-  int textureIndex = 5;
+  //초기화시 텍스처(2) + IBL 텍스처(spec, diffuse, ggx) + sound texture(2)를 이미 추가한 뒤
+  int textureIndex = 7;
   
   if (m_baseColorTexture) {
       m_baseColorTexture->bind(textureIndex);

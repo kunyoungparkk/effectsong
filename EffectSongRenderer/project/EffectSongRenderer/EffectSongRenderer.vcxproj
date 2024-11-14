@@ -107,7 +107,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\SDL2-2.30.5\include;$(ProjectDir)\..\..\include;$(ProjectDir)\..\..\thirdparty\glew-2.1.0\include;$(ProjectDir)\..\..\thirdparty\cgltf;$(ProjectDir)\..\..\thirdparty\stb-master;$(ProjectDir)\..\..\thirdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\SDL2-2.30.5\include;$(ProjectDir)\..\..\include;$(ProjectDir)\..\..\thirdparty\glew-2.1.0\include;$(ProjectDir)\..\..\thirdparty\cgltf;$(ProjectDir)\..\..\thirdparty\stb-master;$(ProjectDir)\..\..\thirdparty;$(ProjectDir)\..\..\thirdparty\dr_libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,7 +132,7 @@ copy "$(ProjectDir)..\..\thirdparty\SDL2-2.30.5\lib\x64\SDL2.dll" "$(ProjectDir)
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\SDL2-2.30.5\include;$(ProjectDir)\..\..\include;$(ProjectDir)\..\..\thirdparty\glew-2.1.0\include;$(ProjectDir)\..\..\thirdparty\cgltf;$(ProjectDir)\..\..\thirdparty\stb-master;$(ProjectDir)\..\..\thirdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\SDL2-2.30.5\include;$(ProjectDir)\..\..\include;$(ProjectDir)\..\..\thirdparty\glew-2.1.0\include;$(ProjectDir)\..\..\thirdparty\cgltf;$(ProjectDir)\..\..\thirdparty\stb-master;$(ProjectDir)\..\..\thirdparty;$(ProjectDir)\..\..\thirdparty\dr_libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -162,6 +162,7 @@ copy "$(ProjectDir)..\..\thirdparty\SDL2-2.30.5\lib\x64\SDL2.dll" "$(ProjectDir)
     <ClCompile Include="..\..\src\Primitive.cpp" />
     <ClCompile Include="..\..\src\Renderer.cpp" />
     <ClCompile Include="..\..\src\Scene.cpp" />
+    <ClCompile Include="..\..\src\SoundTexture.cpp" />
     <ClCompile Include="..\..\src\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -177,6 +178,7 @@ copy "$(ProjectDir)..\..\thirdparty\SDL2-2.30.5\lib\x64\SDL2.dll" "$(ProjectDir)
     <ClInclude Include="..\..\include\Primitive.h" />
     <ClInclude Include="..\..\include\Renderer.h" />
     <ClInclude Include="..\..\include\Scene.h" />
+    <ClInclude Include="..\..\include\SoundTexture.h" />
     <ClInclude Include="..\..\include\Texture.h" />
   </ItemGroup>
   <ItemGroup>

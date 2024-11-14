@@ -10,6 +10,7 @@
 #include "Primitive.h"
 #include "IBLTexture.h"
 #include "IBLPrimitive.h"
+#include "SoundTexture.h"
 
 Renderer* Renderer::instance = nullptr;
 
@@ -102,6 +103,11 @@ Renderer::Renderer()
 	m_specularIBLTexture->bind(2);
 	m_diffuseIBLTexture->bind(3);
 	m_lut_ggx->bind(4);
+
+	//sound texture
+	m_soundTexture = new SoundTexture();
+	m_soundTexture->loadWavFile("C:/Users/pgyag/Desktop/EffectSong/EffectSongRenderer/res/music/agi.wav");
+	m_soundTexture->bind(5, 6);
 }
 
 Renderer::~Renderer() {
@@ -128,9 +134,14 @@ Renderer::~Renderer() {
 	if (m_diffuseIBLTexture) {
 		delete m_diffuseIBLTexture;
 	}
+	if (m_soundTexture) {
+		delete m_soundTexture;
+	}
 }
-
+float curTime = 0.0f;
 void Renderer::update() {
+	curTime += 0.02f;
+	m_soundTexture->update(curTime);
 	for (auto iter = m_scenes.begin(); iter != m_scenes.end(); iter++) {
 		(*iter)->update();
 	}
@@ -167,6 +178,11 @@ void Renderer::render() {
 		glUniform1i(diffuseIBLTexLoc, 3);
 		GLint lutGGXTexLoc = glGetUniformLocation(m_shaderProgram, "lutGGX");
 		glUniform1i(lutGGXTexLoc, 4);
+
+		GLint leftSoundTexLoc = glGetUniformLocation(m_shaderProgram, "leftSoundTexture");
+		glUniform1i(leftSoundTexLoc, 5);
+		GLint rightSoundTexLoc = glGetUniformLocation(m_shaderProgram, "rightSoundTexture");
+		glUniform1i(rightSoundTexLoc, 6);
 
 		GLint iblItensityLoc = glGetUniformLocation(m_shaderProgram, "iblIntensity");
 		glUniform1f(iblItensityLoc, 1.0f);

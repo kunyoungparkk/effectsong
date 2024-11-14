@@ -9,6 +9,7 @@ class Texture;
 class IBLTexture;
 class Primitive;
 class IBLPrimitive;
+class SoundTexture;
 
 class Renderer {
  public:
@@ -39,8 +40,8 @@ class Renderer {
  private:
   Renderer();
   static Renderer* instance;
-  GLuint m_shaderProgram;
-  GLuint m_iblShaderProgram;
+  GLuint m_shaderProgram = 0;
+  GLuint m_iblShaderProgram = 0;
 
   std::list<Scene*> m_scenes;
   std::unordered_map<std::string, Material*> m_materials;
@@ -52,4 +53,5 @@ class Renderer {
   IBLTexture* m_specularIBLTexture = nullptr;
   IBLTexture* m_diffuseIBLTexture = nullptr;
   Texture* m_lut_ggx = nullptr;
+  SoundTexture* m_soundTexture = nullptr;
 };

@@ -33,10 +33,10 @@ int main(int argc, char* argv[]) {
 
 	Renderer* renderer = Renderer::getInstance();
 
-	//util::loadGLTFData("../../res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf");
+	util::loadGLTFData("../../res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf");
 	//util::loadGLTFData("../../res/2.0/Fox/glTF/Fox.gltf");
 	//util::loadGLTFData("../../res/2.0/Duck/glTF/Duck.gltf");
-	util::loadGLTFData("../../res/2.0/Box/glTF/Box.gltf");
+	//util::loadGLTFData("../../res/2.0/Box/glTF/Box.gltf");
 	//util::loadGLTFData("../../res/2.0/ToyCar/glTF/ToyCar.gltf");
 	//util::loadGLTFData("../../res/2.0/WaterBottle/glTF/WaterBottle.gltf");
 	//util::loadGLTFData("../../res/2.0/Lantern/glTF/Lantern.gltf");
