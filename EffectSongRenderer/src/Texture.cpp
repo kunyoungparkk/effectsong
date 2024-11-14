@@ -17,6 +17,7 @@ Texture::Texture(std::string& gltfPath, cgltf_texture* cgltf_texture, bool bSRGB
 	}
 
 	glGenTextures(1, &m_textureID);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 
 	// 텍스처 설정
@@ -97,12 +98,13 @@ IBLTexture::IBLTexture(std::string& path)
 	}
 
 	glGenTextures(1, &m_textureID);
+	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID);
 
 	if (nrChannels == 3) {
 		for (int i = 0; i < 6; i++)
 		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_SRGB, width, height, 0, GL_RGB,
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB,
 				GL_UNSIGNED_BYTE, m_data);
 		}
 	}
@@ -110,7 +112,7 @@ IBLTexture::IBLTexture(std::string& path)
 	else if (nrChannels == 4) {
 		for (int i = 0; i < 6; i++)
 		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_SRGB_ALPHA, width, height, 0, GL_RGBA,
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, width, height, 0, GL_RGBA,
 				GL_UNSIGNED_BYTE, m_data);
 		}
 	}

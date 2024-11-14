@@ -97,7 +97,11 @@ Renderer::Renderer()
 		0, 3, 7,  0, 7, 4,
 		1, 5, 6,  1, 6, 2
 	};
-	m_skybox = new IBLPrimitive(skyboxVerts, skyboxIndices, m_specularIBLTexture);
+	m_skybox = new IBLPrimitive(skyboxVerts, skyboxIndices);
+
+	m_specularIBLTexture->bind(2);
+	m_diffuseIBLTexture->bind(3);
+	m_lut_ggx->bind(4);
 }
 
 Renderer::~Renderer() {
@@ -157,15 +161,12 @@ void Renderer::render() {
 
 		glDepthMask(GL_TRUE);
 		glUseProgram(m_shaderProgram);
-		m_specularIBLTexture->bind(0);
 		GLint specularIBLTexLoc = glGetUniformLocation(m_shaderProgram, "specularIBLMap");
-		glUniform1i(specularIBLTexLoc, 0);
-		m_diffuseIBLTexture->bind(1);
+		glUniform1i(specularIBLTexLoc, 2);
 		GLint diffuseIBLTexLoc = glGetUniformLocation(m_shaderProgram, "diffuseIBLMap");
-		glUniform1i(diffuseIBLTexLoc, 1);
-		m_lut_ggx->bind(2);
+		glUniform1i(diffuseIBLTexLoc, 3);
 		GLint lutGGXTexLoc = glGetUniformLocation(m_shaderProgram, "lutGGX");
-		glUniform1i(lutGGXTexLoc, 2);
+		glUniform1i(lutGGXTexLoc, 4);
 
 		GLint iblItensityLoc = glGetUniformLocation(m_shaderProgram, "iblIntensity");
 		glUniform1f(iblItensityLoc, 1.0f);

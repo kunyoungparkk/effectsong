@@ -2,11 +2,10 @@
 #include "Renderer.h"
 #include "IBLTexture.h"
 
-IBLPrimitive::IBLPrimitive(std::vector<glm::vec3>& vertices, std::vector<GLuint>& indices, IBLTexture* iblTexture)
+IBLPrimitive::IBLPrimitive(std::vector<glm::vec3>& vertices, std::vector<GLuint>& indices)
 {
 	m_vertices = vertices;
 	m_indices = indices;
-	m_iblTexture = iblTexture;
 	//bind
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
@@ -36,9 +35,8 @@ IBLPrimitive::IBLPrimitive(std::vector<glm::vec3>& vertices, std::vector<GLuint>
 void IBLPrimitive::render(GLuint shaderProgram) {
 	glBindVertexArray(VAO);
 
-	m_iblTexture->bind(0);
 	GLint specularIBLTexLoc = glGetUniformLocation(shaderProgram, "backgroundCubeMap");
-	glUniform1i(specularIBLTexLoc, 0);
+	glUniform1i(specularIBLTexLoc, 2);
 
 	// Draw
 	glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
