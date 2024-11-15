@@ -234,10 +234,10 @@ void Renderer::render() {
 		GLint lutGGXTexLoc = glGetUniformLocation(m_shaderProgram, "lutGGX");
 		glUniform1i(lutGGXTexLoc, 4);
 
-		GLint leftSoundTexLoc = glGetUniformLocation(m_shaderProgram, "leftSoundTexture");
-		glUniform1i(leftSoundTexLoc, 5);
-		GLint rightSoundTexLoc = glGetUniformLocation(m_shaderProgram, "rightSoundTexture");
-		glUniform1i(rightSoundTexLoc, 6);
+		//GLint leftSoundTexLoc = glGetUniformLocation(m_shaderProgram, "leftSoundTexture");
+		//glUniform1i(leftSoundTexLoc, 5);
+		//GLint rightSoundTexLoc = glGetUniformLocation(m_shaderProgram, "rightSoundTexture");
+		//glUniform1i(rightSoundTexLoc, 6);
 
 		GLint iblItensityLoc = glGetUniformLocation(m_shaderProgram, "iblIntensity");
 		glUniform1f(iblItensityLoc, 1.0f);
