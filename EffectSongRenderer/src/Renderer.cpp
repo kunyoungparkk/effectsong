@@ -79,10 +79,9 @@ Renderer::Renderer()
 	glDeleteShader(iblFragmentShader);
 
 	//shader art
-	ArtShader::getInstance();
 	glGenTextures(1, &m_artTextureBuffer);
 	glBindTexture(GL_TEXTURE_2D, m_artTextureBuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Renderer::getWidth(), Renderer::getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -90,9 +89,17 @@ Renderer::Renderer()
 	glBindFramebuffer(GL_FRAMEBUFFER, m_artFrameBuffer);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_artTextureBuffer, 0);
 
+	//GLuint depthRenderBuffer;
+	//glGenRenderbuffers(1, &depthRenderBuffer);
+	//glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
+	//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, m_width, m_height);
+	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
+
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		std::cerr << "Framebuffer is not complete!" << std::endl;
 	}
+	glActiveTexture(GL_TEXTURE0 + 12);
+	glBindTexture(GL_TEXTURE_2D, m_artTextureBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	//IBL
@@ -169,6 +176,7 @@ void Renderer::render() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//vertex shader art
+	glBindFramebuffer(GL_FRAMEBUFFER, m_artFrameBuffer);
 	ArtShader::getInstance()->bind();
 	GLuint artProgram = ArtShader::getInstance()->getProgram();
 	glDepthMask(GL_TRUE);
@@ -199,7 +207,8 @@ void Renderer::render() {
 	else {
 		glUniform1i(isStereoUniformLoc, false);
 	}
-
+	ArtShader::getInstance()->render();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	
 	//TODO: multi scene Ã³¸®
 	for (auto iter = m_scenes.begin(); iter != m_scenes.end(); iter++) {

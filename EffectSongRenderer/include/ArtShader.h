@@ -25,7 +25,7 @@ public:
 
 	void bind();
 
-	void render(GLuint shaderProgram);
+	void render();
 
 	GLenum getPrimitiveMode() const { return m_primitiveMode; }
 	void setPrimitiveMode(GLenum primitiveMode) { m_primitiveMode = primitiveMode;  }

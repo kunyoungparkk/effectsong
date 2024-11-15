@@ -46,7 +46,7 @@ void ArtShader::bind()
 {
 	glUseProgram(m_artShaderProgram);
 }
-void ArtShader::render(GLuint shaderProgram)
+void ArtShader::render()
 {
 	glBindVertexArray(VAO);
 	glDrawArrays(m_primitiveMode, 0, m_vertexCount);
