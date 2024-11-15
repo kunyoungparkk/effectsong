@@ -78,25 +78,22 @@ Renderer::Renderer()
 	glDeleteShader(iblVertexShader);
 	glDeleteShader(iblFragmentShader);
 
-	//shader art program
-	std::string artVertexShaderSource =
-		ArtShader::getInstance()->getVertexShader();
-	std::string artFragmentShaderSource =
-		ArtShader::getInstance()->getFragmentShader();
-	const char* cArtVertexShaderSource = artVertexShaderSource.c_str();
-	const char* cArtFragmentShaderSource = artFragmentShaderSource.c_str();
-	GLuint artVertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(artVertexShader, 1, &cArtVertexShaderSource, NULL);
-	glCompileShader(artVertexShader);
-	GLuint artFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(artFragmentShader, 1, &cArtFragmentShaderSource, NULL);
-	glCompileShader(artFragmentShader);
-	m_artShaderProgram = glCreateProgram();
-	glAttachShader(m_artShaderProgram, artVertexShader);
-	glAttachShader(m_artShaderProgram, artFragmentShader);
-	glLinkProgram(m_artShaderProgram);
-	glDeleteShader(artVertexShader);
-	glDeleteShader(artFragmentShader);
+	//shader art
+	ArtShader::getInstance();
+	glGenTextures(1, &m_artTextureBuffer);
+	glBindTexture(GL_TEXTURE_2D, m_artTextureBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Renderer::getWidth(), Renderer::getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	glGenFramebuffers(1, &m_artFrameBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_artFrameBuffer);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_artTextureBuffer, 0);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		std::cerr << "Framebuffer is not complete!" << std::endl;
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	//IBL
 	std::string ggxPath = "../../res/IBL/lut_ggx.png";
@@ -172,29 +169,30 @@ void Renderer::render() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//vertex shader art
+	ArtShader::getInstance()->bind();
+	GLuint artProgram = ArtShader::getInstance()->getProgram();
 	glDepthMask(GL_TRUE);
-	glUseProgram(m_artShaderProgram);
 	//TODO:touch coord input(-1 ~ 1, -1 ~ 1)
-	GLint touchUniformLoc = glGetUniformLocation(m_artShaderProgram, "touch");
+	GLint touchUniformLoc = glGetUniformLocation(artProgram, "touch");
 
-	GLint resolutionUniformLoc = glGetUniformLocation(m_artShaderProgram, "resolution");
+	GLint resolutionUniformLoc = glGetUniformLocation(artProgram, "resolution");
 	GLint resolution[2] = { m_width, m_height };
 	glUniform2iv(resolutionUniformLoc, 1, resolution);
 
-	GLint backgroundUniformLoc = glGetUniformLocation(m_artShaderProgram, "background");
+	GLint backgroundUniformLoc = glGetUniformLocation(artProgram, "background");
 	glUniform4fv(backgroundUniformLoc, 1, m_backgroundColor);
 
-	GLint timeUniformLoc = glGetUniformLocation(m_artShaderProgram, "time");
+	GLint timeUniformLoc = glGetUniformLocation(artProgram, "time");
 	glUniform1f(timeUniformLoc, m_currentTime);
 
-	GLint vertexCountUniformLoc = glGetUniformLocation(m_artShaderProgram, "vertexCount");
+	GLint vertexCountUniformLoc = glGetUniformLocation(artProgram, "vertexCount");
 	glUniform1i(vertexCountUniformLoc, m_vertexCount);
 
-	GLint soundUniformLoc = glGetUniformLocation(m_artShaderProgram, "sound");
+	GLint soundUniformLoc = glGetUniformLocation(artProgram, "sound");
 	glUniform1i(soundUniformLoc, 5);
-	GLint soundUniformLoc2 = glGetUniformLocation(m_artShaderProgram, "sound2");
+	GLint soundUniformLoc2 = glGetUniformLocation(artProgram, "sound2");
 	glUniform1i(soundUniformLoc2, 6);
-	GLint isStereoUniformLoc = glGetUniformLocation(m_artShaderProgram, "isStereo");
+	GLint isStereoUniformLoc = glGetUniformLocation(artProgram, "isStereo");
 	if (m_soundTexture->getChannelCount() == 2) {
 		glUniform1i(isStereoUniformLoc, true);
 	}

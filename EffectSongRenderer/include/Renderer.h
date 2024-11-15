@@ -50,7 +50,6 @@ class Renderer {
   static Renderer* instance;
   GLuint m_shaderProgram = 0;
   GLuint m_iblShaderProgram = 0;
-  GLuint m_artShaderProgram = 0;
 
   std::list<Scene*> m_scenes;
   std::unordered_map<std::string, Material*> m_materials;
@@ -62,12 +61,14 @@ class Renderer {
   IBLTexture* m_specularIBLTexture = nullptr;
   IBLTexture* m_diffuseIBLTexture = nullptr;
   Texture* m_lut_ggx = nullptr;
-  SoundTexture* m_soundTexture = nullptr;
 
   int m_width = 0;
   int m_height = 0;
 
   //sound art
+  GLuint m_artTextureBuffer;
+  GLuint m_artFrameBuffer;
+  SoundTexture* m_soundTexture = nullptr;
   float m_currentTime = 0.0f;
   float m_backgroundColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
   int m_vertexCount = 10000;

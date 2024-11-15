@@ -1,5 +1,6 @@
 #pragma once
-#include <string>
+#include "common.h"
+
 class ArtShader
 {
 public:
@@ -19,10 +20,36 @@ public:
 	std::string getVertexShaderHeader(){ return vsHeader_; }
 	std::string getVertexShader(){ return vsHeader_ + vs_; }
 	void setVertexShader(std::string vs){ vs_ = vs; }
+
+	void compileShader();
+
+	void bind();
+
+	void render(GLuint shaderProgram);
+
+	GLenum getPrimitiveMode() const { return m_primitiveMode; }
+	void setPrimitiveMode(GLenum primitiveMode) { m_primitiveMode = primitiveMode;  }
+
+	int getVertexCount() const { return m_vertexCount; }
+	void setVertexCount(int vertexCount) {
+		for (int i = m_vertexCount; i < vertexCount; i++) {
+			m_vertices[i] = (float)i;
+		}
+
+		m_vertices.resize(m_vertexCount);
+		m_vertexCount = vertexCount;
+	}
+
+	GLuint getProgram() { return m_artShaderProgram; }
 private:
 	ArtShader();
 	static ArtShader* instance_;
-	
+	GLuint VAO, VBO;
+	GLenum m_primitiveMode = GL_POINTS;
+	std::vector<float> m_vertices;
+	int m_vertexCount = 10000;
+	GLuint m_artShaderProgram;
+
 	std::string fs_ = R"(#version 300 es
 	precision mediump float;
 	in vec4 v_color;
