@@ -40,13 +40,12 @@ void Scene::render(GLuint shaderProgram) {
 	if (m_active_camera) {
 		projectionMatrix = glm::perspective(
 			glm::radians(m_active_camera->fov), 
-			(float)Renderer::getInstance()->getWidth() / Renderer::getInstance()->getWidth(),
+			(float)Renderer::getInstance()->getWidth() / Renderer::getInstance()->getHeight(),
 			m_active_camera->zNear, m_active_camera->zFar);
 		viewMatrix = glm::inverse(m_active_camera->getNode()->getModelMatrix());
 
 		GLint camPosLoc = glGetUniformLocation(shaderProgram, "cameraWorldPos");
-		//TODO: Global position으로 변경 필요
-		glUniform3fv(camPosLoc, 1, glm::value_ptr(m_active_camera->getNode()->getPosition()));
+		glUniform3fv(camPosLoc, 1, glm::value_ptr(m_active_camera->getNode()->getGlobalPosition()));
 	}
 	else {
 		//TODO: ERROR!

@@ -34,7 +34,8 @@ Renderer::Renderer()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
@@ -78,38 +79,16 @@ Renderer::Renderer()
 	glDeleteShader(iblVertexShader);
 	glDeleteShader(iblFragmentShader);
 
-	//shader art
-	glGenTextures(1, &m_artTextureBuffer);
-	glBindTexture(GL_TEXTURE_2D, m_artTextureBuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glGenFramebuffers(1, &m_artFrameBuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_artFrameBuffer);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_artTextureBuffer, 0);
-
-	//GLuint depthRenderBuffer;
-	//glGenRenderbuffers(1, &depthRenderBuffer);
-	//glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
-	//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, m_width, m_height);
-	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-		std::cerr << "Framebuffer is not complete!" << std::endl;
-	}
-	glActiveTexture(GL_TEXTURE0 + 12);
-	glBindTexture(GL_TEXTURE_2D, m_artTextureBuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 	//IBL
 	std::string ggxPath = "../../res/IBL/lut_ggx.png";
 	m_lut_ggx = new Texture(ggxPath);
 
-	std::string specularPath = "../../res/IBL/IBL_specular_image.png";
-	std::string diffusePath = "../../res/IBL/IBL_diffuse_image.png";
-	m_specularIBLTexture = new IBLTexture(specularPath);
-	m_diffuseIBLTexture = new IBLTexture(diffusePath);
+	//std::string specularPath = "../../res/IBL/IBL_specular_image.png";
+	//std::string diffusePath = "../../res/IBL/IBL_diffuse_image.png";
+
+	//shader art
+	glGenFramebuffers(1, &m_artFrameBuffer);
+
 	//skybox
 	std::vector<glm::vec3> skyboxVerts = { glm::vec3(-1, -1, -1), glm::vec3(1, -1, -1), glm::vec3(1, 1, -1), glm::vec3(-1, 1, -1),
 		glm::vec3(-1, -1, 1), glm::vec3(1, -1, 1), glm::vec3(1, 1, 1), glm::vec3(-1, 1, 1)
@@ -124,13 +103,15 @@ Renderer::Renderer()
 	};
 	m_skybox = new IBLPrimitive(skyboxVerts, skyboxIndices);
 
+	m_specularIBLTexture = new IBLTexture();
+	m_diffuseIBLTexture = new IBLTexture();
 	m_specularIBLTexture->bind(2);
 	m_diffuseIBLTexture->bind(3);
 	m_lut_ggx->bind(4);
 
 	//sound texture
 	m_soundTexture = new SoundTexture();
-	m_soundTexture->loadWavFile("../../res/music/agi.wav");
+	m_soundTexture->loadWavFile("../../res/music/voia.wav");
 	m_soundTexture->bind(5, 6);
 }
 
@@ -172,20 +153,18 @@ void Renderer::update(float currentTime) {
 }
 
 void Renderer::render() {
-	glViewport(0, 0, m_width, m_height);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	//vertex shader art
+	glViewport(0, 0, SOUND_TEXTURE_WIDTH, SOUND_TEXTURE_HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_artFrameBuffer);
-	ArtShader::getInstance()->bind();
 	GLuint artProgram = ArtShader::getInstance()->getProgram();
+	glUseProgram(artProgram);
 	glDepthMask(GL_TRUE);
 	//TODO:touch coord input(-1 ~ 1, -1 ~ 1)
 	GLint touchUniformLoc = glGetUniformLocation(artProgram, "touch");
 
 	GLint resolutionUniformLoc = glGetUniformLocation(artProgram, "resolution");
-	GLint resolution[2] = { m_width, m_height };
-	glUniform2iv(resolutionUniformLoc, 1, resolution);
+	float resolution[2] = { SOUND_TEXTURE_WIDTH, SOUND_TEXTURE_HEIGHT };
+	glUniform2fv(resolutionUniformLoc, 1, resolution);
 
 	GLint backgroundUniformLoc = glGetUniformLocation(artProgram, "background");
 	glUniform4fv(backgroundUniformLoc, 1, m_backgroundColor);
@@ -194,7 +173,7 @@ void Renderer::render() {
 	glUniform1f(timeUniformLoc, m_currentTime);
 
 	GLint vertexCountUniformLoc = glGetUniformLocation(artProgram, "vertexCount");
-	glUniform1i(vertexCountUniformLoc, m_vertexCount);
+	glUniform1f(vertexCountUniformLoc, (float)ArtShader::getInstance()->getVertexCount());
 
 	GLint soundUniformLoc = glGetUniformLocation(artProgram, "sound");
 	glUniform1i(soundUniformLoc, 5);
@@ -207,9 +186,20 @@ void Renderer::render() {
 	else {
 		glUniform1i(isStereoUniformLoc, false);
 	}
-	ArtShader::getInstance()->render();
+
+	for (int i = 0; i < 6; i++) {
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_specularIBLTexture->getId(), 0);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_specularIBLTexture->getDepthTextureId());
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			std::cerr << "Framebuffer is not complete!" << std::endl;
+		}
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		ArtShader::getInstance()->render();
+	}
+
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glViewport(0, 0, m_width, m_height);
 	//TODO: multi scene Ã³¸®
 	for (auto iter = m_scenes.begin(); iter != m_scenes.end(); iter++) {
 		//skybox
@@ -219,7 +209,7 @@ void Renderer::render() {
 		if (activeCamera)
 		{
 			glm::mat4 projectionMatrix = glm::perspective(
-				glm::radians(activeCamera->fov),(float)m_width / (float)m_height,
+				glm::radians(activeCamera->fov),(float)m_width / m_height,
 				activeCamera->zNear, activeCamera->zFar);
 			glm::mat4 viewMatrix = glm::inverse(activeCamera->getNode()->getModelMatrix());
 
@@ -286,22 +276,8 @@ int Renderer::getHeight()
 	return m_height;
 }
 
-void Renderer::setWidth(int width)
+void Renderer::resize(int width, int height)
 {
 	m_width = width;
-}
-
-void Renderer::setHeight(int height)
-{
 	m_height = height;
-}
-
-int Renderer::getVertexCount()
-{
-	return m_vertexCount;
-}
-
-void Renderer::setVertexCount(int vertexCount)
-{
-	m_vertexCount = vertexCount;
 }

@@ -30,7 +30,8 @@ Light::Light(Node* node, cgltf_light* cgltf_light)
 	color[2] = cgltf_light->color[2];
 
 	intensity = cgltf_light->intensity;
-	range = cgltf_light->range;
+	//TODO: blender range 안들어오는 현상?
+	range = 2.0;// cgltf_light->range;
 	innerConeAngle = cgltf_light->spot_inner_cone_angle;
 	outerConeAngle = cgltf_light->spot_outer_cone_angle;
 	if (cgltf_light->name)

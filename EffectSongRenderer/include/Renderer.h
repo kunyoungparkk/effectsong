@@ -40,11 +40,8 @@ class Renderer {
   int getWidth();
   int getHeight();
 
-  void setWidth(int width);
-  void setHeight(int height);
+  void resize(int width, int height);
 
-  int getVertexCount();
-  void setVertexCount(int vertexCount);
  private:
   Renderer();
   static Renderer* instance;
@@ -66,10 +63,9 @@ class Renderer {
   int m_height = 0;
 
   //sound art
-  GLuint m_artTextureBuffer;
+  //GLuint m_artTextureBuffer;
   GLuint m_artFrameBuffer;
   SoundTexture* m_soundTexture = nullptr;
   float m_currentTime = 0.0f;
   float m_backgroundColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-  int m_vertexCount = 10000;
 };

@@ -19,11 +19,12 @@ public:
 	std::string getFragmentShader(){ return fs_; }
 	std::string getVertexShaderHeader(){ return vsHeader_; }
 	std::string getVertexShader(){ return vsHeader_ + vs_; }
-	void setVertexShader(std::string vs){ vs_ = vs; }
+	void setVertexShader(std::string vs){ 
+		vs_ = vs;
+		compileShader();
+	}
 
 	void compileShader();
-
-	void bind();
 
 	void render();
 
@@ -32,26 +33,30 @@ public:
 
 	int getVertexCount() const { return m_vertexCount; }
 	void setVertexCount(int vertexCount) {
+		m_vertices.resize(vertexCount);
 		for (int i = m_vertexCount; i < vertexCount; i++) {
 			m_vertices[i] = (float)i;
 		}
 
-		m_vertices.resize(m_vertexCount);
 		m_vertexCount = vertexCount;
+
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(float), m_vertices.data(), GL_STATIC_DRAW);
 	}
 
 	GLuint getProgram() { return m_artShaderProgram; }
 private:
 	ArtShader();
+	~ArtShader();
 	static ArtShader* instance_;
 	GLuint VAO, VBO;
 	GLenum m_primitiveMode = GL_POINTS;
 	std::vector<float> m_vertices;
-	int m_vertexCount = 10000;
+	int m_vertexCount = 40000;
 	GLuint m_artShaderProgram;
 
 	std::string fs_ = R"(#version 300 es
-	precision mediump float;
+	precision highp float;
 	in vec4 v_color;
 	out vec4 FragColor;
 	void main() {
@@ -59,7 +64,7 @@ private:
 	}
 	)";
 	std::string vsHeader_ = R"(#version 300 es
-	precision mediump float;
+	precision highp float;
 	layout (location = 0) in float vertexId;
 	uniform vec2 touch;
 	uniform vec2 resolution;
@@ -77,34 +82,34 @@ private:
 	//uniform float _dontUseDirectly_pointSize; : multiflydevicePixelRatio
 	)";
 	std::string vs_ = R"(
-	#define PI radians(180.0)
-	vec3 hsv2rgb(vec3 c) {
-	  c = vec3(c.x, clamp(c.yz, 0.0, 1.0));
-	  vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-	  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-	  return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-	}
+#define PI radians(180.0)
 
-	void main() {
-	  float across = floor(sqrt(vertexCount));
-	  float down = floor(vertexCount / across);
+vec3 hsv2rgb(vec3 c) {
+  c = vec3(c.x, clamp(c.yz, 0.0, 1.0));
+  vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+  return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+void main() {
+  float across = floor(sqrt(vertexCount));
+  float down = floor(vertexCount / across);
   
-	  float x = mod(vertexId, across);
-	  float y = floor(vertexId / across);
+  float x = mod(vertexId, across);
+  float y = floor(vertexId / across);
   
-	  float u = x / across;
-	  float v = y / across;
+  float u = x / across;
+  float v = y / across;
   
-	  vec2 xy = vec2(u * 2.0 - 1.0, v * 2.0 - 1.0);
-	  gl_Position = vec4(xy, 0, 1);
-	  gl_PointSize = max(0.1, resolution.x / across);
-	  gl_PointSize = 10.0;
-	  float f = atan(xy.x, xy.y);
-	  float h = length(xy);
-	  float s = texture(sound, vec2(abs(f / PI) * 0.5, h * 0.25)).a;
+  vec2 xy = vec2(u * 2.0 - 1.0, v * 2.0 - 1.0);
+  gl_Position = vec4(xy, 0, 1);
+  gl_PointSize = 0.1;//max(0.1, resolution.x / across);
+  
+  float f = atan(xy.x, xy.y);
+  float h = length(xy);
+  float s = texture(sound, vec2(abs(f / PI) * 0.25, h * 0.2)).r;
 
-	  float hue = (time * 0.01 + abs(f) * 0.04);
-	  v_color = vec4(hsv2rgb(vec3(hue, 1, pow(s, 2.))), 1);
-	}
+  float hue = (time * 0.01 + abs(f) * 0.04);
+  v_color = vec4(hsv2rgb(vec3(hue, 1, pow(s, 2.))), 1.0);
+}
 	)";
 };

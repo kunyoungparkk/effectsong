@@ -2,10 +2,12 @@
 #include "common.h"
 class IBLTexture {
  public:
-  IBLTexture(std::string& path);
+  IBLTexture();
   ~IBLTexture();
   void bind(int texIdx);
+  GLuint getId() { return m_textureID; }
+  GLuint getDepthTextureId() { return m_depthTextureID; }
  private:
   GLuint m_textureID;
-  unsigned char* m_data;
+  GLuint m_depthTextureID;
 };

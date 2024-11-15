@@ -24,12 +24,20 @@ ArtShader::ArtShader() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
+ArtShader::~ArtShader()
+{
+	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(1, &VAO);
+}
 void ArtShader::compileShader()
 {
+	glDeleteProgram(m_artShaderProgram);
+	m_artShaderProgram = glCreateProgram();
 	//shader art program
 	std::string vertexShader = getVertexShader();
 	const char* cArtVertexShaderSource = vertexShader.c_str();
 	const char* cArtFragmentShaderSource = fs_.c_str();
+
 	GLuint artVertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(artVertexShader, 1, &cArtVertexShaderSource, NULL);
 	glCompileShader(artVertexShader);
@@ -42,12 +50,9 @@ void ArtShader::compileShader()
 	glDeleteShader(artVertexShader);
 	glDeleteShader(artFragmentShader);
 }
-void ArtShader::bind()
-{
-	glUseProgram(m_artShaderProgram);
-}
 void ArtShader::render()
 {
 	glBindVertexArray(VAO);
 	glDrawArrays(m_primitiveMode, 0, m_vertexCount);
+	glBindVertexArray(0);
 }

@@ -206,7 +206,7 @@ void main() {
         vec3 lightDirection = normalize(pointLights[i].position - fragPos);
 
         float distance = length(pointLights[i].position - fragPos);
-        float range = 0.5;//TODO: pointLights[i].range;, 편집기에서 수정하도록. gltf로 안들어온다. 기본값 설정 필요?
+        float range = pointLights[i].range;
         float attenuation = clamp((range * range - distance * distance) / (range * range), 0.0, 1.0);
         
         result += pointLights[i].color * pointLights[i].intensity * calculateBRDF(normal, view, lightDirection, baseColorTextureColor, F0, metallic, roughness, ao) * attenuation;
@@ -218,7 +218,7 @@ void main() {
         vec3 lightDirection = normalize(spotLights[i].position - fragPos);
         
         float distance = length(spotLights[i].position - fragPos);
-        float range = 3.0;//TODO: spotLights[i].range;
+        float range = spotLights[i].range;
         float attenuation = clamp((range * range - distance * distance) / (range * range), 0.0, 1.0);
         float spotEffect = dot(-lightDirection, normalize(spotLights[i].direction));
         float innerCutOff = cos(spotLights[i].innerConeAngle);

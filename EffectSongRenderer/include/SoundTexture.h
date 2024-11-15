@@ -1,8 +1,8 @@
 #pragma once
 #include "common.h"
 #include <vector>
-#define SOUND_TEXTURE_WIDTH 512
-#define SOUND_TEXTURE_HEIGHT 512
+#define SOUND_TEXTURE_WIDTH 1000
+#define SOUND_TEXTURE_HEIGHT 1000
 
 class SoundTexture {
 public:
