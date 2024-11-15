@@ -11,6 +11,8 @@ public:
     void update(float currentTime);
     void bind(int texIdx, int texIdx2);
     bool loadWavFile(const std::string& filePath);
+
+    int getChannelCount();
 private:
     std::vector<float> m_audioSamples;
     size_t m_eachSampleCount = 0;

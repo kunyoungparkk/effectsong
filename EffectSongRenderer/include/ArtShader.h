@@ -1,0 +1,83 @@
+#pragma once
+#include <string>
+class ArtShader
+{
+public:
+	static ArtShader* getInstance()
+	{
+		if (instance_ == nullptr)
+		{
+			instance_ = new ArtShader();
+		}
+		return instance_;
+	}
+	static void deleteInstance() {
+		delete instance_;
+		instance_ = nullptr;
+	}
+	std::string getFragmentShader(){ return fs_; }
+	std::string getVertexShaderHeader(){ return vsHeader_; }
+	std::string getVertexShader(){ return vsHeader_ + vs_; }
+	void setVertexShader(std::string vs){ vs_ = vs; }
+private:
+	ArtShader();
+	static ArtShader* instance_;
+	
+	std::string fs_ = R"(#version 300 es
+	precision mediump float;
+	in vec4 v_color;
+	out vec4 FragColor;
+	void main() {
+		FragColor = v_color;
+	}
+	)";
+	std::string vsHeader_ = R"(#version 300 es
+	precision mediump float;
+	layout (location = 0) in float vertexId;
+	uniform vec2 touch;
+	uniform vec2 resolution;
+	uniform vec4 background;
+	uniform float time;
+	uniform float vertexCount;
+	uniform sampler2D sound;
+	uniform sampler2D sound2;
+	uniform bool isStereo;
+	out vec4 v_color;
+	//uniform vec2 mouse;
+	//uniform sampler2D volume;
+	//uniform sampler2D floatSound;
+	//uniform vec2 soundRes;
+	//uniform float _dontUseDirectly_pointSize; : multiflydevicePixelRatio
+	)";
+	std::string vs_ = R"(
+	#define PI radians(180.0)
+	vec3 hsv2rgb(vec3 c) {
+	  c = vec3(c.x, clamp(c.yz, 0.0, 1.0));
+	  vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+	  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+	  return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+	}
+
+	void main() {
+	  float across = floor(sqrt(vertexCount));
+	  float down = floor(vertexCount / across);
+  
+	  float x = mod(vertexId, across);
+	  float y = floor(vertexId / across);
+  
+	  float u = x / across;
+	  float v = y / across;
+  
+	  vec2 xy = vec2(u * 2.0 - 1.0, v * 2.0 - 1.0);
+	  gl_Position = vec4(xy, 0, 1);
+	  gl_PointSize = max(0.1, resolution.x / across);
+	  gl_PointSize = 10.0;
+	  float f = atan(xy.x, xy.y);
+	  float h = length(xy);
+	  float s = texture(sound, vec2(abs(f / PI) * 0.5, h * 0.25)).a;
+
+	  float hue = (time * 0.01 + abs(f) * 0.04);
+	  v_color = vec4(hsv2rgb(vec3(hue, 1, pow(s, 2.))), 1);
+	}
+	)";
+};

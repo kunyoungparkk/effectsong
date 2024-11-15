@@ -161,3 +161,8 @@ bool SoundTexture::loadWavFile(const std::string& filePath)
 
     return true;
 }
+
+int SoundTexture::getChannelCount()
+{
+    return m_channels;
+}

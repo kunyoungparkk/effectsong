@@ -11,6 +11,7 @@
 #include "IBLTexture.h"
 #include "IBLPrimitive.h"
 #include "SoundTexture.h"
+#include "ArtShader.h"
 
 Renderer* Renderer::instance = nullptr;
 
@@ -30,7 +31,6 @@ Renderer::Renderer()
 	}
 
 	// OpenGL 설정
-	glViewport(0, 0, 640, 480);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -78,6 +78,26 @@ Renderer::Renderer()
 	glDeleteShader(iblVertexShader);
 	glDeleteShader(iblFragmentShader);
 
+	//shader art program
+	std::string artVertexShaderSource =
+		ArtShader::getInstance()->getVertexShader();
+	std::string artFragmentShaderSource =
+		ArtShader::getInstance()->getFragmentShader();
+	const char* cArtVertexShaderSource = artVertexShaderSource.c_str();
+	const char* cArtFragmentShaderSource = artFragmentShaderSource.c_str();
+	GLuint artVertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(artVertexShader, 1, &cArtVertexShaderSource, NULL);
+	glCompileShader(artVertexShader);
+	GLuint artFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(artFragmentShader, 1, &cArtFragmentShaderSource, NULL);
+	glCompileShader(artFragmentShader);
+	m_artShaderProgram = glCreateProgram();
+	glAttachShader(m_artShaderProgram, artVertexShader);
+	glAttachShader(m_artShaderProgram, artFragmentShader);
+	glLinkProgram(m_artShaderProgram);
+	glDeleteShader(artVertexShader);
+	glDeleteShader(artFragmentShader);
+
 	//IBL
 	std::string ggxPath = "../../res/IBL/lut_ggx.png";
 	m_lut_ggx = new Texture(ggxPath);
@@ -106,7 +126,7 @@ Renderer::Renderer()
 
 	//sound texture
 	m_soundTexture = new SoundTexture();
-	m_soundTexture->loadWavFile("C:/Users/pgyag/Desktop/EffectSong/EffectSongRenderer/res/music/agi.wav");
+	m_soundTexture->loadWavFile("../../res/music/agi.wav");
 	m_soundTexture->bind(5, 6);
 }
 
@@ -138,17 +158,52 @@ Renderer::~Renderer() {
 		delete m_soundTexture;
 	}
 }
-float curTime = 0.0f;
-void Renderer::update() {
-	curTime += 0.02f;
-	m_soundTexture->update(curTime);
+
+void Renderer::update(float currentTime) {
+	m_currentTime = currentTime;
+	m_soundTexture->update(currentTime);
 	for (auto iter = m_scenes.begin(); iter != m_scenes.end(); iter++) {
 		(*iter)->update();
 	}
 }
 
 void Renderer::render() {
+	glViewport(0, 0, m_width, m_height);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//vertex shader art
+	glDepthMask(GL_TRUE);
+	glUseProgram(m_artShaderProgram);
+	//TODO:touch coord input(-1 ~ 1, -1 ~ 1)
+	GLint touchUniformLoc = glGetUniformLocation(m_artShaderProgram, "touch");
+
+	GLint resolutionUniformLoc = glGetUniformLocation(m_artShaderProgram, "resolution");
+	GLint resolution[2] = { m_width, m_height };
+	glUniform2iv(resolutionUniformLoc, 1, resolution);
+
+	GLint backgroundUniformLoc = glGetUniformLocation(m_artShaderProgram, "background");
+	glUniform4fv(backgroundUniformLoc, 1, m_backgroundColor);
+
+	GLint timeUniformLoc = glGetUniformLocation(m_artShaderProgram, "time");
+	glUniform1f(timeUniformLoc, m_currentTime);
+
+	GLint vertexCountUniformLoc = glGetUniformLocation(m_artShaderProgram, "vertexCount");
+	glUniform1i(vertexCountUniformLoc, m_vertexCount);
+
+	GLint soundUniformLoc = glGetUniformLocation(m_artShaderProgram, "sound");
+	glUniform1i(soundUniformLoc, 5);
+	GLint soundUniformLoc2 = glGetUniformLocation(m_artShaderProgram, "sound2");
+	glUniform1i(soundUniformLoc2, 6);
+	GLint isStereoUniformLoc = glGetUniformLocation(m_artShaderProgram, "isStereo");
+	if (m_soundTexture->getChannelCount() == 2) {
+		glUniform1i(isStereoUniformLoc, true);
+	}
+	else {
+		glUniform1i(isStereoUniformLoc, false);
+	}
+
+	
+	//TODO: multi scene 처리
 	for (auto iter = m_scenes.begin(); iter != m_scenes.end(); iter++) {
 		//skybox
 		glDepthMask(GL_FALSE);
@@ -157,7 +212,7 @@ void Renderer::render() {
 		if (activeCamera)
 		{
 			glm::mat4 projectionMatrix = glm::perspective(
-				glm::radians(activeCamera->fov), 640.0f / 480.0f,
+				glm::radians(activeCamera->fov),(float)m_width / (float)m_height,
 				activeCamera->zNear, activeCamera->zFar);
 			glm::mat4 viewMatrix = glm::inverse(activeCamera->getNode()->getModelMatrix());
 
@@ -212,4 +267,34 @@ Texture* Renderer::getTexture(std::string uri) { return m_textures[uri]; }
 
 void Renderer::addTexture(std::string uri, Texture* texture) {
 	m_textures[uri] = texture;
+}
+
+int Renderer::getWidth()
+{
+	return m_width;
+}
+
+int Renderer::getHeight()
+{
+	return m_height;
+}
+
+void Renderer::setWidth(int width)
+{
+	m_width = width;
+}
+
+void Renderer::setHeight(int height)
+{
+	m_height = height;
+}
+
+int Renderer::getVertexCount()
+{
+	return m_vertexCount;
+}
+
+void Renderer::setVertexCount(int vertexCount)
+{
+	m_vertexCount = vertexCount;
 }

@@ -51,6 +51,9 @@
     <ClCompile Include="..\..\src\SoundTexture.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\ArtShader.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\Renderer.h">
@@ -83,7 +86,7 @@
     <ClInclude Include="..\..\include\Light.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ArtShader.hpp">
+    <ClInclude Include="..\..\include\ArtShader.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\IBLTexture.h">

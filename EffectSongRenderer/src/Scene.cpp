@@ -1,4 +1,5 @@
 #include "Scene.h"
+#include "Renderer.h"
 #include <string>
 
 Scene::Scene(cgltf_scene& cgltfScene) : m_cgltf_scene(cgltfScene) {
@@ -8,13 +9,13 @@ Scene::Scene(cgltf_scene& cgltfScene) : m_cgltf_scene(cgltfScene) {
 	}
 	//TODO: modify required about temp camera
 	//if (!m_active_camera) {
-		Node* emptyNode = new Node(this, nullptr);
-		Camera* camera = new Camera(emptyNode);
-		setActiveCamera(camera);
-		emptyNode->setPosition(glm::vec3(0, 0, -5));
-		emptyNode->setRotation(
-			glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
-		nodes.push_back(emptyNode);
+	Node* emptyNode = new Node(this, nullptr);
+	Camera* camera = new Camera(emptyNode);
+	setActiveCamera(camera);
+	emptyNode->setPosition(glm::vec3(0, 0, -5));
+	emptyNode->setRotation(
+		glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	nodes.push_back(emptyNode);
 	//}
 }
 
@@ -35,9 +36,11 @@ void Scene::render(GLuint shaderProgram) {
 	//camera
 	glm::mat4 projectionMatrix;
 	glm::mat4 viewMatrix;
+	//TODO: viewport?
 	if (m_active_camera) {
 		projectionMatrix = glm::perspective(
-			glm::radians(m_active_camera->fov), 640.0f / 480.0f,
+			glm::radians(m_active_camera->fov), 
+			(float)Renderer::getInstance()->getWidth() / Renderer::getInstance()->getWidth(),
 			m_active_camera->zNear, m_active_camera->zFar);
 		viewMatrix = glm::inverse(m_active_camera->getNode()->getModelMatrix());
 
@@ -86,7 +89,7 @@ void Scene::render(GLuint shaderProgram) {
 			uniformName = "directionalLights[" + std::to_string(dirLightCnt) + "].direction";
 			GLint lightDirLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
 			glUniform3fv(lightDirLoc, 1, glm::value_ptr(glm::normalize(-1.0f * light->getNode()->getGlobalFront())));
-			
+
 			dirLightCnt++;
 			break;
 		}

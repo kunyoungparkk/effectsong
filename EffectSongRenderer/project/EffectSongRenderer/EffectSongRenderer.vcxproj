@@ -152,6 +152,7 @@ copy "$(ProjectDir)..\..\thirdparty\SDL2-2.30.5\lib\x64\SDL2.dll" "$(ProjectDir)
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\ArtShader.cpp" />
     <ClCompile Include="..\..\src\Camera.cpp" />
     <ClCompile Include="..\..\src\GLTFLoader.cpp" />
     <ClCompile Include="..\..\src\IBLPrimitive.cpp" />
@@ -166,7 +167,7 @@ copy "$(ProjectDir)..\..\thirdparty\SDL2-2.30.5\lib\x64\SDL2.dll" "$(ProjectDir)
     <ClCompile Include="..\..\src\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\ArtShader.hpp" />
+    <ClInclude Include="..\..\include\ArtShader.h" />
     <ClInclude Include="..\..\include\Camera.h" />
     <ClInclude Include="..\..\include\common.h" />
     <ClInclude Include="..\..\include\GLTFLoader.h" />
