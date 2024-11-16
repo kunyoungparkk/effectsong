@@ -14,12 +14,12 @@ public:
 	void update();
 	void render(GLuint shaderProgram);
 
-	glm::mat4 getModelMatrix();
 
 	glm::vec3 getPosition() const;
 	glm::quat getRotation() const;
 	glm::vec3 getScale() const;
-
+	glm::vec3 getFront();
+	glm::vec3 getLeft();
 	void setPosition(glm::vec3 position);
 	void setRotation(glm::quat rotation);
 	void setScale(glm::vec3 scale);
@@ -27,12 +27,9 @@ public:
 	glm::vec3 getGlobalPosition() const;
 	glm::quat getGlobalRotation() const;
 	glm::vec3 getGlobalScale() const;
-
-	glm::vec3 getFront();
-	glm::vec3 getLeft();
-
 	glm::vec3 getGlobalFront();
 	glm::vec3 getGlobalLeft();
+	glm::mat4 getModelMatrix();
 
 	//Component
 	Light* getLight();

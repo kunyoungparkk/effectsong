@@ -16,6 +16,7 @@ class Scene {
   void addLight(Light* light);
   void removeLight(Light* light);
 
+  Node* getChildByIndex(int index);
  private:
   Camera* m_active_camera = nullptr;
   std::vector<Node*> nodes;

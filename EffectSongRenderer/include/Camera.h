@@ -22,7 +22,7 @@ class Camera {
   float yMag = 0.0f;
 
   //common
-  float zFar = 1000.0f;
+  float zFar = 100.0f;
   float zNear = 0.1f;
  
   std::string name;

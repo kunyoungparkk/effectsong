@@ -180,3 +180,11 @@ void Scene::removeLight(Light* light)
 {
 	lights.remove(light);
 }
+
+Node* Scene::getChildByIndex(int index)
+{
+	if (index >= nodes.size()) {
+		return nullptr;
+	}
+	return nodes[index];
+}

@@ -36,7 +36,7 @@ Renderer::Renderer()
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_PROGRAM_POINT_SIZE);
 	glCullFace(GL_BACK);
 
 	//general shader program
@@ -111,7 +111,7 @@ Renderer::Renderer()
 
 	//sound texture
 	m_soundTexture = new SoundTexture();
-	m_soundTexture->loadWavFile("../../res/music/voia.wav");
+	m_soundTexture->loadWavFile("../../res/music/debug.wav");
 	m_soundTexture->bind(5, 6);
 }
 
@@ -147,6 +147,11 @@ Renderer::~Renderer() {
 void Renderer::update(float currentTime) {
 	m_currentTime = currentTime;
 	m_soundTexture->update(currentTime);
+	
+	float soundSize = m_soundTexture->getCurrentEnergy() / SOUND_TEXTURE_WIDTH;
+	Node* node = getActiveScene()->getChildByIndex(0);
+	//node->setScale(glm::vec3(soundSize * 0.1 + 0.9));
+
 	for (auto iter = m_scenes.begin(); iter != m_scenes.end(); iter++) {
 		(*iter)->update();
 	}
@@ -154,8 +159,10 @@ void Renderer::update(float currentTime) {
 
 void Renderer::render() {
 	//vertex shader art
-	glViewport(0, 0, SOUND_TEXTURE_WIDTH, SOUND_TEXTURE_HEIGHT);
+	glDisable(GL_CULL_FACE);
+	glViewport(0, 0, SOUND_TEXTURE_WIDTH * 2, SOUND_TEXTURE_HEIGHT * 2);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_artFrameBuffer);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	GLuint artProgram = ArtShader::getInstance()->getProgram();
 	glUseProgram(artProgram);
 	glDepthMask(GL_TRUE);
@@ -163,7 +170,7 @@ void Renderer::render() {
 	GLint touchUniformLoc = glGetUniformLocation(artProgram, "touch");
 
 	GLint resolutionUniformLoc = glGetUniformLocation(artProgram, "resolution");
-	float resolution[2] = { SOUND_TEXTURE_WIDTH, SOUND_TEXTURE_HEIGHT };
+	float resolution[2] = { (float)SOUND_TEXTURE_WIDTH * 2, (float)SOUND_TEXTURE_HEIGHT * 2 };
 	glUniform2fv(resolutionUniformLoc, 1, resolution);
 
 	GLint backgroundUniformLoc = glGetUniformLocation(artProgram, "background");
@@ -187,19 +194,21 @@ void Renderer::render() {
 		glUniform1i(isStereoUniformLoc, false);
 	}
 
-	for (int i = 0; i < 6; i++) {
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, m_specularIBLTexture->getId(), 0);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_specularIBLTexture->getDepthTextureId());
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-			std::cerr << "Framebuffer is not complete!" << std::endl;
-		}
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		ArtShader::getInstance()->render();
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X, m_specularIBLTexture->getId(), 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_specularIBLTexture->getDepthTextureId());
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		std::cerr << "Framebuffer is not complete!" << std::endl;
+	}
+	ArtShader::getInstance()->render();
+	m_specularIBLTexture->bind(2);
+	for (int i = 1; i < 6; i++) {
+		glCopyTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, 0, 0, SOUND_TEXTURE_WIDTH * 2, SOUND_TEXTURE_HEIGHT * 2);
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, m_width, m_height);
+	glEnable(GL_CULL_FACE);
 	//TODO: multi scene Ã³¸®
 	for (auto iter = m_scenes.begin(); iter != m_scenes.end(); iter++) {
 		//skybox

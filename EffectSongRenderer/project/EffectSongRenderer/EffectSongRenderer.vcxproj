@@ -107,13 +107,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\SDL2-2.30.5\include;$(ProjectDir)\..\..\include;$(ProjectDir)\..\..\thirdparty\glew-2.1.0\include;$(ProjectDir)\..\..\thirdparty\cgltf;$(ProjectDir)\..\..\thirdparty\stb-master;$(ProjectDir)\..\..\thirdparty;$(ProjectDir)\..\..\thirdparty\dr_libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\SDL2-2.30.5\include;$(ProjectDir)\..\..\include;$(ProjectDir)\..\..\thirdparty\glew-2.1.0\include;$(ProjectDir)\..\..\thirdparty\cgltf;$(ProjectDir)\..\..\thirdparty\stb-master;$(ProjectDir)\..\..\thirdparty;$(ProjectDir)\..\..\thirdparty\dr_libs;$(ProjectDir)\..\..\thirdparty\fftw3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;glew32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\thirdparty\SDL2-2.30.5\lib\x64;$(ProjectDir)\..\..\thirdparty\glew-2.1.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;glew32.lib;opengl32.lib;fftw3f.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\thirdparty\SDL2-2.30.5\lib\x64;$(ProjectDir)\..\..\thirdparty\glew-2.1.0\lib\Release\x64;$(ProjectDir)\..\..\thirdparty\fftw3\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreLinkEvent>
       <Command>
@@ -121,7 +121,8 @@
     </PreLinkEvent>
     <PostBuildEvent>
       <Command>copy "$(ProjectDir)..\..\thirdparty\glew-2.1.0\lib\Release\x64\glew32.dll" "$(ProjectDir)..\x64\$(ConfigurationName)"
-copy "$(ProjectDir)..\..\thirdparty\SDL2-2.30.5\lib\x64\SDL2.dll" "$(ProjectDir)..\x64\$(ConfigurationName)"</Command>
+copy "$(ProjectDir)..\..\thirdparty\SDL2-2.30.5\lib\x64\SDL2.dll" "$(ProjectDir)..\x64\$(ConfigurationName)"
+copy "$(ProjectDir)..\..\thirdparty\fftw3\bin\fftw3f.dll" "$(ProjectDir)..\x64\$(ConfigurationName)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -132,15 +133,15 @@ copy "$(ProjectDir)..\..\thirdparty\SDL2-2.30.5\lib\x64\SDL2.dll" "$(ProjectDir)
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\SDL2-2.30.5\include;$(ProjectDir)\..\..\include;$(ProjectDir)\..\..\thirdparty\glew-2.1.0\include;$(ProjectDir)\..\..\thirdparty\cgltf;$(ProjectDir)\..\..\thirdparty\stb-master;$(ProjectDir)\..\..\thirdparty;$(ProjectDir)\..\..\thirdparty\dr_libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\SDL2-2.30.5\include;$(ProjectDir)\..\..\include;$(ProjectDir)\..\..\thirdparty\glew-2.1.0\include;$(ProjectDir)\..\..\thirdparty\cgltf;$(ProjectDir)\..\..\thirdparty\stb-master;$(ProjectDir)\..\..\thirdparty;$(ProjectDir)\..\..\thirdparty\dr_libs;$(ProjectDir)\..\..\thirdparty\fftw3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;glew32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\thirdparty\SDL2-2.30.5\lib\x64;$(ProjectDir)\..\..\thirdparty\glew-2.1.0\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;glew32.lib;opengl32.lib;fftw3f.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\thirdparty\SDL2-2.30.5\lib\x64;$(ProjectDir)\..\..\thirdparty\glew-2.1.0\lib\Release\x64;$(ProjectDir)\..\..\thirdparty\fftw3\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreLinkEvent>
       <Command>
@@ -148,7 +149,8 @@ copy "$(ProjectDir)..\..\thirdparty\SDL2-2.30.5\lib\x64\SDL2.dll" "$(ProjectDir)
     </PreLinkEvent>
     <PostBuildEvent>
       <Command>copy "$(ProjectDir)..\..\thirdparty\glew-2.1.0\lib\Release\x64\glew32.dll" "$(ProjectDir)..\x64\$(ConfigurationName)"
-copy "$(ProjectDir)..\..\thirdparty\SDL2-2.30.5\lib\x64\SDL2.dll" "$(ProjectDir)..\x64\$(ConfigurationName)"</Command>
+copy "$(ProjectDir)..\..\thirdparty\SDL2-2.30.5\lib\x64\SDL2.dll" "$(ProjectDir)..\x64\$(ConfigurationName)"
+copy "$(ProjectDir)..\..\thirdparty\fftw3\bin\fftw3f.dll" "$(ProjectDir)..\x64\$(ConfigurationName)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

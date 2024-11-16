@@ -102,14 +102,15 @@ void main() {
   
   vec2 xy = vec2(u * 2.0 - 1.0, v * 2.0 - 1.0);
   gl_Position = vec4(xy, 0, 1);
-  gl_PointSize = 0.1;//max(0.1, resolution.x / across);
+  gl_PointSize = max(0.1, ceil(resolution.x / across));
   
-  float f = atan(xy.x, xy.y);
-  float h = length(xy);
-  float s = texture(sound, vec2(abs(f / PI) * 0.25, h * 0.2)).r;
-
-  float hue = (time * 0.01 + abs(f) * 0.04);
-  v_color = vec4(hsv2rgb(vec3(hue, 1, pow(s, 2.))), 1.0);
+  float s;
+  if(!isStereo || u<0.5){
+    s = texture(sound, vec2(u * 2.0, v)).r;
+  }else{
+    s = texture(sound2, vec2((u - 0.5) * 2.0, v)).r;
+  }  
+  v_color = vec4(s, s, s, 1.0);
 }
 	)";
 };

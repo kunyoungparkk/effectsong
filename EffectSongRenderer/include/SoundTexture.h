@@ -1,8 +1,9 @@
 #pragma once
 #include "common.h"
+#include <fftw3.h>
 #include <vector>
-#define SOUND_TEXTURE_WIDTH 1000
-#define SOUND_TEXTURE_HEIGHT 1000
+#define SOUND_TEXTURE_WIDTH 1024
+#define SOUND_TEXTURE_HEIGHT 1024
 
 class SoundTexture {
 public:
@@ -13,6 +14,8 @@ public:
     bool loadWavFile(const std::string& filePath);
 
     int getChannelCount();
+
+    float getCurrentEnergy() { return m_currentEnergy; }
 private:
     std::vector<float> m_audioSamples;
     size_t m_eachSampleCount = 0;
@@ -30,7 +33,8 @@ private:
     //use when stereo
     float m_textureBuffer2[SOUND_TEXTURE_HEIGHT][SOUND_TEXTURE_WIDTH] = { 0.0f };
 
-    //TODO: FFTW ºÐ¼®
-    //fftw_complex* in, * out;
-    //fftw_plan plan;
+    float m_currentEnergy = 0.0f;
+
+    fftwf_complex* in, * out;
+    fftwf_plan plan;
 };
