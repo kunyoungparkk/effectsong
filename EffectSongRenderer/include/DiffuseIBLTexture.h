@@ -1,9 +1,9 @@
 #pragma once
 #include "common.h"
-class IBLTexture {
+class DiffuseIBLTexture {
  public:
-  IBLTexture();
-  ~IBLTexture();
+  DiffuseIBLTexture(int width, int height, int nrChannels, GLint wrapS, GLint wrapT, GLint minFilter, GLint maxFilter);
+  ~DiffuseIBLTexture();
   void bind(int texIdx);
   GLuint getId() { return m_textureID; }
   GLuint getDepthTextureId() { return m_depthTextureID; }

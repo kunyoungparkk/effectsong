@@ -1,6 +1,5 @@
 #include "IBLPrimitive.h"
 #include "Renderer.h"
-#include "IBLTexture.h"
 
 IBLPrimitive::IBLPrimitive(std::vector<glm::vec3>& vertices, std::vector<GLuint>& indices)
 {

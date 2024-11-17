@@ -2,11 +2,12 @@
 #include <list>
 #include <unordered_map>
 #include "common.h"
-#define IBL_DIFFUSE_LENGTH 64
+#define IBL_DIFFUSE_LENGTH 128
 class Scene;
 class Material;
 class Texture;
-class IBLTexture;
+class SpecularIBLTexture;
+class DiffuseIBLTexture;
 class Primitive;
 class IBLPrimitive;
 class SoundTexture;
@@ -69,8 +70,8 @@ class Renderer {
   //Scene* m_active_scene = nullptr;
   IBLPrimitive* m_skybox = nullptr;
 
-  IBLTexture* m_specularIBLTexture = nullptr;
-  Texture* m_diffuseTexture = nullptr;
+  SpecularIBLTexture* m_specularIBLTexture = nullptr;
+  DiffuseIBLTexture* m_diffuseIBLTexture = nullptr;
   unsigned char m_diffusePixels[IBL_DIFFUSE_LENGTH * IBL_DIFFUSE_LENGTH * 4];
   
   Texture* m_lut_ggx = nullptr;
@@ -79,7 +80,8 @@ class Renderer {
   int m_height = 0;
 
   //sound art
-  GLuint m_artFrameBuffer = 0;
+  GLuint m_specularIBLFrameBuffer = 0;
+  GLuint m_diffuseIBLFrameBuffer = 0;
   SoundTexture* m_soundTexture = nullptr;
   float m_currentTime = 0.0f;
   glm::vec4 m_backgroundColor = glm::vec4(0.0f);

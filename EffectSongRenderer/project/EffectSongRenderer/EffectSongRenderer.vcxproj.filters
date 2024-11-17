@@ -89,13 +89,16 @@
     <ClInclude Include="..\..\include\ArtShader.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\IBLTexture.h">
+    <ClInclude Include="..\..\include\SpecularIBLTexture.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\IBLPrimitive.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\SoundTexture.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\DiffuseIBLTexture.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

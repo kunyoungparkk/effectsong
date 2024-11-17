@@ -8,7 +8,8 @@
 #include "Material.h"
 #include "Texture.h"
 #include "Primitive.h"
-#include "IBLTexture.h"
+#include "SpecularIBLTexture.h"
+#include "DiffuseIBLTexture.h"
 #include "IBLPrimitive.h"
 #include "SoundTexture.h"
 #include "ArtShader.h"
@@ -83,7 +84,8 @@ Renderer::Renderer(){
 	m_lut_ggx = new Texture(ggxPath);
 
 	//shader art
-	glGenFramebuffers(1, &m_artFrameBuffer);
+	glGenFramebuffers(1, &m_specularIBLFrameBuffer);
+	glGenFramebuffers(1, &m_diffuseIBLFrameBuffer);
 
 	//skybox
 	std::vector<glm::vec3> skyboxVerts = { glm::vec3(-1, -1, -1), glm::vec3(1, -1, -1), glm::vec3(1, 1, -1), glm::vec3(-1, 1, -1),
@@ -99,10 +101,10 @@ Renderer::Renderer(){
 	};
 	m_skybox = new IBLPrimitive(skyboxVerts, skyboxIndices);
 
-	m_specularIBLTexture = new IBLTexture();
+	m_specularIBLTexture = new SpecularIBLTexture();
 	m_specularIBLTexture->bind(2);
-	m_diffuseTexture = new Texture(64, 64, 4, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
-	m_diffuseTexture->bind(3);
+	m_diffuseIBLTexture = new DiffuseIBLTexture(64, 64, 4, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
+	m_diffuseIBLTexture->bind(3);
 	m_lut_ggx->bind(4);
 
 	m_soundTexture = new SoundTexture();
@@ -129,8 +131,8 @@ Renderer::~Renderer() {
 	if (m_specularIBLTexture) {
 		delete m_specularIBLTexture;
 	}
-	if (m_diffuseTexture) {
-		delete m_diffuseTexture;
+	if (m_diffuseIBLTexture) {
+		delete m_diffuseIBLTexture;
 	}
 	if (m_soundTexture) {
 		delete m_soundTexture;
@@ -152,9 +154,9 @@ void Renderer::update(float currentTime) {
 
 void Renderer::render() {
 	/*vertex shader art*/
+	glBindFramebuffer(GL_FRAMEBUFFER, m_specularIBLFrameBuffer);
 	glDisable(GL_CULL_FACE);
 	glViewport(0, 0, SOUND_TEXTURE_WIDTH * 2, SOUND_TEXTURE_HEIGHT * 2);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_artFrameBuffer);
 	glClearColor(m_backgroundColor.r, m_backgroundColor.g, m_backgroundColor.b, m_backgroundColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	GLuint artProgram = ArtShader::getInstance()->getProgram();
@@ -200,21 +202,26 @@ void Renderer::render() {
 	}
 
 	/*diffuse texture->IBL_DIFFUSE_LENGTH* IBL_DIFFUSE_LENGTH 렌더링 후, 평균 색상을 계산*/
+	glBindFramebuffer(GL_FRAMEBUFFER, m_diffuseIBLFrameBuffer);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_diffuseIBLTexture->getId(), 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_diffuseIBLTexture->getDepthTextureId());
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		std::cerr << "Framebuffer is not complete!" << std::endl;
+	}
 	glViewport(0, 0, IBL_DIFFUSE_LENGTH, IBL_DIFFUSE_LENGTH);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	m_diffuseTexture->bind(3);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_diffuseTexture->getId(), 0);
-	//TODO: 깊이 버퍼가 필요할까? 고민
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
 	ArtShader::getInstance()->render();
+
+	m_diffuseIBLTexture->bind(3);
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_diffusePixels);
-	glm::vec3 average = glm::vec3(0.0f);
+	glm::vec4 average = glm::vec4(0.0f);
 	for (int i = 0; i < IBL_DIFFUSE_LENGTH; i++) {
 		for (int j = 0; j < IBL_DIFFUSE_LENGTH; j++) {
 			int index = 4 * (IBL_DIFFUSE_LENGTH * i + j);
 			average.r += m_diffusePixels[index] / 255.0f;
 			average.g += m_diffusePixels[index + 1] / 255.0f;
 			average.b += m_diffusePixels[index + 2] / 255.0f;
+			average.a += m_diffusePixels[index + 3] / 255.0f;
 		}
 	}
 	average /= IBL_DIFFUSE_LENGTH * IBL_DIFFUSE_LENGTH;
@@ -251,7 +258,7 @@ void Renderer::render() {
 		GLint specularIBLTexLoc = glGetUniformLocation(m_shaderProgram, "specularIBLMap");
 		glUniform1i(specularIBLTexLoc, 2);
 		GLint diffuseIBLTexLoc = glGetUniformLocation(m_shaderProgram, "diffuseIBLColor");
-		glUniform3fv(diffuseIBLTexLoc, 1, glm::value_ptr(average));
+		glUniform4fv(diffuseIBLTexLoc, 1, glm::value_ptr(average));
 		GLint lutGGXTexLoc = glGetUniformLocation(m_shaderProgram, "lutGGX");
 		glUniform1i(lutGGXTexLoc, 4);
 		//sound tex (5,6) 이미 바인딩 (update)

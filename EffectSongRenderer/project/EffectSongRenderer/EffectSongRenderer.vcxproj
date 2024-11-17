@@ -172,9 +172,10 @@ copy "$(ProjectDir)..\..\thirdparty\fftw3\bin\fftw3f.dll" "$(ProjectDir)..\x64\$
     <ClInclude Include="..\..\include\ArtShader.h" />
     <ClInclude Include="..\..\include\Camera.h" />
     <ClInclude Include="..\..\include\common.h" />
+    <ClInclude Include="..\..\include\DiffuseIBLTexture.h" />
     <ClInclude Include="..\..\include\GLTFLoader.h" />
     <ClInclude Include="..\..\include\IBLPrimitive.h" />
-    <ClInclude Include="..\..\include\IBLTexture.h" />
+    <ClInclude Include="..\..\include\SpecularIBLTexture.h" />
     <ClInclude Include="..\..\include\Light.h" />
     <ClInclude Include="..\..\include\Material.h" />
     <ClInclude Include="..\..\include\Node.h" />

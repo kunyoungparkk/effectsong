@@ -10,43 +10,21 @@
 SDL_GLContext g_context;
 SDL_Window* g_window;
 
-void initialize(int width, int height) {
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-		printf("SDL Initialization Fail: %s\n", SDL_GetError());
-		exit(0);
-	}
+void initialize(int width, int height);
+void deInitialize();
+void loop();
 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
-
-	// 윈도우 창 생성
-	g_window =
-		SDL_CreateWindow("EffectSong", SDL_WINDOWPOS_UNDEFINED,
-			SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-	// OpenGL 컨텍스트 생성
-	g_context = SDL_GL_CreateContext(g_window);
-
-	Renderer::getInstance()->resize(width, height);
-}
-void deInitialize() {
-	ArtShader::deleteInstance();
-	Renderer::deleteInstance();
-
-	SDL_GL_DeleteContext(g_context);
-
-	SDL_DestroyWindow(g_window);
-	SDL_Quit();
-}
 #ifdef _WIN64
+float musicTime = 0.0f;
+int initialWidth = 1000;
+int initialHeight = 800;
+
 void windowTestProc()
 {
 	util::loadGLTFData("../../res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf");
 	util::loadGLTFData("../../res/2.0/Duck/glTF/Duck.gltf");
 	Renderer::getInstance()->getSceneAt(1)->getNodeAt(0)->setPosition(glm::vec3(1.0f, 0.0f, 0.0f));
+	Renderer::getInstance()->setBackgroundColor(glm::vec4(0.5f, 0.5f, 0.0f, 1.0f));
 
 	ArtShader::getInstance()->setVertexCount(10000);
 	ArtShader::getInstance()->setPrimitiveMode(GL_POINTS);
@@ -105,12 +83,10 @@ void main() {
 	float cam_yRot = 180.0f;
 	uint32_t frameStart;
 	uint32_t frameTime;
-	//TODO: 임시적 변수 제거
-	float musicTime = 0.0f;
 	float printTime = 0.0f;
 	uint32_t musicStartTime = SDL_GetTicks();
 
-	//TODO: remove required
+	//Test Camera
 	Node* camNode = new Node(Renderer::getInstance()->getSceneAt(0), nullptr);
 	Camera* camera = new Camera(camNode);
 	Renderer::getInstance()->setActiveCamera(camera);
@@ -184,10 +160,7 @@ void main() {
 				break;
 			}
 		}
-		Renderer::getInstance()->update(musicTime);
-		// render
-		Renderer::getInstance()->render();
-		SDL_GL_SwapWindow(g_window);
+		loop();
 
 		uint32_t curTime = SDL_GetTicks();
 		frameTime = curTime - frameStart;
@@ -204,7 +177,7 @@ void main() {
 	}
 }
 int main(int argc, char* argv[]) {
-	initialize(1000,800);
+	initialize(initialWidth, initialHeight);
 
 	windowTestProc();
 
@@ -212,3 +185,42 @@ int main(int argc, char* argv[]) {
 	return 0;
 }
 #endif
+
+void initialize(int width, int height) {
+	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+		printf("SDL Initialization Fail: %s\n", SDL_GetError());
+		exit(0);
+	}
+
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+
+	// 윈도우 창 생성
+	g_window =
+		SDL_CreateWindow("EffectSong", SDL_WINDOWPOS_UNDEFINED,
+			SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	// OpenGL 컨텍스트 생성
+	g_context = SDL_GL_CreateContext(g_window);
+
+	Renderer::getInstance()->resize(width, height);
+}
+
+void deInitialize() {
+	ArtShader::deleteInstance();
+	Renderer::deleteInstance();
+
+	SDL_GL_DeleteContext(g_context);
+
+	SDL_DestroyWindow(g_window);
+	SDL_Quit();
+}
+
+void loop() {
+	Renderer::getInstance()->update(musicTime);
+	Renderer::getInstance()->render();
+	SDL_GL_SwapWindow(g_window);
+}
