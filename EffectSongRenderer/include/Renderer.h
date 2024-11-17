@@ -2,7 +2,7 @@
 #include <list>
 #include <unordered_map>
 #include "common.h"
-
+#define IBL_DIFFUSE_LENGTH 64
 class Scene;
 class Material;
 class Texture;
@@ -10,6 +10,7 @@ class IBLTexture;
 class Primitive;
 class IBLPrimitive;
 class SoundTexture;
+class Camera;
 
 class Renderer {
  public:
@@ -22,14 +23,21 @@ class Renderer {
     }
     return instance;
   }
+  static void deleteInstance() {
+	  delete instance;
+      instance = nullptr;
+  }
 
   void update(float currentTime);
   void render();
+
   void addScene(Scene* scene);
   void removeScene(Scene* scene);
-  
-  Scene* getActiveScene();
-  void setActiveScene(Scene* activeScene);
+  Scene* getSceneAt(int index);
+  Scene* getSceneByName(std::string name);
+
+  void setActiveCamera(Camera* camera);
+  Camera* getActiveCamera();
 
   Material* getMaterial(std::string name);
   void addMaterial(std::string name, Material* material);
@@ -39,8 +47,12 @@ class Renderer {
 
   int getWidth();
   int getHeight();
-
   void resize(int width, int height);
+
+  bool setAudioFile(std::string filePath);
+
+  glm::vec4 getBackgroundColor() { return m_backgroundColor; }
+  void setBackgroundColor(glm::vec4 backgroundColor) { m_backgroundColor = backgroundColor; }
 
  private:
   Renderer();
@@ -48,24 +60,27 @@ class Renderer {
   GLuint m_shaderProgram = 0;
   GLuint m_iblShaderProgram = 0;
 
+  Camera* m_activeCamera = nullptr;
+
   std::list<Scene*> m_scenes;
   std::unordered_map<std::string, Material*> m_materials;
   std::unordered_map<std::string, Texture*> m_textures;
 
-  Scene* m_active_scene = nullptr;
+  //Scene* m_active_scene = nullptr;
   IBLPrimitive* m_skybox = nullptr;
 
   IBLTexture* m_specularIBLTexture = nullptr;
-  IBLTexture* m_diffuseIBLTexture = nullptr;
+  Texture* m_diffuseTexture = nullptr;
+  unsigned char m_diffusePixels[IBL_DIFFUSE_LENGTH * IBL_DIFFUSE_LENGTH * 4];
+  
   Texture* m_lut_ggx = nullptr;
 
   int m_width = 0;
   int m_height = 0;
 
   //sound art
-  //GLuint m_artTextureBuffer;
-  GLuint m_artFrameBuffer;
+  GLuint m_artFrameBuffer = 0;
   SoundTexture* m_soundTexture = nullptr;
   float m_currentTime = 0.0f;
-  float m_backgroundColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+  glm::vec4 m_backgroundColor = glm::vec4(0.0f);
 };

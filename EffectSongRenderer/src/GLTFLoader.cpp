@@ -32,12 +32,9 @@ bool loadGLTFData(std::string file_path) {
                           new Material(&data->materials[i]));
   }
 
-  // Scene으로부터 읽어오기 - Active Scene은 어떻게 결정?
   for (size_t i = 0; i < data->scenes_count; i++) {
     Scene* scene = new Scene(data->scenes[i]);
     renderer->addScene(scene);
-
-    renderer->setActiveScene(scene);
   }
 
   return true;

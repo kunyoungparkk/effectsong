@@ -21,8 +21,7 @@ std::string readFile(const char* filePath) {
 	buffer << file.rdbuf();
 	return buffer.str();
 }
-Renderer::Renderer()
-	: m_active_scene(nullptr) {
+Renderer::Renderer(){
 	// glew 초기화
 	glewExperimental = true;
 	if (glewInit() != GLEW_OK) {
@@ -83,9 +82,6 @@ Renderer::Renderer()
 	std::string ggxPath = "../../res/IBL/lut_ggx.png";
 	m_lut_ggx = new Texture(ggxPath);
 
-	//std::string specularPath = "../../res/IBL/IBL_specular_image.png";
-	//std::string diffusePath = "../../res/IBL/IBL_diffuse_image.png";
-
 	//shader art
 	glGenFramebuffers(1, &m_artFrameBuffer);
 
@@ -104,15 +100,12 @@ Renderer::Renderer()
 	m_skybox = new IBLPrimitive(skyboxVerts, skyboxIndices);
 
 	m_specularIBLTexture = new IBLTexture();
-	m_diffuseIBLTexture = new IBLTexture();
 	m_specularIBLTexture->bind(2);
-	m_diffuseIBLTexture->bind(3);
+	m_diffuseTexture = new Texture(64, 64, 4, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
+	m_diffuseTexture->bind(3);
 	m_lut_ggx->bind(4);
 
-	//sound texture
 	m_soundTexture = new SoundTexture();
-	m_soundTexture->loadWavFile("../../res/music/debug.wav");
-	m_soundTexture->bind(5, 6);
 }
 
 Renderer::~Renderer() {
@@ -136,8 +129,8 @@ Renderer::~Renderer() {
 	if (m_specularIBLTexture) {
 		delete m_specularIBLTexture;
 	}
-	if (m_diffuseIBLTexture) {
-		delete m_diffuseIBLTexture;
+	if (m_diffuseTexture) {
+		delete m_diffuseTexture;
 	}
 	if (m_soundTexture) {
 		delete m_soundTexture;
@@ -149,8 +142,8 @@ void Renderer::update(float currentTime) {
 	m_soundTexture->update(currentTime);
 	
 	float soundSize = m_soundTexture->getCurrentEnergy() / SOUND_TEXTURE_WIDTH;
-	Node* node = getActiveScene()->getChildByIndex(0);
-	//node->setScale(glm::vec3(soundSize * 0.1 + 0.9));
+	Node* node = getSceneAt(0)->getNodeAt(0);
+	node->setScale(glm::vec3(soundSize * 0.1 + 0.9));
 
 	for (auto iter = m_scenes.begin(); iter != m_scenes.end(); iter++) {
 		(*iter)->update();
@@ -158,10 +151,11 @@ void Renderer::update(float currentTime) {
 }
 
 void Renderer::render() {
-	//vertex shader art
+	/*vertex shader art*/
 	glDisable(GL_CULL_FACE);
 	glViewport(0, 0, SOUND_TEXTURE_WIDTH * 2, SOUND_TEXTURE_HEIGHT * 2);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_artFrameBuffer);
+	glClearColor(m_backgroundColor.r, m_backgroundColor.g, m_backgroundColor.b, m_backgroundColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	GLuint artProgram = ArtShader::getInstance()->getProgram();
 	glUseProgram(artProgram);
@@ -174,7 +168,7 @@ void Renderer::render() {
 	glUniform2fv(resolutionUniformLoc, 1, resolution);
 
 	GLint backgroundUniformLoc = glGetUniformLocation(artProgram, "background");
-	glUniform4fv(backgroundUniformLoc, 1, m_backgroundColor);
+	glUniform4fv(backgroundUniformLoc, 1, glm::value_ptr(m_backgroundColor));
 
 	GLint timeUniformLoc = glGetUniformLocation(artProgram, "time");
 	glUniform1f(timeUniformLoc, m_currentTime);
@@ -205,51 +199,86 @@ void Renderer::render() {
 		glCopyTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, 0, 0, SOUND_TEXTURE_WIDTH * 2, SOUND_TEXTURE_HEIGHT * 2);
 	}
 
+	/*diffuse texture->IBL_DIFFUSE_LENGTH* IBL_DIFFUSE_LENGTH 렌더링 후, 평균 색상을 계산*/
+	glViewport(0, 0, IBL_DIFFUSE_LENGTH, IBL_DIFFUSE_LENGTH);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	m_diffuseTexture->bind(3);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_diffuseTexture->getId(), 0);
+	//TODO: 깊이 버퍼가 필요할까? 고민
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+	ArtShader::getInstance()->render();
+	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_diffusePixels);
+	glm::vec3 average = glm::vec3(0.0f);
+	for (int i = 0; i < IBL_DIFFUSE_LENGTH; i++) {
+		for (int j = 0; j < IBL_DIFFUSE_LENGTH; j++) {
+			int index = 4 * (IBL_DIFFUSE_LENGTH * i + j);
+			average.r += m_diffusePixels[index] / 255.0f;
+			average.g += m_diffusePixels[index + 1] / 255.0f;
+			average.b += m_diffusePixels[index + 2] / 255.0f;
+		}
+	}
+	average /= IBL_DIFFUSE_LENGTH * IBL_DIFFUSE_LENGTH;
+
+	/*scene rendering*/
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, m_width, m_height);
 	glEnable(GL_CULL_FACE);
-	//TODO: multi scene 처리
+
+	//skybox
+	glDepthMask(GL_FALSE);
+	glUseProgram(m_iblShaderProgram);
+	if (m_activeCamera)
+	{
+		glm::mat4 projectionMatrix = glm::perspective(
+			glm::radians(m_activeCamera->fov), (float)m_width / m_height,
+			m_activeCamera->zNear, m_activeCamera->zFar);
+		glm::mat4 viewMatrix = glm::inverse(m_activeCamera->getNode()->getModelMatrix());
+
+		GLint viewMatLoc = glGetUniformLocation(m_iblShaderProgram, "viewMat");
+		GLint projectionMatLoc = glGetUniformLocation(m_iblShaderProgram, "projMat");
+		glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+		glUniformMatrix4fv(projectionMatLoc, 1, GL_FALSE,
+			glm::value_ptr(projectionMatrix));
+
+		m_skybox->render(m_iblShaderProgram);
+	}
+
+	glDepthMask(GL_TRUE);
 	for (auto iter = m_scenes.begin(); iter != m_scenes.end(); iter++) {
-		//skybox
-		glDepthMask(GL_FALSE);
-		glUseProgram(m_iblShaderProgram);
-		Camera* activeCamera = (*iter)->getActiveCamera();
-		if (activeCamera)
-		{
-			glm::mat4 projectionMatrix = glm::perspective(
-				glm::radians(activeCamera->fov),(float)m_width / m_height,
-				activeCamera->zNear, activeCamera->zFar);
-			glm::mat4 viewMatrix = glm::inverse(activeCamera->getNode()->getModelMatrix());
-
-			GLint viewMatLoc = glGetUniformLocation(m_iblShaderProgram, "viewMat");
-			GLint projectionMatLoc = glGetUniformLocation(m_iblShaderProgram, "projMat");
-			glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-			glUniformMatrix4fv(projectionMatLoc, 1, GL_FALSE,
-				glm::value_ptr(projectionMatrix));
-
-			m_skybox->render(m_iblShaderProgram);
-		}
-
-		glDepthMask(GL_TRUE);
 		glUseProgram(m_shaderProgram);
 		GLint specularIBLTexLoc = glGetUniformLocation(m_shaderProgram, "specularIBLMap");
 		glUniform1i(specularIBLTexLoc, 2);
-		GLint diffuseIBLTexLoc = glGetUniformLocation(m_shaderProgram, "diffuseIBLMap");
-		glUniform1i(diffuseIBLTexLoc, 3);
+		GLint diffuseIBLTexLoc = glGetUniformLocation(m_shaderProgram, "diffuseIBLColor");
+		glUniform3fv(diffuseIBLTexLoc, 1, glm::value_ptr(average));
 		GLint lutGGXTexLoc = glGetUniformLocation(m_shaderProgram, "lutGGX");
 		glUniform1i(lutGGXTexLoc, 4);
-
-		//GLint leftSoundTexLoc = glGetUniformLocation(m_shaderProgram, "leftSoundTexture");
-		//glUniform1i(leftSoundTexLoc, 5);
-		//GLint rightSoundTexLoc = glGetUniformLocation(m_shaderProgram, "rightSoundTexture");
-		//glUniform1i(rightSoundTexLoc, 6);
-
+		//sound tex (5,6) 이미 바인딩 (update)
 		GLint iblItensityLoc = glGetUniformLocation(m_shaderProgram, "iblIntensity");
 		glUniform1f(iblItensityLoc, 1.0f);
+
+		//camera
+		glm::mat4 projectionMatrix = glm::mat4(1.0f);
+		glm::mat4 viewMatrix = glm::mat4(1.0f);
+		if (m_activeCamera) {
+			projectionMatrix = glm::perspective(
+				glm::radians(m_activeCamera->fov),
+				(float)Renderer::getInstance()->getWidth() / Renderer::getInstance()->getHeight(),
+				m_activeCamera->zNear, m_activeCamera->zFar);
+			viewMatrix = glm::inverse(m_activeCamera->getNode()->getModelMatrix());
+
+			GLint camPosLoc = glGetUniformLocation(m_shaderProgram, "cameraWorldPos");
+			glUniform3fv(camPosLoc, 1, glm::value_ptr(m_activeCamera->getNode()->getGlobalPosition()));
+		}
+		GLint viewMatLoc = glGetUniformLocation(m_shaderProgram, "viewMat");
+		GLint projectionMatLoc = glGetUniformLocation(m_shaderProgram, "projMat");
+		glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
+		glUniformMatrix4fv(projectionMatLoc, 1, GL_FALSE,
+			glm::value_ptr(projectionMatrix));
+
 		//scene
 		(*iter)->render(m_shaderProgram);
-
 	}
 }
 
@@ -257,10 +286,35 @@ void Renderer::addScene(Scene* scene) { m_scenes.push_back(scene); }
 
 void Renderer::removeScene(Scene* scene) { m_scenes.remove(scene); }
 
-Scene* Renderer::getActiveScene() { return m_active_scene; }
+Scene* Renderer::getSceneAt(int index)
+{
+	if (m_scenes.size() <= index) {
+		return nullptr;
+	}
+	auto iter = m_scenes.begin();
+	std::advance(iter, index);
 
-void Renderer::setActiveScene(Scene* activeScene) {
-	m_active_scene = activeScene;
+	return *iter;
+}
+
+Scene* Renderer::getSceneByName(std::string name)
+{
+	for (auto iter = m_scenes.begin(); iter != m_scenes.end(); iter++) {
+		if ((*iter)->getName() == name) {
+			return *iter;
+		}
+	}
+	return nullptr;
+}
+
+void Renderer::setActiveCamera(Camera* camera)
+{
+	m_activeCamera = camera;
+}
+
+Camera* Renderer::getActiveCamera()
+{
+	return m_activeCamera;
 }
 
 Material* Renderer::getMaterial(std::string name) { return m_materials[name]; }
@@ -289,4 +343,10 @@ void Renderer::resize(int width, int height)
 {
 	m_width = width;
 	m_height = height;
+}
+
+bool Renderer::setAudioFile(std::string filePath)
+{
+	//TODO: extend mp3, flac..
+	return m_soundTexture->loadWavFile(filePath);
 }

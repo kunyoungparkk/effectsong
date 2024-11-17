@@ -63,8 +63,6 @@ Node::Node(cgltf_node* cgltfNode, Node* parent, Scene* scene)
 		//camera
 		if (m_cgltf_node->camera) {
 			m_camera = new Camera(this, m_cgltf_node->camera);
-			//TODO: 여기서 임시로 결정하는 것이 맞는지 생각해보기
-			m_scene->setActiveCamera(m_camera);
 		}
 		//light
 		if (m_cgltf_node->light) {
@@ -119,8 +117,6 @@ void Node::render(GLuint shaderProgram) {
 	glm::mat4 modelMatrix = getModelMatrix();
 	GLint worldMatLoc = glGetUniformLocation(shaderProgram, "worldMat");
 	glUniformMatrix4fv(worldMatLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
-	GLint normalMatLoc = glGetUniformLocation(shaderProgram, "normalMat");
-	glUniformMatrix3fv(normalMatLoc, 1, GL_FALSE, glm::value_ptr(glm::transpose(glm::inverse(glm::mat3(modelMatrix)))));
 
 	for (int primIdx = 0; primIdx < m_primitives.size(); primIdx++) {
 		m_primitives[primIdx]->render(shaderProgram);
@@ -219,4 +215,21 @@ void Node::setCamera(Camera* camera)
 		delete m_camera;
 	}
 	m_camera = camera;
+}
+
+Node* Node::getChildAt(int index)
+{
+	if (m_children.size() <= index)
+		return nullptr;
+	return m_children[index];
+}
+
+Node* Node::getChildByName(std::string name)
+{
+	for (int i = 0; i < m_children.size(); i++) {
+		if (m_children[i]->getName() == name) {
+			return m_children[i];
+		}
+	}
+	return nullptr;
 }

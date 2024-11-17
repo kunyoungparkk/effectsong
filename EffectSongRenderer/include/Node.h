@@ -14,7 +14,7 @@ public:
 	void update();
 	void render(GLuint shaderProgram);
 
-
+	/*TRS*/
 	glm::vec3 getPosition() const;
 	glm::quat getRotation() const;
 	glm::vec3 getScale() const;
@@ -23,7 +23,6 @@ public:
 	void setPosition(glm::vec3 position);
 	void setRotation(glm::quat rotation);
 	void setScale(glm::vec3 scale);
-
 	glm::vec3 getGlobalPosition() const;
 	glm::quat getGlobalRotation() const;
 	glm::vec3 getGlobalScale() const;
@@ -37,7 +36,12 @@ public:
 
 	Camera* getCamera();
 	void setCamera(Camera* camera);
+	
+	std::string getName() { return m_name; }
+	void setName(std::string name) { m_name = name; }
 
+	Node* getChildAt(int index);
+	Node* getChildByName(std::string name);
 private:
 	Node* m_parent;
 	Scene* m_scene;
@@ -48,6 +52,7 @@ private:
 
 	std::vector<Node*> m_children;
 	std::vector<Primitive*> m_primitives;
+
 	glm::vec3 m_position = glm::vec3(0, 0, 0);
 	glm::quat m_rotation = glm::quat(1, 0, 0, 0);
 	glm::vec3 m_scale = glm::vec3(1, 1, 1);

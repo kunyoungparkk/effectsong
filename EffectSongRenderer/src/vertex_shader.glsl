@@ -1,8 +1,7 @@
 #version 300 es
-precision mediump float;
+precision highp float;
 
 uniform mat4 worldMat, viewMat, projMat;
-uniform mat3 normalMat;
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
@@ -15,11 +14,13 @@ out vec2 fragTexcoord;
 out mat3 TBN;
 
 void main(){
+	mat3 normalMat = transpose(inverse(mat3(worldMat)));
+
 	fragPos = vec3(worldMat * vec4(position, 1.0));
 	fragNormal = normalize(normalMat * normal);
 	fragTexcoord = texcoord;
 
-	vec3 T = normalize(mat3(worldMat) * tangent.xyz);
+	vec3 T = normalize(normalMat * tangent.xyz);
 	vec3 N = fragNormal;
 	vec3 B = cross(N, T) * tangent.w; // ∫Ò∆Æ≈ƒ¡®∆Æ πÊ«‚ ¡∂¡§
 	TBN = mat3(T, B, N);

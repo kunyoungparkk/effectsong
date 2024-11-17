@@ -10,7 +10,6 @@ public:
     SoundTexture();
     ~SoundTexture();
     void update(float currentTime);
-    void bind(int texIdx, int texIdx2);
     bool loadWavFile(const std::string& filePath);
 
     int getChannelCount();

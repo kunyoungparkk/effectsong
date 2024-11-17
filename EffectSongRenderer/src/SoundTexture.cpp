@@ -20,6 +20,18 @@ SoundTexture::SoundTexture() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	//TODO: just fix it?
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, m_textureID);
+	if (m_channels == 2) {
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_2D, m_textureID2);
+	}
+	else {
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_2D, m_textureID);
+	}
+
 	// FFT 메모리와 계획 설정
 	in = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * SOUND_TEXTURE_WIDTH * 2);
 	out = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * SOUND_TEXTURE_WIDTH * 2);
@@ -38,6 +50,8 @@ void SoundTexture::update(float currentTime) {
 	m_currentEnergy = 0.0f;
 	float newRowData[2][SOUND_TEXTURE_WIDTH];
 	int samplePosition = (int)(currentTime * m_sampleRate);
+
+	//음악이 끝났을 경우 (파싱된 데이터가 없을 경우 포함)
 	if (samplePosition + SOUND_TEXTURE_WIDTH * 2 > m_totalRunningTime * m_sampleRate)
 	{
 		return;
@@ -100,22 +114,6 @@ void SoundTexture::update(float currentTime) {
 		glActiveTexture(GL_TEXTURE0 + m_texBindIdx2);
 		glBindTexture(GL_TEXTURE_2D, m_textureID2);
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, SOUND_TEXTURE_WIDTH, SOUND_TEXTURE_HEIGHT, GL_RED, GL_FLOAT, m_textureBuffer2);
-	}
-}
-
-void SoundTexture::bind(int texIdx, int texIdx2) {
-	m_texBindIdx = texIdx;
-	m_texBindIdx2 = texIdx2;
-
-	glActiveTexture(GL_TEXTURE0 + m_texBindIdx);
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
-	if (m_channels == 2) {
-		glActiveTexture(GL_TEXTURE0 + m_texBindIdx2);
-		glBindTexture(GL_TEXTURE_2D, m_textureID2);
-	}
-	else {
-		glActiveTexture(GL_TEXTURE0 + m_texBindIdx2);
-		glBindTexture(GL_TEXTURE_2D, m_textureID);
 	}
 }
 

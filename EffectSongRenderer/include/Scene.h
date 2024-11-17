@@ -10,16 +10,19 @@ class Scene {
   ~Scene();
   void update();
   void render(GLuint shaderProgram);
-  void setActiveCamera(Camera* camera);
-  Camera* getActiveCamera();
 
   void addLight(Light* light);
   void removeLight(Light* light);
 
-  Node* getChildByIndex(int index);
+  std::string getName() { return m_name; }
+  void setName(std::string name) { m_name = name; }
+
+  Node* getNodeAt(int index);
+  Node* getNodeByName(std::string name);
+  void addNode(Node* node);
  private:
-  Camera* m_active_camera = nullptr;
-  std::vector<Node*> nodes;
+  std::list<Node*> m_nodes;
   std::list<Light*> lights;
+  std::string m_name = "";
   cgltf_scene& m_cgltf_scene;
 };

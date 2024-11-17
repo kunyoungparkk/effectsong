@@ -58,7 +58,7 @@ uniform sampler2D lutGGX;
 //uniform sampler2D lutSheen;
 
 uniform samplerCube specularIBLMap;
-uniform samplerCube diffuseIBLMap;
+uniform vec3 diffuseIBLColor;
 uniform float iblIntensity;
 
 uniform DirectionalLight directionalLights[MAX_DIRECTIONAL_LIGHTS];
@@ -78,10 +78,6 @@ in mat3 TBN;
 out vec4 FragColor;
 
 /*IBL*/
-
-vec3 calculateIBLDiffuse(vec3 N) {
-    return texture(diffuseIBLMap, N).rgb;
-}
 vec3 calculateIBLSpecular(vec3 N, vec3 V, float roughness, vec3 F0) {
     vec3 R = reflect(-V, N);
     
@@ -187,8 +183,7 @@ void main() {
 
     vec3 F0 = mix(vec3(0.04), baseColorTextureColor, metallic);
     
-    
-    vec3 diffuseIBL = calculateIBLDiffuse(normal) * (baseColorTextureColor / 3.141592);
+    vec3 diffuseIBL = diffuseIBLColor * (baseColorTextureColor / 3.141592);
     vec3 specularIBL = calculateIBLSpecular(normal, view, roughness, F0);
     result = iblIntensity * (diffuseIBL + specularIBL) * ao + emissiveTextureColor;
 

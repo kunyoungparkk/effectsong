@@ -49,6 +49,8 @@ Texture::Texture(std::string& gltfPath, cgltf_texture* cgltf_texture, bool bSRGB
 			GL_UNSIGNED_BYTE, m_data);
 	}
 	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 Texture::Texture(std::string& path)
@@ -84,9 +86,38 @@ Texture::Texture(std::string& path)
 			GL_UNSIGNED_BYTE, m_data);
 	}
 	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-Texture::~Texture() { stbi_image_free(m_data); }
+Texture::Texture(int width, int height, int nrChannels, GLint wrapS, GLint wrapT, GLint minFilter, GLint maxFilter)
+	: m_cgltfTexture(nullptr), m_data(nullptr) {
+	glGenTextures(1, &m_textureID);
+	glBindTexture(GL_TEXTURE_2D, m_textureID);
+
+	// 텍스처 설정
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+		wrapS);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+		wrapT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+		minFilter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+		maxFilter);
+
+	// 텍스처 데이터 생성
+	if (nrChannels == 3) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+			GL_UNSIGNED_BYTE, m_data);
+	}
+	else if (nrChannels == 4) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+			GL_UNSIGNED_BYTE, m_data);
+	}
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+Texture::~Texture() { if (m_data) { stbi_image_free(m_data); } }
 
 void Texture::bind(int texIdx) {
 	glActiveTexture(GL_TEXTURE0 + texIdx);
@@ -119,6 +150,7 @@ IBLTexture::IBLTexture()
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER,
 		GL_LINEAR);
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
 IBLTexture::~IBLTexture() {

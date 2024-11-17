@@ -3,62 +3,29 @@
 #include <string>
 
 Scene::Scene(cgltf_scene& cgltfScene) : m_cgltf_scene(cgltfScene) {
+	if (m_cgltf_scene.name) {
+		m_name = m_cgltf_scene.name;
+	}
 	for (int i = 0; i < m_cgltf_scene.nodes_count; i++) {
 		Node* node = new Node(m_cgltf_scene.nodes[i], nullptr, this);
-		nodes.push_back(node);
+		m_nodes.push_back(node);
 	}
-	//TODO: modify required about temp camera
-	//if (!m_active_camera) {
-	Node* emptyNode = new Node(this, nullptr);
-	Camera* camera = new Camera(emptyNode);
-	setActiveCamera(camera);
-	emptyNode->setPosition(glm::vec3(0, 0, -5));
-	emptyNode->setRotation(
-		glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
-	nodes.push_back(emptyNode);
-	//}
 }
 
 Scene::~Scene()
 {
-	for (int i = 0; i < nodes.size(); i++) {
-		delete nodes[i];
+	for (auto iter = m_nodes.begin(); iter != m_nodes.end(); iter++) {
+		delete *iter;
 	}
 }
 
 void Scene::update() {
-	for (int i = 0; i < nodes.size(); i++) {
-		nodes[i]->update();
+	for (auto iter = m_nodes.begin(); iter != m_nodes.end(); iter++) {
+		(*iter)->update();
 	}
 }
 
 void Scene::render(GLuint shaderProgram) {
-	//camera
-	glm::mat4 projectionMatrix;
-	glm::mat4 viewMatrix;
-	//TODO: viewport?
-	if (m_active_camera) {
-		projectionMatrix = glm::perspective(
-			glm::radians(m_active_camera->fov), 
-			(float)Renderer::getInstance()->getWidth() / Renderer::getInstance()->getHeight(),
-			m_active_camera->zNear, m_active_camera->zFar);
-		viewMatrix = glm::inverse(m_active_camera->getNode()->getModelMatrix());
-
-		GLint camPosLoc = glGetUniformLocation(shaderProgram, "cameraWorldPos");
-		glUniform3fv(camPosLoc, 1, glm::value_ptr(m_active_camera->getNode()->getGlobalPosition()));
-	}
-	else {
-		//TODO: ERROR!
-		projectionMatrix = glm::mat4(1.0f);
-		viewMatrix = glm::mat4(1.0f);
-		exit(0);
-	}
-	GLint viewMatLoc = glGetUniformLocation(shaderProgram, "viewMat");
-	GLint projectionMatLoc = glGetUniformLocation(shaderProgram, "projMat");
-	glUniformMatrix4fv(viewMatLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
-	glUniformMatrix4fv(projectionMatLoc, 1, GL_FALSE,
-		glm::value_ptr(projectionMatrix));
-
 	//light
 	int dirLightCnt = 0;
 	int pointLightCnt = 0;
@@ -162,14 +129,10 @@ void Scene::render(GLuint shaderProgram) {
 	glUniform1i(numSpotLightsLoc, spotLightCnt);
 
 	//nodes
-	for (int i = 0; i < nodes.size(); i++) {
-		nodes[i]->render(shaderProgram);
+	for (auto iter = m_nodes.begin(); iter != m_nodes.end(); iter++) {
+		(*iter)->render(shaderProgram);
 	}
 }
-
-void Scene::setActiveCamera(Camera* camera) { m_active_camera = camera; }
-
-Camera* Scene::getActiveCamera() { return m_active_camera; }
 
 void Scene::addLight(Light* light)
 {
@@ -181,10 +144,27 @@ void Scene::removeLight(Light* light)
 	lights.remove(light);
 }
 
-Node* Scene::getChildByIndex(int index)
+Node* Scene::getNodeAt(int index)
 {
-	if (index >= nodes.size()) {
+	if (index >= m_nodes.size()) {
 		return nullptr;
 	}
-	return nodes[index];
+	auto iter = m_nodes.begin();
+	std::advance(iter, index);
+	return *iter;
+}
+
+Node* Scene::getNodeByName(std::string name)
+{
+	for (auto iter = m_nodes.begin(); iter != m_nodes.end(); iter++) {
+		if (name == (*iter)->getName()) {
+			return *iter;
+		}
+	}
+	return nullptr;
+}
+
+void Scene::addNode(Node* node)
+{
+	m_nodes.push_back(node);
 }
