@@ -100,7 +100,7 @@ void SoundTexture::update(float currentTime) {
 		}
 		m_currentEnergy /= 2.0f;
 	}
-
+	m_currentEnergy /= (float)SOUND_TEXTURE_WIDTH;
 
 	memmove(m_textureBuffer[1], m_textureBuffer[0], (SOUND_TEXTURE_HEIGHT - 1) * SOUND_TEXTURE_WIDTH * sizeof(float));
 	memcpy(m_textureBuffer[0], newRowData[0], SOUND_TEXTURE_WIDTH * sizeof(float));

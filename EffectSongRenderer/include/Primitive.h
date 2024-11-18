@@ -6,7 +6,7 @@ struct Vertex {
   glm::vec3 position;
   glm::vec3 normal;
   glm::vec2 texcoord;
-  glm::vec3 tangent;
+  glm::vec4 tangent;
 };
 
 class Primitive {
@@ -16,6 +16,7 @@ class Primitive {
 
  private:
   std::vector<Vertex> m_vertices;
+  std::vector<glm::vec3> m_bitangents;
   std::vector<GLuint> m_indices;
 
   Material* m_material;

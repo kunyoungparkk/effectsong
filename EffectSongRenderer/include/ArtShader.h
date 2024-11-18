@@ -66,7 +66,8 @@ private:
 	std::string vsHeader_ = R"(#version 300 es
 	precision highp float;
 	layout (location = 0) in float vertexId;
-	uniform vec2 touch; // 누적해서 텍스처로 제공?
+	uniform vec2 touch;
+	uniform float volume;
 	uniform vec2 resolution;
 	uniform vec4 background;
 	uniform float time;

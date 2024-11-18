@@ -142,11 +142,10 @@ Renderer::~Renderer() {
 void Renderer::update(float currentTime) {
 	m_currentTime = currentTime;
 	m_soundTexture->update(currentTime);
-	
-	float soundSize = m_soundTexture->getCurrentEnergy() / SOUND_TEXTURE_WIDTH;
+
+	float soundSize = m_soundTexture->getCurrentEnergy();
 	Node* node = getSceneAt(0)->getNodeAt(0);
 	node->setScale(glm::vec3(soundSize * 0.1f + 0.9f));
-
 	for (auto iter = m_scenes.begin(); iter != m_scenes.end(); iter++) {
 		(*iter)->update();
 	}
@@ -164,6 +163,9 @@ void Renderer::render() {
 	glDepthMask(GL_TRUE);
 	//TODO:touch coord input(-1 ~ 1, -1 ~ 1)
 	GLint touchUniformLoc = glGetUniformLocation(artProgram, "touch");
+
+	GLint volumeUniformLoc = glGetUniformLocation(artProgram, "volume");
+	glUniform1f(volumeUniformLoc, m_soundTexture->getCurrentEnergy());
 
 	GLint resolutionUniformLoc = glGetUniformLocation(artProgram, "resolution");
 	float resolution[2] = { (float)SOUND_TEXTURE_WIDTH * 2, (float)SOUND_TEXTURE_HEIGHT * 2 };
