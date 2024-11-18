@@ -50,7 +50,7 @@ void ArtShader::compileShader()
 	glDeleteShader(artVertexShader);
 	glDeleteShader(artFragmentShader);
 }
-void ArtShader::render()
+void ArtShader::render() const
 {
 	glBindVertexArray(VAO);
 	glDrawArrays(m_primitiveMode, 0, m_vertexCount);

@@ -36,7 +36,7 @@ void IBLPrimitive::render(GLuint shaderProgram) {
 
 	GLint specularIBLTexLoc = glGetUniformLocation(shaderProgram, "backgroundCubeMap");
 	glUniform1i(specularIBLTexLoc, 2);
-
+	
 	// Draw
 	glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
 }

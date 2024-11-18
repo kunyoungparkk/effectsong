@@ -46,15 +46,17 @@ class Renderer {
   Texture* getTexture(std::string uri);
   void addTexture(std::string uri, Texture* texture);
 
-  int getWidth();
-  int getHeight();
+  int getWidth() const;
+  int getHeight() const;
   void resize(int width, int height);
 
   bool setAudioFile(std::string filePath);
 
-  glm::vec4 getBackgroundColor() { return m_backgroundColor; }
+  glm::vec4 getBackgroundColor() const { return m_backgroundColor; }
   void setBackgroundColor(glm::vec4 backgroundColor) { m_backgroundColor = backgroundColor; }
 
+  float getDiffuseIBLIntensity() const { return m_diffuseIBLIntensity; }
+  void setDiffuseIBLIntensity(float diffuseIBLIntensity) { m_diffuseIBLIntensity = diffuseIBLIntensity; }
  private:
   Renderer();
   static Renderer* instance;
@@ -72,7 +74,7 @@ class Renderer {
 
   SpecularIBLTexture* m_specularIBLTexture = nullptr;
   DiffuseIBLTexture* m_diffuseIBLTexture = nullptr;
-  unsigned char m_diffusePixels[IBL_DIFFUSE_LENGTH * IBL_DIFFUSE_LENGTH * 4];
+  unsigned char m_diffusePixels[IBL_DIFFUSE_LENGTH * IBL_DIFFUSE_LENGTH * 4] = { 0, };
   
   Texture* m_lut_ggx = nullptr;
 
@@ -84,5 +86,6 @@ class Renderer {
   GLuint m_diffuseIBLFrameBuffer = 0;
   SoundTexture* m_soundTexture = nullptr;
   float m_currentTime = 0.0f;
+  float m_diffuseIBLIntensity = 1.0f;
   glm::vec4 m_backgroundColor = glm::vec4(0.0f);
 };

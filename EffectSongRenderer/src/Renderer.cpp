@@ -145,7 +145,7 @@ void Renderer::update(float currentTime) {
 	
 	float soundSize = m_soundTexture->getCurrentEnergy() / SOUND_TEXTURE_WIDTH;
 	Node* node = getSceneAt(0)->getNodeAt(0);
-	node->setScale(glm::vec3(soundSize * 0.1 + 0.9));
+	node->setScale(glm::vec3(soundSize * 0.1f + 0.9f));
 
 	for (auto iter = m_scenes.begin(); iter != m_scenes.end(); iter++) {
 		(*iter)->update();
@@ -214,17 +214,17 @@ void Renderer::render() {
 
 	m_diffuseIBLTexture->bind(3);
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_diffusePixels);
-	glm::vec4 average = glm::vec4(0.0f);
+	glm::vec4 diffuseIBLColor = glm::vec4(0.0f);
 	for (int i = 0; i < IBL_DIFFUSE_LENGTH; i++) {
 		for (int j = 0; j < IBL_DIFFUSE_LENGTH; j++) {
 			int index = 4 * (IBL_DIFFUSE_LENGTH * i + j);
-			average.r += m_diffusePixels[index] / 255.0f;
-			average.g += m_diffusePixels[index + 1] / 255.0f;
-			average.b += m_diffusePixels[index + 2] / 255.0f;
-			average.a += m_diffusePixels[index + 3] / 255.0f;
+			diffuseIBLColor.r += m_diffusePixels[index] / 255.0f;
+			diffuseIBLColor.g += m_diffusePixels[index + 1] / 255.0f;
+			diffuseIBLColor.b += m_diffusePixels[index + 2] / 255.0f;
+			diffuseIBLColor.a += m_diffusePixels[index + 3] / 255.0f;
 		}
 	}
-	average /= IBL_DIFFUSE_LENGTH * IBL_DIFFUSE_LENGTH;
+	diffuseIBLColor *= m_diffuseIBLIntensity / IBL_DIFFUSE_LENGTH / IBL_DIFFUSE_LENGTH;
 
 	/*scene rendering*/
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -258,7 +258,7 @@ void Renderer::render() {
 		GLint specularIBLTexLoc = glGetUniformLocation(m_shaderProgram, "specularIBLMap");
 		glUniform1i(specularIBLTexLoc, 2);
 		GLint diffuseIBLTexLoc = glGetUniformLocation(m_shaderProgram, "diffuseIBLColor");
-		glUniform4fv(diffuseIBLTexLoc, 1, glm::value_ptr(average));
+		glUniform4fv(diffuseIBLTexLoc, 1, glm::value_ptr(diffuseIBLColor));
 		GLint lutGGXTexLoc = glGetUniformLocation(m_shaderProgram, "lutGGX");
 		glUniform1i(lutGGXTexLoc, 4);
 		//sound tex (5,6) 이미 바인딩 (update)
@@ -336,12 +336,12 @@ void Renderer::addTexture(std::string uri, Texture* texture) {
 	m_textures[uri] = texture;
 }
 
-int Renderer::getWidth()
+int Renderer::getWidth() const
 {
 	return m_width;
 }
 
-int Renderer::getHeight()
+int Renderer::getHeight() const
 {
 	return m_height;
 }

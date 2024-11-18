@@ -82,6 +82,51 @@ Primitive::Primitive(cgltf_primitive* cgltfPrimitive) {
 
 		m_vertices.push_back(vertex);
 	}
+
+	if (tangents.empty()) {
+		// 모든 정점의 Tangent 초기화
+		for (auto& vertex : m_vertices) {
+			vertex.tangent = glm::vec3(0.0f);
+		}
+
+		// 삼각형 단위로 Tangent 계산 및 정점에 누적
+		for (size_t i = 0; i < m_indices.size(); i += 3) {
+			Vertex& v0 = m_vertices[m_indices[i + 0]];
+			Vertex& v1 = m_vertices[m_indices[i + 1]];
+			Vertex& v2 = m_vertices[m_indices[i + 2]];
+
+			// Edge 벡터 계산
+			glm::vec3 edge1 = v1.position - v0.position;
+			glm::vec3 edge2 = v2.position - v0.position;
+
+			// UV 좌표 차이 계산
+			glm::vec2 deltaUV1 = v1.texcoord - v0.texcoord;
+			glm::vec2 deltaUV2 = v2.texcoord - v0.texcoord;
+
+			// Tangent 계산
+			float det = deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x;
+			if (fabs(det) < 1e-6) {
+				continue; // UV 변화량이 너무 작으면 생략
+			}
+			float f = 1.0f / det;
+
+			glm::vec3 tangent;
+			tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+			tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+			tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+
+			// 각 정점에 Tangent 누적
+			v0.tangent += tangent;
+			v1.tangent += tangent;
+			v2.tangent += tangent;
+		}
+
+		// 정점 Tangent 평균화 및 정규화
+		for (auto& vertex : m_vertices) {
+			vertex.tangent = glm::normalize(vertex.tangent);
+		}
+	}
+
 	switch (cgltfPrimitive->type) {
 	case cgltf_primitive_type_points:
 		m_primitiveMode = GL_POINTS;
@@ -141,7 +186,7 @@ Primitive::Primitive(cgltf_primitive* cgltfPrimitive) {
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 		(const void*)offsetof(Vertex, texcoord));
 	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 		(const void*)offsetof(Vertex, tangent));
 
 	//바인딩 해제

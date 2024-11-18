@@ -73,7 +73,7 @@ uniform vec3 cameraWorldPos;
 in vec3 fragPos;
 in vec3 fragNormal;
 in vec2 fragTexcoord;
-in mat3 TBN;
+in mat3 tangentWorldMat;
 
 out vec4 FragColor;
 
@@ -146,7 +146,7 @@ void main() {
     vec3 normal;
     if(useNormalTexture)
     {
-        normal = normalize(TBN * (2.0 * texture(normalTexture, fragTexcoord).rgb - 1.0));
+        normal = normalize(tangentWorldMat * (2.0 * texture(normalTexture, fragTexcoord).rgb - 1.0));
     }
     else
     {

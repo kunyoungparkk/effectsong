@@ -24,7 +24,7 @@ void windowTestProc()
 	util::loadGLTFData("../../res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf");
 	util::loadGLTFData("../../res/2.0/Duck/glTF/Duck.gltf");
 	Renderer::getInstance()->getSceneAt(1)->getNodeAt(0)->setPosition(glm::vec3(1.0f, 0.0f, 0.0f));
-	Renderer::getInstance()->setBackgroundColor(glm::vec4(0.5f, 0.5f, 0.0f, 1.0f));
+	//Renderer::getInstance()->setBackgroundColor(glm::vec4(0.5f, 0.5f, 0.0f, 1.0f));
 
 	ArtShader::getInstance()->setVertexCount(10000);
 	ArtShader::getInstance()->setPrimitiveMode(GL_POINTS);
@@ -94,7 +94,8 @@ void main() {
 	camNode->setRotation(
 		glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	Renderer::getInstance()->getSceneAt(0)->addNode(camNode);
-
+	Renderer::getInstance()->setDiffuseIBLIntensity(10.0f);
+	
 	while (running) {
 		frameStart = SDL_GetTicks();
 		const uint8_t* state = SDL_GetKeyboardState(nullptr);
