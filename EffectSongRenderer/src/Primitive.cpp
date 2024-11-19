@@ -109,12 +109,12 @@ Primitive::Primitive(cgltf_primitive* cgltfPrimitive) {
 				continue; // UV 변화량이 너무 작으면 생략
 			}
 			float f = 1.0f / det;
-
+			
 			glm::vec3 tangent;
 			tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
 			tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
 			tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
-
+			std::cout << tangent.x << ", " << tangent.y << ", " << tangent.z << std::endl;
 			// 각 정점에 Tangent 누적
 			v0.tangent += tangent;
 			v1.tangent += tangent;
