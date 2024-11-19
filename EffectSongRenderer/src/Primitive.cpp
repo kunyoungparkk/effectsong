@@ -86,7 +86,7 @@ Primitive::Primitive(cgltf_primitive* cgltfPrimitive) {
 	if (tangents.empty()) {
 		// 모든 정점의 Tangent 초기화
 		for (auto& vertex : m_vertices) {
-			vertex.tangent = glm::vec3(0.0f);
+			vertex.tangent = glm::vec4(0.0f);
 		}
 
 		// 삼각형 단위로 Tangent 계산 및 정점에 누적
@@ -102,19 +102,21 @@ Primitive::Primitive(cgltf_primitive* cgltfPrimitive) {
 			// UV 좌표 차이 계산
 			glm::vec2 deltaUV1 = v1.texcoord - v0.texcoord;
 			glm::vec2 deltaUV2 = v2.texcoord - v0.texcoord;
-
+			
 			// Tangent 계산
 			float det = deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x;
 			if (fabs(det) < 1e-6) {
-				continue; // UV 변화량이 너무 작으면 생략
+				continue;
 			}
 			float f = 1.0f / det;
 			
-			glm::vec3 tangent;
+			glm::vec4 tangent;
 			tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
 			tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
 			tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
-			std::cout << tangent.x << ", " << tangent.y << ", " << tangent.z << std::endl;
+			tangent.w = (det < 0.0f) ? -1.0f : 1.0f;
+			tangent = glm::normalize(tangent);
+
 			// 각 정점에 Tangent 누적
 			v0.tangent += tangent;
 			v1.tangent += tangent;
@@ -186,7 +188,7 @@ Primitive::Primitive(cgltf_primitive* cgltfPrimitive) {
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 		(const void*)offsetof(Vertex, texcoord));
 	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
 		(const void*)offsetof(Vertex, tangent));
 
 	//바인딩 해제
