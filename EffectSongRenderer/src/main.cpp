@@ -34,124 +34,75 @@ void windowTestProc()
 	//Renderer::getInstance()->setBackgroundColor(glm::vec4(0.5f, 0.5f, 0.0f, 1.0f));
 
 	ArtShader::getInstance()->setVertexCount(50000);
-	ArtShader::getInstance()->setPrimitiveMode(GL_TRIANGLES);
-	ArtShader::getInstance()->setVertexShader(R"(
-// Perlin 노이즈 함수
-float hash(float n) {
-    return fract(sin(n) * 43758.5453123);
-}
-
-float noise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    f = f * f * (3.0 - 2.0 * f);
-    return mix(
-        mix(hash(i.x + i.y * 57.0), hash(i.x + 1.0 + i.y * 57.0), f.x),
-        mix(hash(i.x + (i.y + 1.0) * 57.0), hash(i.x + 1.0 + (i.y + 1.0) * 57.0), f.x),
-        f.y
-    );
-}
-
-// 원형 방사 효과
-float radialGradient(vec2 uv, vec2 center, float radius, float intensity) {
-    float dist = length(uv - center);
-    return exp(-dist * intensity) * smoothstep(radius, 0.0, dist);
-}
-
-// 소용돌이 효과
-vec2 swirl(vec2 uv, vec2 center, float strength, float offset) {
-    vec2 centeredUV = uv - center;
-    float angle = atan(centeredUV.y, centeredUV.x) + strength * length(centeredUV) + offset;
-    float radius = length(centeredUV);
-    return center + vec2(cos(angle), sin(angle)) * radius;
-}
-
-// 다중 별 생성
-vec3 multipleStars(vec2 uv, vec2[15] centers, float[15] radii, float[15] intensities) {
-    vec3 starColor = vec3(0.0);
-    for (int i = 0; i < 15; i++) {
-        float starGlow = radialGradient(uv, centers[i], radii[i], intensities[i]);
-        vec3 singleStarColor = mix(
-            vec3(1.0, 0.9, 0.3), // 중심부 강렬한 노란빛
-            vec3(1.0, 0.7, 0.2), // 외곽부 따뜻한 주황빛
-            pow(starGlow, 1.0)
-        );
-        starColor += singleStarColor * starGlow; // 별빛 중첩
-    }
-    return starColor * 1.2; // 별빛 강조
-}
-
-void main() {
-    // 화면 비율과 격자 크기
-    float aspect = resolution.x / resolution.y;
-    float gridSize = 100.0; // 격자 해상도
-    float numTrianglesPerQuad = 2.0;
-    float numVerticesPerQuad = numTrianglesPerQuad * 3.0;
-    float quadId = floor(vertexId / numVerticesPerQuad);
-    float vertexInQuad = mod(vertexId, numVerticesPerQuad);
-
-    // 격자에서 사각형 위치 계산
-    float quadX = mod(quadId, gridSize - 1.0);
-    float quadY = floor(quadId / (gridSize - 1.0));
-
-    // 사각형의 네 정점 계산
-    vec2 p0 = vec2(quadX, quadY) / gridSize * 2.0 - 1.0; // 좌상단
-    vec2 p1 = vec2(quadX + 1.0, quadY) / gridSize * 2.0 - 1.0; // 우상단
-    vec2 p2 = vec2(quadX, quadY + 1.0) / gridSize * 2.0 - 1.0; // 좌하단
-    vec2 p3 = vec2(quadX + 1.0, quadY + 1.0) / gridSize * 2.0 - 1.0; // 우하단
-
-    vec2 pos;
-    if (vertexInQuad < 3.0) {
-        // 첫 번째 삼각형
-        if (vertexInQuad == 0.0) pos = p0;
-        if (vertexInQuad == 1.0) pos = p1;
-        if (vertexInQuad == 2.0) pos = p2;
-    } else {
-        // 두 번째 삼각형
-        if (vertexInQuad == 3.0) pos = p2;
-        if (vertexInQuad == 4.0) pos = p1;
-        if (vertexInQuad == 5.0) pos = p3;
-    }
-
-    // 소용돌이 확장 (NDC 전체 덮음)
-    vec2 primarySwirl = swirl(pos * 1.5, vec2(0.0, 0.0), 6.0, time * 0.5);
-
-    // 다중 별 설정
-    vec2 starCenters[15] = vec2[15](
-        vec2(0.0, 0.4), vec2(-0.6, 0.7), vec2(0.5, 0.5), vec2(-0.8, -0.2), vec2(0.7, -0.3), 
-        vec2(-0.3, -0.5), vec2(0.6, 0.8), vec2(-0.9, 0.2), vec2(0.4, -0.6), vec2(-0.4, 0.1),
-        vec2(0.2, -0.8), vec2(-0.6, 0.3), vec2(0.8, 0.9), vec2(-0.7, -0.7), vec2(0.1, 0.2)
-    );
-    float starRadii[15] = float[15](0.25, 0.2, 0.22, 0.18, 0.2, 0.15, 0.18, 0.17, 0.14, 0.16, 0.13, 0.19, 0.15, 0.12, 0.21);
-    float starIntensities[15] = float[15](8.0, 7.0, 7.5, 6.0, 6.5, 5.0, 6.5, 7.2, 5.5, 5.8, 6.0, 7.0, 6.2, 5.5, 6.8);
-
-    vec3 starColors = multipleStars(primarySwirl, starCenters, starRadii, starIntensities);
-
-    // 구름과 배경 색상
-    float height = noise(primarySwirl * 5.0 + time * 0.1) * 0.1;
-    vec3 cloudColor = mix(
-        vec3(0.1, 0.1, 0.3),  // 어두운 남색 구름
-        vec3(0.3, 0.4, 0.6),  // 은은한 파란 구름
-        height
-    ) * 0.4; // 구름 밝기 조정
-
-    // 최종 색상 조합
-    vec3 finalColor = background.rgb * 0.3 + cloudColor + starColors * (0.5 + volume / 3.0);
-
-    // 색상 클램핑
-    finalColor = clamp(finalColor, 0.0, 1.0);
-
-    // 빛나는 효과 추가
-    finalColor += vec3(0.03 * abs(sin(time * 2.0 + vertexId * 0.1)));
-
-    // 출력 색상
-    v_color = vec4(finalColor, 1.0);
-
-    // gl_Position 설정
-    gl_Position = vec4(primarySwirl * vec2(aspect, 1.0), height, 1.0);
-}
-)");
-	Renderer::getInstance()->setAudioFile("../../res/music/badguy.wav");
+	ArtShader::getInstance()->setPrimitiveMode(GL_POINTS);
+//	ArtShader::getInstance()->setVertexShader(R"(
+//#define PI 3.14159
+//#define NUM_SEGMENTS 51.0
+//#define NUM_POINTS (NUM_SEGMENTS * 2.0)
+//#define STEP 5.0
+//
+//vec3 hsv2rgb(vec3 c) {
+//    c = vec3(c.x, clamp(c.yz, 0.0, 1.0));
+//    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+//    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+//    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+//}
+//
+//void main() {
+//    float num = mod(vertexId, 2.0);
+//    float point = mod(floor(vertexId / 2.0) + mod(vertexId, 2.0) * STEP, NUM_SEGMENTS);
+//    float count = floor(vertexId / NUM_POINTS);
+//    float offset = count * 0.02;
+//    float angle = point * PI * 2.0 / NUM_SEGMENTS - offset;
+//    float spread = 0.02;
+//    float off = 0.1;
+//    float speed = count * 0.004;
+//    float snd = 1.0;
+//
+//    // 좌/우 사운드 텍스처에서 강도 계산
+//    if (num < 0.9) {
+//		off = 0.2;
+//    } else {
+//		off = 0.1;
+//    }
+//        snd *= (
+//            texture(sound, vec2(off + spread * 0., speed)).r +
+//            texture(sound, vec2(off + spread * 1., speed)).r +
+//            texture(sound, vec2(off + spread * 2., speed)).r) / 3.;
+//	
+//	float leftTarget =  texture(sound, vec2(off, 0.0)).r;
+//	float rightTarget =  texture(sound2, vec2(off, 0.0)).r;
+//	
+//    // 사운드 강도 기반 진폭 계산
+//    float rPulse = pow(snd, 5.0);
+//    float radius = count * 0.02 + rPulse * 0.4; // 진폭 증가
+//
+//    // 각도 및 회전 속도 차별화
+//    float rotationSpeed = num < 0.9 ? 1.0 : -1.0; // 좌/우 반대 방향
+//    float c = cos(angle + time * rotationSpeed) * radius;
+//    float s = sin(angle + time * rotationSpeed) * radius;
+//
+//    vec2 aspect = vec2(1, resolution.x / resolution.y);
+//    vec2 xy = vec2(c, s);
+//
+//    // 좌우 분리 강조
+//    gl_Position = vec4(xy * aspect, 0, 1);
+//    gl_Position.x = num < 0.9 
+//        ? gl_Position.x * 0.5 - 0.5 // 왼쪽으로 이동
+//        : gl_Position.x * 0.5 + 0.5; // 오른쪽으로 이동
+//    
+//    gl_PointSize = 2.0 + length(xy) * 20. * resolution.x / 1600.0;
+//
+//    // 색상 차별화 (좌/우 각각 다른 색상 계열)
+//    float hue = time * 0.03 + count * 1.001 + (num < 0.9 ? 0.0 : 0.5); // 오른쪽 색상 이동
+//    float cPulse = pow(rPulse, 2.0);
+//    float invCPulse = 1.0 - cPulse;
+//    vec4 color = vec4(hsv2rgb(vec3(hue, invCPulse, 1.0)), 1.0);
+//    v_color = mix(color, background, radius - cPulse);
+//}
+//
+//)");
+	Renderer::getInstance()->setAudioFile("../../res/music/magnetic.flac");
 	SDL_Event event;
 	bool running = true;
 	// camera control

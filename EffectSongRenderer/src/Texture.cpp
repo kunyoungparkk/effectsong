@@ -133,10 +133,10 @@ SpecularIBLTexture::SpecularIBLTexture()
 
 	glGenRenderbuffers(1, &m_depthTextureID);
 	glBindRenderbuffer(GL_RENDERBUFFER, m_depthTextureID);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, SOUND_TEXTURE_WIDTH * 2, SOUND_TEXTURE_HEIGHT * 2);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, 2048, 2048);
 	for (int i = 0; i < 6; i++)
 	{
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, SOUND_TEXTURE_WIDTH * 2, SOUND_TEXTURE_HEIGHT * 2, 0, GL_RGBA,
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, 2048, 2048, 0, GL_RGBA,
 			GL_UNSIGNED_BYTE, nullptr);
 	}
 	// 텍스처 설정

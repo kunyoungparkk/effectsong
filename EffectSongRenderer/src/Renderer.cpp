@@ -155,7 +155,7 @@ void Renderer::render() {
 	/*vertex shader art*/
 	glBindFramebuffer(GL_FRAMEBUFFER, m_specularIBLFrameBuffer);
 	glDisable(GL_CULL_FACE);
-	glViewport(0, 0, SOUND_TEXTURE_WIDTH * 2, SOUND_TEXTURE_HEIGHT * 2);
+	glViewport(0, 0, 2048, 2048);
 	glClearColor(m_backgroundColor.r, m_backgroundColor.g, m_backgroundColor.b, m_backgroundColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	GLuint artProgram = ArtShader::getInstance()->getProgram();
@@ -168,7 +168,7 @@ void Renderer::render() {
 	glUniform1f(volumeUniformLoc, m_soundTexture->getCurrentEnergy());
 
 	GLint resolutionUniformLoc = glGetUniformLocation(artProgram, "resolution");
-	float resolution[2] = { (float)SOUND_TEXTURE_WIDTH * 2, (float)SOUND_TEXTURE_HEIGHT * 2 };
+	float resolution[2] = { 2048.0f, 2048.0f };
 	glUniform2fv(resolutionUniformLoc, 1, resolution);
 
 	GLint backgroundUniformLoc = glGetUniformLocation(artProgram, "background");
@@ -200,7 +200,7 @@ void Renderer::render() {
 	ArtShader::getInstance()->render();
 	m_specularIBLTexture->bind(2);
 	for (int i = 1; i < 6; i++) {
-		glCopyTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, 0, 0, SOUND_TEXTURE_WIDTH * 2, SOUND_TEXTURE_HEIGHT * 2);
+		glCopyTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, 0, 0, 2048, 2048);
 	}
 
 	/*diffuse texture->IBL_DIFFUSE_LENGTH* IBL_DIFFUSE_LENGTH 렌더링 후, 평균 색상을 계산*/
@@ -357,5 +357,5 @@ void Renderer::resize(int width, int height)
 bool Renderer::setAudioFile(std::string filePath)
 {
 	//TODO: extend mp3, flac..
-	return m_soundTexture->loadWavFile(filePath);
+	return m_soundTexture->loadAudioFile(filePath);
 }
