@@ -6,7 +6,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-Texture::Texture(std::string& gltfPath, cgltf_texture* cgltf_texture, bool bSRGB)
+Texture::Texture(std::string& gltfPath, cgltf_texture* cgltf_texture)
 	: m_cgltfTexture(cgltf_texture) {
 	int width, height, nrChannels;
 	std::string combinedPath = gltfPath + cgltf_texture->image->uri;
@@ -21,7 +21,7 @@ Texture::Texture(std::string& gltfPath, cgltf_texture* cgltf_texture, bool bSRGB
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 
-	// ÅØ½ºÃ³ ¼³Á¤
+	// ï¿½Ø½ï¿½Ã³ ï¿½ï¿½ï¿½ï¿½
 	if (cgltf_texture->sampler)
 	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
@@ -40,13 +40,13 @@ Texture::Texture(std::string& gltfPath, cgltf_texture* cgltf_texture, bool bSRGB
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	}
 
-	// ÅØ½ºÃ³ µ¥ÀÌÅÍ »ý¼º
+	// ï¿½Ø½ï¿½Ã³ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	if (nrChannels == 3) {
-		glTexImage2D(GL_TEXTURE_2D, 0, bSRGB ? GL_SRGB : GL_RGB, width, height, 0, GL_RGB,
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
 			GL_UNSIGNED_BYTE, m_data);
 	}
 	else if (nrChannels == 4) {
-		glTexImage2D(GL_TEXTURE_2D, 0, bSRGB ? GL_SRGB_ALPHA : GL_RGBA, width, height, 0, GL_RGBA,
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
 			GL_UNSIGNED_BYTE, m_data);
 	}
 	glGenerateMipmap(GL_TEXTURE_2D);
@@ -67,7 +67,7 @@ Texture::Texture(std::string& path)
 	glGenTextures(1, &m_textureID);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 
-	// ÅØ½ºÃ³ ¼³Á¤
+	// ï¿½Ø½ï¿½Ã³ ï¿½ï¿½ï¿½ï¿½
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
 		GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
@@ -77,7 +77,7 @@ Texture::Texture(std::string& path)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
 		GL_LINEAR);
 
-	// ÅØ½ºÃ³ µ¥ÀÌÅÍ »ý¼º
+	// ï¿½Ø½ï¿½Ã³ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	if (nrChannels == 3) {
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
 			GL_UNSIGNED_BYTE, m_data);
@@ -95,7 +95,7 @@ Texture::Texture(int width, int height, int nrChannels, GLint wrapS, GLint wrapT
 	glGenTextures(1, &m_textureID);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 
-	// ÅØ½ºÃ³ ¼³Á¤
+	// ï¿½Ø½ï¿½Ã³ ï¿½ï¿½ï¿½ï¿½
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
 		wrapS);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
@@ -105,7 +105,7 @@ Texture::Texture(int width, int height, int nrChannels, GLint wrapS, GLint wrapT
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
 		maxFilter);
 
-	// ÅØ½ºÃ³ µ¥ÀÌÅÍ »ý¼º
+	// ï¿½Ø½ï¿½Ã³ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	if (nrChannels == 3) {
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
 			GL_UNSIGNED_BYTE, m_data);
@@ -139,7 +139,7 @@ SpecularIBLTexture::SpecularIBLTexture()
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, 2048, 2048, 0, GL_RGBA,
 			GL_UNSIGNED_BYTE, nullptr);
 	}
-	// ÅØ½ºÃ³ ¼³Á¤
+	// ï¿½Ø½ï¿½Ã³ ï¿½ï¿½ï¿½ï¿½
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S,
 		GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T,
@@ -172,7 +172,7 @@ DiffuseIBLTexture::DiffuseIBLTexture(int width, int height, int nrChannels, GLin
 	glBindRenderbuffer(GL_RENDERBUFFER, m_depthTextureID);
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
 
-	// ÅØ½ºÃ³ ¼³Á¤
+	// ï¿½Ø½ï¿½Ã³ ï¿½ï¿½ï¿½ï¿½
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
 		wrapS);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
@@ -182,7 +182,7 @@ DiffuseIBLTexture::DiffuseIBLTexture(int width, int height, int nrChannels, GLin
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
 		maxFilter);
 
-	// ÅØ½ºÃ³ µ¥ÀÌÅÍ »ý¼º
+	// ï¿½Ø½ï¿½Ã³ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	if (nrChannels == 3) {
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
 			GL_UNSIGNED_BYTE, nullptr);

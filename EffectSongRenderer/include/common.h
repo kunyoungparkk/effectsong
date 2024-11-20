@@ -5,7 +5,7 @@
 #ifdef _WIN64
 #include "GL/glew.h"
 #elif defined(__EMSCRIPTEN__)
-
+#include "GLES3/gl3.h"
 #endif
 #include "cgltf.h"
 #include <glm/glm.hpp>

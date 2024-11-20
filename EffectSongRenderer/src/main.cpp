@@ -7,12 +7,17 @@
 #include "Scene.h"
 #include "ArtShader.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
+
 SDL_GLContext g_context;
 SDL_Window* g_window;
 
 void initialize(int width, int height);
 void deInitialize();
-void loop();
+void render(float musicTime, bool isPlay);
 
 #ifdef _WIN64
 float musicTime = 0.0f;
@@ -35,74 +40,74 @@ void windowTestProc()
 
 	ArtShader::getInstance()->setVertexCount(50000);
 	ArtShader::getInstance()->setPrimitiveMode(GL_POINTS);
-//	ArtShader::getInstance()->setVertexShader(R"(
-//#define PI 3.14159
-//#define NUM_SEGMENTS 51.0
-//#define NUM_POINTS (NUM_SEGMENTS * 2.0)
-//#define STEP 5.0
-//
-//vec3 hsv2rgb(vec3 c) {
-//    c = vec3(c.x, clamp(c.yz, 0.0, 1.0));
-//    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-//    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-//    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-//}
-//
-//void main() {
-//    float num = mod(vertexId, 2.0);
-//    float point = mod(floor(vertexId / 2.0) + mod(vertexId, 2.0) * STEP, NUM_SEGMENTS);
-//    float count = floor(vertexId / NUM_POINTS);
-//    float offset = count * 0.02;
-//    float angle = point * PI * 2.0 / NUM_SEGMENTS - offset;
-//    float spread = 0.02;
-//    float off = 0.1;
-//    float speed = count * 0.004;
-//    float snd = 1.0;
-//
-//    // ÁÂ/¿ì »ç¿îµå ÅØ½ºÃ³¿¡¼­ °­µµ °è»ê
-//    if (num < 0.9) {
-//		off = 0.2;
-//    } else {
-//		off = 0.1;
-//    }
-//        snd *= (
-//            texture(sound, vec2(off + spread * 0., speed)).r +
-//            texture(sound, vec2(off + spread * 1., speed)).r +
-//            texture(sound, vec2(off + spread * 2., speed)).r) / 3.;
-//	
-//	float leftTarget =  texture(sound, vec2(off, 0.0)).r;
-//	float rightTarget =  texture(sound2, vec2(off, 0.0)).r;
-//	
-//    // »ç¿îµå °­µµ ±â¹Ý ÁøÆø °è»ê
-//    float rPulse = pow(snd, 5.0);
-//    float radius = count * 0.02 + rPulse * 0.4; // ÁøÆø Áõ°¡
-//
-//    // °¢µµ ¹× È¸Àü ¼Óµµ Â÷º°È­
-//    float rotationSpeed = num < 0.9 ? 1.0 : -1.0; // ÁÂ/¿ì ¹Ý´ë ¹æÇâ
-//    float c = cos(angle + time * rotationSpeed) * radius;
-//    float s = sin(angle + time * rotationSpeed) * radius;
-//
-//    vec2 aspect = vec2(1, resolution.x / resolution.y);
-//    vec2 xy = vec2(c, s);
-//
-//    // ÁÂ¿ì ºÐ¸® °­Á¶
-//    gl_Position = vec4(xy * aspect, 0, 1);
-//    gl_Position.x = num < 0.9 
-//        ? gl_Position.x * 0.5 - 0.5 // ¿ÞÂÊÀ¸·Î ÀÌµ¿
-//        : gl_Position.x * 0.5 + 0.5; // ¿À¸¥ÂÊÀ¸·Î ÀÌµ¿
-//    
-//    gl_PointSize = 2.0 + length(xy) * 20. * resolution.x / 1600.0;
-//
-//    // »ö»ó Â÷º°È­ (ÁÂ/¿ì °¢°¢ ´Ù¸¥ »ö»ó °è¿­)
-//    float hue = time * 0.03 + count * 1.001 + (num < 0.9 ? 0.0 : 0.5); // ¿À¸¥ÂÊ »ö»ó ÀÌµ¿
-//    float cPulse = pow(rPulse, 2.0);
-//    float invCPulse = 1.0 - cPulse;
-//    vec4 color = vec4(hsv2rgb(vec3(hue, invCPulse, 1.0)), 1.0);
-//    v_color = mix(color, background, radius - cPulse);
-//}
-//
-//)");
-	Renderer::getInstance()->setAudioFile("../../res/music/magnetic.flac");
+	ArtShader::getInstance()->setVertexShader(R"(
+#define PI 3.14159
+#define NUM_SEGMENTS 51.0
+#define NUM_POINTS (NUM_SEGMENTS * 2.0)
+#define STEP 5.0
+
+vec3 hsv2rgb(vec3 c) {
+    c = vec3(c.x, clamp(c.yz, 0.0, 1.0));
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+void main() {
+    float num = mod(vertexId, 2.0);
+    float point = mod(floor(vertexId / 2.0) + mod(vertexId, 2.0) * STEP, NUM_SEGMENTS);
+    float count = floor(vertexId / NUM_POINTS);
+    float offset = count * 0.02;
+    float angle = point * PI * 2.0 / NUM_SEGMENTS - offset;
+    float spread = 0.02;
+    float off = 0.1;
+    float speed = count * 0.004;
+    float snd = 1.0;
+
+    // ï¿½ï¿½/ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ø½ï¿½Ã³ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+    if (num < 0.9) {
+		off = 0.2;
+    } else {
+		off = 0.1;
+    }
+        snd *= (
+            texture(sound, vec2(off + spread * 0., speed)).r +
+            texture(sound, vec2(off + spread * 1., speed)).r +
+            texture(sound, vec2(off + spread * 2., speed)).r) / 3.;
+	
+	float leftTarget =  texture(sound, vec2(off, 0.0)).r;
+	float rightTarget =  texture(sound2, vec2(off, 0.0)).r;
+	
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+    float rPulse = pow(snd, 5.0);
+    float radius = count * 0.02 + rPulse * 0.4; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ È¸ï¿½ï¿½ ï¿½Óµï¿½ ï¿½ï¿½ï¿½ï¿½È­
+    float rotationSpeed = num < 0.9 ? 1.0 : -1.0; // ï¿½ï¿½/ï¿½ï¿½ ï¿½Ý´ï¿½ ï¿½ï¿½ï¿½ï¿½
+    float c = cos(angle + time * rotationSpeed) * radius;
+    float s = sin(angle + time * rotationSpeed) * radius;
+
+    vec2 aspect = vec2(1, resolution.x / resolution.y);
+    vec2 xy = vec2(c, s);
+
+    // ï¿½Â¿ï¿½ ï¿½Ð¸ï¿½ ï¿½ï¿½ï¿½ï¿½
+    gl_Position = vec4(xy * aspect, 0, 1);
+    gl_Position.x = num < 0.9 
+        ? gl_Position.x * 0.5 - 0.5 // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½
+        : gl_Position.x * 0.5 + 0.5; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½
+    
+    gl_PointSize = 2.0 + length(xy) * 20. * resolution.x / 1600.0;
+
+    // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½È­ (ï¿½ï¿½/ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ù¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½è¿­)
+    float hue = time * 0.03 + count * 1.001 + (num < 0.9 ? 0.0 : 0.5); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½
+    float cPulse = pow(rPulse, 2.0);
+    float invCPulse = 1.0 - cPulse;
+    vec4 color = vec4(hsv2rgb(vec3(hue, invCPulse, 1.0)), 1.0);
+    v_color = mix(color, background, radius - cPulse);
+}
+
+)");
+	Renderer::getInstance()->setAudioFile("../../res/music/test.wav");
 	SDL_Event event;
 	bool running = true;
 	// camera control
@@ -172,7 +177,7 @@ void windowTestProc()
 			case SDL_MOUSEMOTION:
 				if (b_mouse_pressed) {
 					cam_xRot += event.button.y - prev_mouse_coord[1];
-					//TODO: 45µµÂë ³Ñ¾î°¡¸é ÀÌ»óÇÏ°Ô Èçµé¸®´Â Çö»ó ÇØ°á
+					//TODO: 45ï¿½ï¿½ï¿½ï¿½ ï¿½Ñ¾î°¡ï¿½ï¿½ ï¿½Ì»ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½é¸®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ø°ï¿½
 					cam_xRot = glm::clamp(cam_xRot, -40.0f, 40.0f);
 					cam_yRot -= event.button.x - prev_mouse_coord[0];
 					camNode->setRotation(glm::angleAxis(glm::radians(cam_xRot),
@@ -191,14 +196,14 @@ void windowTestProc()
 				break;
 			}
 		}
-		loop();
+		render(musicTime, true);
 
 		uint32_t curTime = SDL_GetTicks();
 		frameTime = curTime - frameStart;
 		//fixed deltatime
 		if (FIXED_DELTATIME * 1000.0 > frameTime)
 		{
-			SDL_Delay(FIXED_DELTATIME * 1000.0 - frameTime);
+			SDL_Delay((uint32_t)(FIXED_DELTATIME * 1000.0) - frameTime);
 		}
 		musicTime = (curTime - musicStartTime) / 1000.0f;
 		if (musicTime > printTime) {
@@ -230,11 +235,11 @@ void initialize(int width, int height) {
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
-	// À©µµ¿ì Ã¢ »ý¼º
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ã¢ ï¿½ï¿½ï¿½ï¿½
 	g_window =
 		SDL_CreateWindow("EffectSong", SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-	// OpenGL ÄÁÅØ½ºÆ® »ý¼º
+	// OpenGL ï¿½ï¿½ï¿½Ø½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
 	g_context = SDL_GL_CreateContext(g_window);
 
 	Renderer::getInstance()->resize(width, height);
@@ -250,8 +255,8 @@ void deInitialize() {
 	SDL_Quit();
 }
 
-void loop() {
-	Renderer::getInstance()->update(musicTime);
+void render(float musicTime, bool isPlay) {
+	Renderer::getInstance()->update(musicTime, isPlay);
 	Renderer::getInstance()->render();
 	SDL_GL_SwapWindow(g_window);
 }

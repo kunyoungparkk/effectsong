@@ -58,7 +58,7 @@ SoundTexture::~SoundTexture() {
 	glDeleteTextures(1, &m_textureID2);
 }
 
-void SoundTexture::update(float currentTime) {
+void SoundTexture::update(float currentTime, bool isPlay) {
 	m_currentEnergy = 0.0f;
 	float newRowData[2][SOUND_TEXTURE_LENGTH] = { 0.0f, };
 	int samplePosition = (int)(currentTime * m_sampleRate * m_channels);
@@ -71,7 +71,7 @@ void SoundTexture::update(float currentTime) {
 		samplePosition -= 1;
 	}
 
-	if (samplePosition + FFT_SIZE * m_channels < m_audioSamples.size())
+	if (isPlay && samplePosition + FFT_SIZE * m_channels < m_audioSamples.size())
 	{
 		if (m_channels == 1) {
 			for (int i = samplePosition; i < FFT_SIZE; i++) {

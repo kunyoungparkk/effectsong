@@ -29,7 +29,7 @@ class Renderer {
       instance = nullptr;
   }
 
-  void update(float currentTime);
+  void update(float currentTime, bool isPlay);
   void render();
 
   void addScene(Scene* scene);

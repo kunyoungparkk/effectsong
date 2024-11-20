@@ -1,4 +1,4 @@
-#include "renderer.h"
+#include "Renderer.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <fstream>
 #include <iostream>
@@ -23,21 +23,21 @@ std::string readFile(const char* filePath) {
 	return buffer.str();
 }
 Renderer::Renderer(){
-	// glew √ ±‚»≠
+#if _WIN64
 	glewExperimental = true;
 	if (glewInit() != GLEW_OK) {
 		std::cout << "GLEW Init Failed" << std::endl;
 		return;
 	}
-
-	// OpenGL º≥¡§
+#endif
+	// OpenGL
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
-	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glEnable(GL_PROGRAM_POINT_SIZE);
 	glCullFace(GL_BACK);
+	//glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+	//glEnable(GL_PROGRAM_POINT_SIZE);
 
 	//general shader program
 	std::string vertexShaderSource =
@@ -111,7 +111,6 @@ Renderer::Renderer(){
 }
 
 Renderer::~Renderer() {
-	//¿œ¥‹ GLTF ∞¸∑√µµ ø©±‚º≠ «ÿ¡¶
 	for (auto iter = m_scenes.begin(); iter != m_scenes.end(); iter++) {
 		delete *iter;
 	}
@@ -139,9 +138,9 @@ Renderer::~Renderer() {
 	}
 }
 
-void Renderer::update(float currentTime) {
+void Renderer::update(float currentTime, bool isPlay) {
 	m_currentTime = currentTime;
-	m_soundTexture->update(currentTime);
+	m_soundTexture->update(currentTime, isPlay);
 
 	float soundSize = m_soundTexture->getCurrentEnergy();
 	Node* node = getSceneAt(0)->getNodeAt(0);
@@ -203,7 +202,7 @@ void Renderer::render() {
 		glCopyTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, 0, 0, 2048, 2048);
 	}
 
-	/*diffuse texture->IBL_DIFFUSE_LENGTH* IBL_DIFFUSE_LENGTH ∑ª¥ı∏µ »ƒ, ∆Ú±’ ªˆªÛ¿ª ∞ËªÍ*/
+	/*diffuse texture->IBL_DIFFUSE_LENGTH* IBL_DIFFUSE_LENGTH*/
 	glBindFramebuffer(GL_FRAMEBUFFER, m_diffuseIBLFrameBuffer);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_diffuseIBLTexture->getId(), 0);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_diffuseIBLTexture->getDepthTextureId());
@@ -215,7 +214,8 @@ void Renderer::render() {
 	ArtShader::getInstance()->render();
 
 	m_diffuseIBLTexture->bind(3);
-	glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_diffusePixels);
+	glReadPixels(0, 0, IBL_DIFFUSE_LENGTH, IBL_DIFFUSE_LENGTH, GL_RGBA, GL_UNSIGNED_BYTE, m_diffusePixels);
+	//glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_diffusePixels);
 	glm::vec4 diffuseIBLColor = glm::vec4(0.0f);
 	for (int i = 0; i < IBL_DIFFUSE_LENGTH; i++) {
 		for (int j = 0; j < IBL_DIFFUSE_LENGTH; j++) {
@@ -263,7 +263,7 @@ void Renderer::render() {
 		glUniform4fv(diffuseIBLTexLoc, 1, glm::value_ptr(diffuseIBLColor));
 		GLint lutGGXTexLoc = glGetUniformLocation(m_shaderProgram, "lutGGX");
 		glUniform1i(lutGGXTexLoc, 4);
-		//sound tex (5,6) ¿ÃπÃ πŸ¿Œµ˘ (update)
+		//sound tex (5,6) ÔøΩÃπÔøΩ ÔøΩÔøΩÔøΩŒµÔøΩ (update)
 		GLint iblItensityLoc = glGetUniformLocation(m_shaderProgram, "iblIntensity");
 		glUniform1f(iblItensityLoc, 1.0f);
 

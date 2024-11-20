@@ -3,6 +3,14 @@
 .idea/
 .vscode/
 
+CMakeFiles/
+build/
+.ninja_deps
+.ninja_log
+build.ninja
+cmake_install.cmake
+CMakeCache.txt
+
 # Build results
 EffectSongRenderer/project/x64
 EffectSongRenderer/project/EffectSongRenderer/x64/

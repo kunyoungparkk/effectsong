@@ -9,7 +9,7 @@ class SoundTexture {
 public:
     SoundTexture();
     ~SoundTexture();
-    void update(float currentTime);
+    void update(float currentTime, bool isPlay);
 
     int getChannelCount();
 
