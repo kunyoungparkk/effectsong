@@ -185,12 +185,6 @@ copy "$(ProjectDir)..\..\thirdparty\fftw3\bin\fftw3f.dll" "$(ProjectDir)..\x64\$
     <ClInclude Include="..\..\include\SoundTexture.h" />
     <ClInclude Include="..\..\include\Texture.h" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\src\fragment_shader.glsl" />
-    <None Include="..\..\src\ibl_fragment_shader.glsl" />
-    <None Include="..\..\src\ibl_vertex_shader.glsl" />
-    <None Include="..\..\src\vertex_shader.glsl" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

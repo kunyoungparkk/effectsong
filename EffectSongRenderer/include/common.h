@@ -4,8 +4,10 @@
 #define FIXED_DELTATIME (1.0f/60.0f)
 #ifdef _WIN64
 #include "GL/glew.h"
+#define EFFECTSONG_ROOT "../../"
 #elif defined(__EMSCRIPTEN__)
 #include "GLES3/gl3.h"
+#define EFFECTSONG_ROOT "../"
 #endif
 #include "cgltf.h"
 #include <glm/glm.hpp>

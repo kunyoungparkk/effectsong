@@ -14,3 +14,25 @@ CMakeCache.txt
 # Build results
 EffectSongRenderer/project/x64
 EffectSongRenderer/project/EffectSongRenderer/x64/
+
+# dependencies
+EffectSongEditor/node_modules
+EffectSongEditor/.pnp
+EffectSongEditor/.pnp.js
+
+# testing
+EffectSongEditor/coverage
+
+# production
+EffectSongEditor/build
+
+# misc
+EffectSongEditor/.DS_Store
+EffectSongEditor/.env.local
+EffectSongEditor/.env.development.local
+EffectSongEditor/.env.test.local
+EffectSongEditor/.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

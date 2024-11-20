@@ -1,0 +1,40 @@
+@import url(https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css);
+.engineDiv{
+  background-color:#505050;
+  height: calc(100vh - 50px);
+  width: calc(100% -  650px);
+  float: left;
+  text-align: center;
+}
+.musicPlayer{
+  height: 50px;
+  width: calc(100% -  650px);
+  float: left;
+}
+.editor{
+  font-family: 'NanumSquare';
+}
+.transfromInput{
+  width: 50px;
+}
+.hierarchy{
+  background-color: #2e2e2e;
+  font-family: 'NanumSquare';
+  color: white;
+  height: 100vh;
+  width: 300px;
+  float: left;
+}
+.attribute{
+  background-color: #2e2e2e;
+  font-family: 'NanumSquare';
+  color: white;
+  height: 100vh;
+  width: 350px;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.MuiOutlinedInput-notchedOutline {
+  border-color: lightgrey !important;
+}

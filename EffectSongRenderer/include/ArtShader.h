@@ -4,6 +4,7 @@
 class ArtShader
 {
 public:
+	~ArtShader();
 	static ArtShader* getInstance()
 	{
 		if (instance_ == nullptr)
@@ -19,12 +20,15 @@ public:
 	std::string getFragmentShader(){ return fs_; }
 	std::string getVertexShaderHeader(){ return vsHeader_; }
 	std::string getVertexShader(){ return vsHeader_ + vs_; }
-	void setVertexShader(std::string vs){ 
-		vs_ = vs;
-		compileShader();
+	bool setVertexShader(std::string vs){ 
+		if (compileShader(vs)) {
+			vs_ = vs;
+			return true;
+		}
+		return false;
 	}
 
-	void compileShader();
+	bool compileShader(std::string tempVS);
 
 	void render() const;
 
@@ -47,7 +51,6 @@ public:
 	GLuint getProgram() { return m_artShaderProgram; }
 private:
 	ArtShader();
-	~ArtShader();
 	static ArtShader* instance_;
 	GLuint VAO, VBO;
 	GLenum m_primitiveMode = GL_POINTS;
@@ -58,9 +61,19 @@ private:
 	std::string fs_ = R"(#version 300 es
 	precision highp float;
 	in vec4 v_color;
-	out vec4 FragColor;
+	layout(location = 0) out vec4 FragColor1;
+	layout(location = 1) out vec4 FragColor2;
+	layout(location = 2) out vec4 FragColor3;
+	layout(location = 3) out vec4 FragColor4;
+	layout(location = 4) out vec4 FragColor5;
+	layout(location = 5) out vec4 FragColor6;
 	void main() {
-		FragColor = v_color;
+		FragColor1 = v_color;
+		FragColor2 = v_color;
+		FragColor3 = v_color;
+		FragColor4 = v_color;
+		FragColor5 = v_color;
+		FragColor6 = v_color;
 	}
 	)";
 	std::string vsHeader_ = R"(#version 300 es

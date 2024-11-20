@@ -1,0 +1,53 @@
+{
+  "name": "wasm-editor",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@monaco-editor/react": "^4.6.0",
+    "@mui/icons-material": "^5.15.12",
+    "@mui/material": "^5.15.15",
+    "@mui/x-data-grid": "^7.3.1",
+    "@mui/x-tree-view": "^7.3.1",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "file-saver": "^2.0.5",
+    "jszip": "^3.10.1",
+    "math": "^0.0.3",
+    "mathjs": "^12.4.1",
+    "monaco-editor": "^0.52.0",
+    "mui-file-input": "^4.0.4",
+    "quaternion": "^1.5.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1",
+    "recoil": "^0.7.7",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

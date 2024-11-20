@@ -21,23 +21,28 @@ Texture::Texture(std::string& gltfPath, cgltf_texture* cgltf_texture)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 
+	GLuint defaultWrapS = GL_REPEAT;
+	GLuint defaultWrapT = GL_REPEAT;
+	GLuint defaultMin = GL_LINEAR_MIPMAP_LINEAR;
+	GLuint defaultMag = GL_LINEAR;
+
 	// �ؽ�ó ����
 	if (cgltf_texture->sampler)
 	{
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
-			cgltf_texture->sampler->wrap_s);
+			cgltf_texture->sampler->wrap_s ? cgltf_texture->sampler->wrap_s : defaultWrapS);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
-			cgltf_texture->sampler->wrap_t);
+			cgltf_texture->sampler->wrap_t ? cgltf_texture->sampler->wrap_t : defaultWrapT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-			cgltf_texture->sampler->min_filter);
+			cgltf_texture->sampler->min_filter ? cgltf_texture->sampler->min_filter : defaultMin);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-			cgltf_texture->sampler->mag_filter);
+			cgltf_texture->sampler->mag_filter ? cgltf_texture->sampler->mag_filter : defaultMag);
 	}
 	else {
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, defaultWrapS);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, defaultWrapT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, defaultMin);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, defaultMag);
 	}
 
 	// �ؽ�ó ������ ����

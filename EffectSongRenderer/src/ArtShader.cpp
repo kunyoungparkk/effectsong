@@ -3,7 +3,22 @@
 ArtShader* ArtShader::instance_ = nullptr;
 ArtShader::ArtShader() {
 	m_artShaderProgram = glCreateProgram();
-	compileShader();
+	//shader art program
+	std::string vertexShader = getVertexShader();
+	const char* cArtVertexShaderSource = vertexShader.c_str();
+	const char* cArtFragmentShaderSource = fs_.c_str();
+
+	GLuint artVertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(artVertexShader, 1, &cArtVertexShaderSource, NULL);
+	glCompileShader(artVertexShader);
+	GLuint artFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(artFragmentShader, 1, &cArtFragmentShaderSource, NULL);
+	glCompileShader(artFragmentShader);
+	glAttachShader(m_artShaderProgram, artVertexShader);
+	glAttachShader(m_artShaderProgram, artFragmentShader);
+	glLinkProgram(m_artShaderProgram);
+	glDeleteShader(artVertexShader);
+	glDeleteShader(artFragmentShader);
 
 	m_vertices.resize(m_vertexCount);
 	for (int i = 0; i < m_vertexCount; i++) {
@@ -29,26 +44,35 @@ ArtShader::~ArtShader()
 	glDeleteBuffers(1, &VBO);
 	glDeleteVertexArrays(1, &VAO);
 }
-void ArtShader::compileShader()
+bool ArtShader::compileShader(std::string tempVS)
 {
-	glDeleteProgram(m_artShaderProgram);
-	m_artShaderProgram = glCreateProgram();
+	GLuint tempProgram = glCreateProgram();
 	//shader art program
-	std::string vertexShader = getVertexShader();
+	std::string vertexShader = vsHeader_ + tempVS;//getVertexShader();
 	const char* cArtVertexShaderSource = vertexShader.c_str();
 	const char* cArtFragmentShaderSource = fs_.c_str();
 
 	GLuint artVertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(artVertexShader, 1, &cArtVertexShaderSource, NULL);
 	glCompileShader(artVertexShader);
+	GLint success;
+	glGetShaderiv(artVertexShader, GL_COMPILE_STATUS, &success);
+	if (!success) {
+		glDeleteShader(artVertexShader);
+		return false;
+	}
 	GLuint artFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(artFragmentShader, 1, &cArtFragmentShaderSource, NULL);
 	glCompileShader(artFragmentShader);
-	glAttachShader(m_artShaderProgram, artVertexShader);
-	glAttachShader(m_artShaderProgram, artFragmentShader);
-	glLinkProgram(m_artShaderProgram);
+	glAttachShader(tempProgram, artVertexShader);
+	glAttachShader(tempProgram, artFragmentShader);
+	glLinkProgram(tempProgram);
 	glDeleteShader(artVertexShader);
 	glDeleteShader(artFragmentShader);
+
+	glDeleteProgram(m_artShaderProgram);
+	m_artShaderProgram = tempProgram;
+	return true;
 }
 void ArtShader::render() const
 {

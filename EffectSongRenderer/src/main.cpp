@@ -8,7 +8,10 @@
 #include "ArtShader.h"
 
 #ifdef __EMSCRIPTEN__
-#include <emscripten.h>
+#include <emscripten/emscripten.h>
+#include <emscripten/html5.h>
+#include <emscripten/bind.h>
+using namespace emscripten;
 #endif
 
 
@@ -17,7 +20,7 @@ SDL_Window* g_window;
 
 void initialize(int width, int height);
 void deInitialize();
-void render(float musicTime, bool isPlay);
+void loop(float musicTime, bool isPlay);
 
 #ifdef _WIN64
 float musicTime = 0.0f;
@@ -26,9 +29,9 @@ int initialHeight = 800;
 
 void windowTestProc()
 {
-	util::loadGLTFData("../../res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf");
-	util::loadGLTFData("../../res/2.0/Lantern/glTF/Lantern.gltf");
-	util::loadGLTFData("../../res/2.0/WaterBottle/glTF/WaterBottle.gltf");
+	util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"));
+	util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/Lantern/glTF/Lantern.gltf"));
+	util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/WaterBottle/glTF/WaterBottle.gltf"));
 	Renderer::getInstance()->getSceneAt(0)->getNodeAt(0)->setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
 
 	Renderer::getInstance()->getSceneAt(1)->getNodeAt(0)->setPosition(glm::vec3(-2.0f, 0.0f, 0.0f));
@@ -107,7 +110,7 @@ void main() {
 }
 
 )");
-	Renderer::getInstance()->setAudioFile("../../res/music/test.wav");
+	Renderer::getInstance()->setAudioFile(EFFECTSONG_ROOT + std::string("res/music/test.wav"));
 	SDL_Event event;
 	bool running = true;
 	// camera control
@@ -196,7 +199,7 @@ void main() {
 				break;
 			}
 		}
-		render(musicTime, true);
+		loop(musicTime, true);
 
 		uint32_t curTime = SDL_GetTicks();
 		frameTime = curTime - frameStart;
@@ -220,9 +223,116 @@ int main(int argc, char* argv[]) {
 	deInitialize();
 	return 0;
 }
+
+#elif defined(__EMSCRIPTEN__)
+std::string getRootPath() {
+	return EFFECTSONG_ROOT;
+}
+EMSCRIPTEN_BINDINGS(CORE){
+  emscripten::function("initialize", &initialize);
+  emscripten::function("deInitialize", &deInitialize);
+  emscripten::function("loop", &loop);
+  emscripten::function("loadGLTFData", &util::loadGLTFData, allow_raw_pointers());
+  emscripten::function("getRootPath", &getRootPath, allow_raw_pointers());
+}
+EMSCRIPTEN_BINDINGS(GLTF){
+  class_<Scene>("Scene")
+    .function("getName", &Scene::getName, allow_raw_pointers())
+    .function("setName", &Scene::setName, allow_raw_pointers())
+    .function("addLight", &Scene::addLight, allow_raw_pointers())
+    .function("removeLight", &Scene::removeLight, allow_raw_pointers())
+    .function("addNode", &Scene::addNode, allow_raw_pointers())
+    .function("getNodeAt", &Scene::getNodeAt, allow_raw_pointers())
+    .function("getNodeByName", &Scene::getNodeByName, allow_raw_pointers());
+  class_<Node>("Node")
+	.constructor<Scene*, Node*>()
+    .function("getPosition", &Node::setPosition, allow_raw_pointers())
+    .function("getRotation", &Node::getRotation, allow_raw_pointers())
+    .function("getScale", &Node::getScale, allow_raw_pointers())
+    .function("getFront", &Node::getFront, allow_raw_pointers())
+    .function("getLeft", &Node::getLeft, allow_raw_pointers())
+    .function("setPosition", &Node::setPosition, allow_raw_pointers())
+    .function("setRotation", &Node::setRotation, allow_raw_pointers())
+    .function("setScale", &Node::setScale, allow_raw_pointers())
+    .function("getGlobalPosition", &Node::getGlobalPosition, allow_raw_pointers())
+    .function("getGlobalRotation", &Node::getGlobalRotation, allow_raw_pointers())
+    .function("getGlobalScale", &Node::getGlobalScale, allow_raw_pointers())
+    .function("getGlobalFront", &Node::getGlobalFront, allow_raw_pointers())
+    .function("getGlobalLeft", &Node::getGlobalLeft, allow_raw_pointers())
+    .function("getLight", &Node::getLight, allow_raw_pointers())
+    .function("setLight", &Node::setLight, allow_raw_pointers())
+    .function("getCamera", &Node::getCamera, allow_raw_pointers())
+    .function("setCamera", &Node::setCamera, allow_raw_pointers())
+    .function("getName", &Node::getName, allow_raw_pointers())
+    .function("setName", &Node::setName, allow_raw_pointers())
+    .function("getChildAt", &Node::getChildAt, allow_raw_pointers())
+    .function("getChildByName", &Node::getChildByName, allow_raw_pointers());
+  class_<Camera>("Camera")
+	.constructor<Node*>()
+	.property("aspectRatio", &Camera::aspectRatio)
+	.property("fov", &Camera::fov)
+	.property("xMag", &Camera::xMag)
+	.property("yMag", &Camera::yMag)
+	.property("zFar", &Camera::zFar)
+	.property("zNear", &Camera::zNear)
+	.property("name", &Camera::name)
+    .function("getNode", &Camera::getNode, allow_raw_pointers());
+  class_<Light>("Light")
+	.property("color", &Light::color)
+	.property("intensity", &Light::intensity)
+	.property("range", &Light::range)
+	.property("innerConeAngle", &Light::innerConeAngle)
+	.property("outerConeAngle", &Light::outerConeAngle)
+	.property("name", &Light::name)
+    .function("getNode", &Light::getNode, allow_raw_pointers());
+}
+EMSCRIPTEN_BINDINGS(SINGLETON){
+  class_<Renderer>("Renderer")
+    .class_function("getInstance", &Renderer::getInstance, allow_raw_pointers())
+    .function("getSceneAt", &Renderer::getSceneAt, allow_raw_pointers())
+    .function("getSceneByName", &Renderer::getSceneByName, allow_raw_pointers())
+    .function("setAudioFile", &Renderer::setAudioFile, allow_raw_pointers())
+    .function("setActiveCamera", &Renderer::setActiveCamera , allow_raw_pointers())
+    .function("getCurrentEnergy", &Renderer::getCurrentEnergy);
+  class_<ArtShader>("ArtShader")
+    .class_function("getInstance", &ArtShader::getInstance, allow_raw_pointers())
+    .function("getVertexShader", &ArtShader::getVertexShader , allow_raw_pointers())
+    .function("setVertexShader", &ArtShader::setVertexShader , allow_raw_pointers())
+    .function("getPrimitiveMode", &ArtShader::getPrimitiveMode , allow_raw_pointers())
+    .function("setPrimitiveMode", &ArtShader::setPrimitiveMode , allow_raw_pointers())
+    .function("getVertexCount", &ArtShader::getVertexCount , allow_raw_pointers())
+    .function("setVertexCount", &ArtShader::setVertexCount , allow_raw_pointers());
+}
+
+EMSCRIPTEN_BINDINGS(BIND_GLM){
+  class_<glm::vec2>("vec2")
+        .constructor<float, float>()
+        .property("x", &glm::vec2::x)
+        .property("y", &glm::vec2::y);
+  class_<glm::vec3>("vec3")
+        .constructor<float, float, float>()
+        .property("x", &glm::vec3::x)
+        .property("y", &glm::vec3::y)
+        .property("z", &glm::vec3::z);
+  class_<glm::vec4>("vec4")
+        .constructor<float, float, float, float>()
+        .property("x", &glm::vec4::x)
+        .property("y", &glm::vec4::y)
+        .property("z", &glm::vec4::z)
+        .property("w", &glm::vec4::w);
+  class_<glm::quat>("quat")
+        .constructor<float, float, float, float>()
+        .property("x", &glm::quat::x)
+        .property("y", &glm::quat::y)
+        .property("z", &glm::quat::z)
+        .property("w", &glm::quat::w);
+}
 #endif
 
 void initialize(int width, int height) {
+#ifdef __EMSCRIPTEN__
+	emscripten_html5_remove_all_event_listeners();
+#endif
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("SDL Initialization Fail: %s\n", SDL_GetError());
 		exit(0);
@@ -235,13 +345,14 @@ void initialize(int width, int height) {
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
 
-	// ������ â ����
+	uint32_t flags = SDL_WINDOW_OPENGL;
+#if _WIN64
+	flags |= SDL_WINDOW_RESIZABLE;
+#endif
 	g_window =
 		SDL_CreateWindow("EffectSong", SDL_WINDOWPOS_UNDEFINED,
-			SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-	// OpenGL ���ؽ�Ʈ ����
+			SDL_WINDOWPOS_UNDEFINED, width, height, flags);
 	g_context = SDL_GL_CreateContext(g_window);
-
 	Renderer::getInstance()->resize(width, height);
 }
 
@@ -255,8 +366,9 @@ void deInitialize() {
 	SDL_Quit();
 }
 
-void render(float musicTime, bool isPlay) {
+void loop(float musicTime, bool isPlay) {
 	Renderer::getInstance()->update(musicTime, isPlay);
 	Renderer::getInstance()->render();
 	SDL_GL_SwapWindow(g_window);
 }
+

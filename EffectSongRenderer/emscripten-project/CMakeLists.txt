@@ -8,9 +8,6 @@ set(PROJECT_VERSION_MINOR 1)
 set(PROJECT_VERSION_PATCH 0)
 set(PROJECT_ROOT ${CMAKE_SOURCE_DIR}/..)
 
-# Makefile 생성 여부
-set(CMAKE_VERBOSE_MAKEFILE true)
-
 # 빌드 형상(Configuration)
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -27,10 +24,11 @@ endif()
 # 빌드 대상 파일명
 set(WASM_OUTPUT_NAME  "effectsong-core")
 
-# 파일 출력 경로
-set(OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE})
+# 파일 출력 경로 : 바로 Editor로 넘기기
+#set(OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE})
+set(OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../../EffectSongEditor/public)
 
-set(GRAPICARCORE_INCLUDE
+set(EFFECTSONG_INCLUDE
   ${PROJECT_ROOT}/include
   ${PROJECT_ROOT}/thirdparty
   ${PROJECT_ROOT}/thirdparty/cgltf
@@ -40,7 +38,7 @@ set(GRAPICARCORE_INCLUDE
 )
 
 # 빌드 대상 라이브러리 소스 파일 목록
-set(GRAPICARCORE_LIBRARY_SOURCE_FILES
+set(EFFECTSONG_LIBRARY_SOURCE_FILES
    ${PROJECT_ROOT}/src/ArtShader.cpp
    ${PROJECT_ROOT}/src/Camera.cpp
    ${PROJECT_ROOT}/src/GLTFLoader.cpp
@@ -95,7 +93,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 # 라이브러리 소스 파일들을 exe(js)로 추가
 add_executable(
   ${WASM_OUTPUT_NAME}
-  ${GRAPICARCORE_LIBRARY_SOURCE_FILES}
+  ${EFFECTSONG_LIBRARY_SOURCE_FILES}
 )
 
 set_target_properties(${WASM_OUTPUT_NAME}
@@ -106,11 +104,11 @@ set_target_properties(${WASM_OUTPUT_NAME}
 target_include_directories(
   ${WASM_OUTPUT_NAME}
   PRIVATE
-  ${GRAPICARCORE_INCLUDE}
+  ${EFFECTSONG_INCLUDE}
 )
 
 target_link_libraries(
   ${WASM_OUTPUT_NAME} 
   PRIVATE
-  ${PROJECT_ROOT}/thirdparty/fftw3/lib/libfftw3.a
+  ${PROJECT_ROOT}/thirdparty/fftw3/lib/libfftw3f.a
 )

@@ -57,6 +57,8 @@ class Renderer {
 
   float getDiffuseIBLIntensity() const { return m_diffuseIBLIntensity; }
   void setDiffuseIBLIntensity(float diffuseIBLIntensity) { m_diffuseIBLIntensity = diffuseIBLIntensity; }
+
+  float getCurrentEnergy() const;
  private:
   Renderer();
   static Renderer* instance;

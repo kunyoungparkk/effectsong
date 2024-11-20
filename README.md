@@ -36,10 +36,8 @@ Visual Node, 편집 및 기타 UI, 커뮤니티 필요
 
 # 계획
 
-#### ~11.16
-엔진 세미 프로토 완성, wasm 빌드 및 바인딩
-
-#### ~11.17
-React와 연동
-
-#### 
+#### ~11.23
+엔진 세미 프로토 완성
+- wasm 바인딩 및 기본적 조작
+- Music Player, mp3/wav/flac/gltf import, Hierarchy/TRS/Light/Camera 조작, Shader Script Input
+- 엔진 안정화
