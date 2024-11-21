@@ -30,8 +30,8 @@ int initialHeight = 800;
 void windowTestProc()
 {
 	util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"));
-	util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/Lantern/glTF/Lantern.gltf"));
-	util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/WaterBottle/glTF/WaterBottle.gltf"));
+	// util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/Lantern/glTF/Lantern.gltf"));
+	// util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/WaterBottle/glTF/WaterBottle.gltf"));
 	Renderer::getInstance()->getSceneAt(0)->getNodeAt(0)->setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
 
 	Renderer::getInstance()->getSceneAt(1)->getNodeAt(0)->setPosition(glm::vec3(-2.0f, 0.0f, 0.0f));

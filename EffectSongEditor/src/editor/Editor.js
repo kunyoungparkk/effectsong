@@ -3,19 +3,14 @@ import useUtil from './Util.js'
 import MusicPlayer from './MusicPlayer/MusicPlayer.js';
 import ScriptEditor from './ScriptEditor/ScriptEditor.js';
 import { floor } from 'mathjs';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Modal, CircularProgress, Snackbar, Alert } from '@mui/material';
-import JSZip from 'jszip';
-import { rotationMatrix, multiply } from 'mathjs';
+//import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Modal, CircularProgress, Snackbar, Alert } from '@mui/material';
+//import JSZip from 'jszip';
+//import { rotationMatrix, multiply } from 'mathjs';
 export default function Editor() {
     const canvasRef = useRef(null);
     const canvasDivRef = useRef(null);
     const widthVal = useRef(1200);
     const heightVal = useRef(900);
-
-    //편집용 카메라
-    const camFront = useRef([0, 0, 0]);
-    const camLeft = useRef([0, 0, 0]);
-    const camSpeed = 0.1;
 
     /*emscripten - 엔진초기화 관련*/
     const [module, setModule] = useState(null);
@@ -23,7 +18,6 @@ export default function Editor() {
     const Util = useUtil();
 
     /*Music*/
-    const [musicTime, setMusicTime] = useState(0.0);
     const [vertexShader, setVertexShader] = useState(`//shader art sample
 #define PI 3.14159
 #define NUM_SEGMENTS 51.0
@@ -144,13 +138,6 @@ void main() {
     }, [module])
 
     useEffect(()=>{
-        if (!module) {
-            return;
-        }
-        module.loop(musicTime, true);
-    },[musicTime])
-
-    useEffect(()=>{
         if(!module){
             return;
         }
@@ -178,7 +165,7 @@ void main() {
             canvasRef.current.style.setProperty('width', `${floor(canvasDivRef.current.offsetHeight * engineAspectRatio)}px`);
         }
     }
-    let time = 0;
+
     const startEngine = () => {
         //module.canvas.addEventListener("webglcontextlost", (e) => { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
         module.initialize(widthVal.current, heightVal.current);
@@ -192,6 +179,7 @@ void main() {
         module.Renderer.getInstance().setActiveCamera(cam);
         module.Renderer.getInstance().getSceneAt(0).addNode(camNode);
         module.ArtShader.getInstance().setVertexShader(vertexShader);
+        module.loop(0.0, false);
     }
 
     return (
@@ -199,7 +187,7 @@ void main() {
             <div className="hierarchy">
             </div>
             <div className="musicPlayer">
-                <MusicPlayer setMusicTime={setMusicTime}/>
+                <MusicPlayer module={module}/>
             </div>
             <div className="engineDiv" ref={canvasDivRef}>
                 <canvas id="canvas" ref={canvasRef} style={{
