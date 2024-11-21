@@ -56,6 +56,7 @@ export default function RightTab({ onChangedIndex }) {
                 >
                     <StyledTab label="Node" />
                     <StyledTab label="Light" />
+                    <StyledTab label="Camera" />
                 </StyledTabs>
                 <Box sx={{ p: 3 }} />
             </Box>

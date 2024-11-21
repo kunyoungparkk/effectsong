@@ -55,7 +55,7 @@ private:
 	GLuint VAO, VBO;
 	GLenum m_primitiveMode = GL_POINTS;
 	std::vector<float> m_vertices;
-	int m_vertexCount = 40000;
+	int m_vertexCount = 10000;
 	GLuint m_artShaderProgram;
 
 	std::string fs_ = R"(#version 300 es

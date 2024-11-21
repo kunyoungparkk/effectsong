@@ -5,6 +5,7 @@ import ScriptEditor from "./ScriptEditor/ScriptEditor.js";
 import ShaderSettings from "./ScriptEditor/ShaderSettings.js";
 import LeftTab from "./LeftPanel/LeftTab.js";
 import RightTab from "./RightPanel/RightTab.js";
+import HierarchyView from "./LeftPanel/HierarchyView.js";
 import { floor } from "mathjs";
 //import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Modal, CircularProgress, Snackbar, Alert } from '@mui/material';
 //import JSZip from 'jszip';
@@ -23,11 +24,11 @@ export default function Editor() {
   const [hierarchyData, setHierarchyData] = useState([]);
   const [expandIdList, setExpandIdList] = useState([]);
   const [selectedNode, setSelectedNode] = useState(null);
-  useEffect(()=>{
-    if(module){
-        updateHierarchy();
+  useEffect(() => {
+    if (module) {
+      updateHierarchy();
     }
-  },[selectedNode]);
+  }, [selectedNode]);
 
   const getNodeById = (id) => {
     const idxList = id.split("-");
@@ -42,11 +43,11 @@ export default function Editor() {
   const updateHierarchy = () => {
     let data;
     let renderer = module.Renderer.getInstance();
-    for(let i=0; i<renderer.getSceneCount(); i++){
-        let scene = renderer.getSceneAt(i);
-        for(let j = 0; j < scene.getChildrenCount(); j++){
-            recursiveWriteNodes(scene.getChildAt(j), i.toString());
-        }
+    for (let i = 0; i < renderer.getSceneCount(); i++) {
+      let scene = renderer.getSceneAt(i);
+      for (let j = 0; j < scene.getChildrenCount(); j++) {
+        recursiveWriteNodes(scene.getChildAt(j), i+'-'+j);
+      }
     }
     setHierarchyData(data);
   };
@@ -55,7 +56,6 @@ export default function Editor() {
     let currentData = {
       id: id,
       name: curNode.getName(),
-      visible: curNode.getVisible(),
       isSelected: false,
       children: [],
     };
@@ -195,6 +195,12 @@ export default function Editor() {
     <div className="editor">
       <div className="hierarchy">
         <LeftTab onChangedIndex={setLeftTabIndex} />
+        <HierarchyView
+          hierarchyData={hierarchyData}
+          selectCallback={onSelectHierarchyObj}
+          expandIdList={expandIdList}
+          setExpandIdList={setExpandIdList}
+        />
       </div>
       <ShaderSettings module={module} />
       <div className="engineDiv" id="engineDiv" ref={canvasDivRef}>
@@ -209,6 +215,7 @@ export default function Editor() {
       </div>
       <div className="musicPlayer">
         <MusicPlayer module={module} />
+        <div style={{width: "90px", height:"80px"}}></div>
       </div>
       <div className="attribute">
         <RightTab onChangedIndex={setRightTabIndex} />
