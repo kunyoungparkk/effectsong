@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import Editor, { loader } from "@monaco-editor/react";
+import { Box} from "@mui/material";
+import ShaderSettings from './ShaderSettings';
 
-function ScriptEditor({vertexShader, setVertexShader}) {
-    const glslCode = vertexShader;
-
+function ScriptEditor({ module, vertexShader, setVertexShader}) {
     useEffect(() => {
         loader.init().then((monaco) => {
             // 언어 등록
@@ -80,25 +80,48 @@ function ScriptEditor({vertexShader, setVertexShader}) {
                     { open: "'", close: "'" },
                 ],
             });
+
+            monaco.editor.defineTheme("transparentTheme", {
+                base: "vs-dark",
+                inherit: true,
+                rules: [],
+                colors: {
+                    "editor.background": "#00000000", // 완전 투명
+                },
+            });
         });
     }, []);
 
     // 에디터 렌더링
     return (
-        <Editor
-            height="90vh"
-            defaultLanguage="glsles"
-            defaultValue={glslCode}
-            theme="vs-dark"
-            onChange={(value)=>{
-                setVertexShader(value);
+        <Box
+            sx={{
+                position: "fixed",
+                top: "0px",
+                left: "300px",
+                width: "calc(100% -  650px)",
+                height: "calc(100vh - 60px)",
+                backgroundColor: "rgba(0.0, 0, 0, 0.2)",
+                boxShadow: 3,
+                pointerEvents: "auto"
             }}
-            options={{
-                fontSize: 14,
-                minimap: { enabled: false },
-                readOnly: false,
-            }}
-        />
+        >
+            <ShaderSettings module={module}/>
+            <Editor
+                height="calc(100% - 50px)"
+                defaultLanguage="glsles"
+                defaultValue={vertexShader}
+                theme="transparentTheme"
+                onChange={(value) => {
+                    setVertexShader(value);
+                }}
+                options={{
+                    fontSize: 14,
+                    minimap: { enabled: false },
+                    readOnly: false,
+                }}
+            />
+        </Box>
     );
 }
 

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import useUtil from './Util.js'
 import MusicPlayer from './MusicPlayer/MusicPlayer.js';
 import ScriptEditor from './ScriptEditor/ScriptEditor.js';
+import ShaderActiveButton from './ScriptEditor/ShaderActiveButton.js'
 import { floor } from 'mathjs';
 //import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Modal, CircularProgress, Snackbar, Alert } from '@mui/material';
 //import JSZip from 'jszip';
@@ -14,6 +15,7 @@ export default function Editor() {
 
     /*emscripten - 엔진초기화 관련*/
     const [module, setModule] = useState(null);
+    const [showScript, setShowScript] = useState(true);
 
     const Util = useUtil();
 
@@ -123,7 +125,7 @@ void main() {
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keyup', handleKeyUp);
             window.removeEventListener('resize', handleResize);
-            console.log('웹어셈블리 모듈 해제');
+            console.log('deinitialize');
             //종료 시 보유한 엔진 스마트포인터 및 addFunction 삭제 필요
             window.EFFECTSONG_CORE.deInitialize();
         };
@@ -137,17 +139,19 @@ void main() {
         startEngine();
     }, [module])
 
-    useEffect(()=>{
-        if(!module){
+    useEffect(() => {
+        if (!module) {
             return;
         }
         let success = module.ArtShader.getInstance().setVertexShader(vertexShader);
         console.log(success);
-    },[vertexShader])
-   
+    }, [vertexShader])
+
     //엔진 초기화 시점에 호출
     function onEngineInitialized() {
         window.EFFECTSONG_CORE.canvas = document.getElementById('canvas');
+        window.EFFECTSONG_CORE.initialize(widthVal.current, heightVal.current);
+        onResizeEngine();
         setModule(window.EFFECTSONG_CORE);
     }
 
@@ -168,8 +172,6 @@ void main() {
 
     const startEngine = () => {
         //module.canvas.addEventListener("webglcontextlost", (e) => { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
-        module.initialize(widthVal.current, heightVal.current);
-        onResizeEngine();
         module.loadGLTFData(module.getRootPath() + "res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf");
         module.Renderer.getInstance().setAudioFile(module.getRootPath() + "res/music/test.wav");
         let camNode = new module.Node(module.Renderer.getInstance().getSceneAt(0), null);
@@ -186,16 +188,19 @@ void main() {
         <div className="editor">
             <div className="hierarchy">
             </div>
-            <div className="musicPlayer">
-                <MusicPlayer module={module}/>
-            </div>
-            <div className="engineDiv" ref={canvasDivRef}>
+            <div className="engineDiv" id="engineDiv" ref={canvasDivRef}>
                 <canvas id="canvas" ref={canvasRef} style={{
                     verticalAlign: "bottom"
                 }} className="engineCanvas"></canvas>
+                <ShaderActiveButton scriptVisible={showScript} setScriptVisible={setShowScript} />
+                {showScript ?
+                    <ScriptEditor module={module} vertexShader={vertexShader} setVertexShader={setVertexShader}></ScriptEditor>
+                    : <></>}
+            </div>
+            <div className="musicPlayer">
+                <MusicPlayer module={module} />
             </div>
             <div className="attribute"></div>
-            <ScriptEditor vertexShader={vertexShader} setVertexShader={setVertexShader}></ScriptEditor>
         </div>
     );
 }

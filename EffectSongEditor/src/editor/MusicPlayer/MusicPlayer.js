@@ -1,62 +1,70 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
+import Player from './react-material-music-player/dist/components/Player'
+import { Track, PlayerInterface } from './react-material-music-player/dist/index';
+import ThemeProvider from "@mui/material/styles/ThemeProvider";
+import { createTheme } from '@mui/material/styles';
+import { green, purple } from '@mui/material/colors';
 
 const MusicPlayer = ({ module }) => {
-  const audioRef = useRef(null); // audio 태그 참조
-  const [isPlaying, setIsPlaying] = useState(false); // 재생 상태
-  const isPlayRef = useRef(false);
-  const [currentTime, setCurrentTime] = useState(0); // 현재 재생 시간
-  const [duration, setDuration] = useState(0); // 총 재생 시간
+  const currentTime = useRef(0.0);
+  const onStateChanged= (e) =>{
+    console.log(e);
+  }
+  useEffect(() => {
+    let tracks = [new Track(
+      "test", null, 'test', 'test', 'test.wav'
+    )];
+    PlayerInterface.setPlaylist(tracks);
+    PlayerInterface.subscribe(onStateChanged);
+  }, [])
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (audioRef.current && module) {
-        module.loop(audioRef.current.currentTime, isPlayRef.current);
+      if (module) {
+        const state = PlayerInterface.getState();
+        module.loop(state.currentTime, state.mediaState === "PLAYING");
       }
     }, 1000.0 / 60.0);
   }, [module]);
 
-  const handlePlayPause = () => {
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
-    }
-    isPlayRef.current = !isPlaying;
-    setIsPlaying(!isPlaying);
-  };
-
-  const handleTimeUpdate = () => {
-    setCurrentTime(audioRef.current.currentTime);
-  };
-
-  const handleLoadedMetadata = () => {
-    setDuration(audioRef.current.duration);
-  };
-
-  const handleSeek = (e) => {
-    const seekTime = (e.target.value / 100) * duration;
-    audioRef.current.currentTime = seekTime;
-    setCurrentTime(seekTime);
-  };
-
+  const theme = createTheme({
+    palette: {
+      primary: {
+        main: purple[500],
+      },
+      secondary: {
+        main: green[500],
+      },
+      background: {
+        paper: 'black'
+      },
+      action: {
+        active: "#fff",
+        hover: "rgba(255, 255, 255, 0.08)",
+        hoverOpacity: 0.08,
+        selected: "rgba(255, 255, 255, 0.16)",
+        selectedOpacity: 0.16,
+      },
+      text: {
+        disabled: "rgba(255, 255, 255, 0.5)",
+        icon: "rgba(255, 255, 255, 0.5)",
+        primary: "#fff",
+        secondary: "#AAB4BE",
+      },
+    },
+  });
   return (
-    <div>
-      <audio
-        ref={audioRef}
-        src="test.wav"
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadedMetadata}
-      ></audio>
-      <button onClick={handlePlayPause}>
-        {isPlaying ? "Pause" : "Play"}
-      </button>
-      <input
-        type="range"
-        value={(currentTime / duration) * 100 || 0}
-        onChange={handleSeek}
+    <ThemeProvider theme={theme}>
+      <Player
+        sx={{
+          width: "100%",
+          height: "100%",
+          position: "static",
+          boxSizing: "border-box",
+          overflow: "hidden"
+        }}
       />
-      <span>{Math.floor(currentTime)}s / {Math.floor(duration)}s</span>
-    </div>
+    </ThemeProvider>
   );
 };
 

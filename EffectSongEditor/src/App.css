@@ -1,13 +1,13 @@
 @import url(https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css);
 .engineDiv{
   background-color:#505050;
-  height: calc(100vh - 50px);
+  height: calc(100vh - 60px);
   width: calc(100% -  650px);
   float: left;
   text-align: center;
 }
 .musicPlayer{
-  height: 50px;
+  height: 60px;
   width: calc(100% -  650px);
   float: left;
 }
@@ -35,6 +35,6 @@
   top: 0;
   right: 0;
 }
-.MuiOutlinedInput-notchedOutline {
-  border-color: lightgrey !important;
+.monaco-container {
+  background-color: rgba(0, 0, 0, 0.5); /* 반투명 검정 */
 }
