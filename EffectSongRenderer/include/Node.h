@@ -42,6 +42,7 @@ public:
 
 	Node* getChildAt(int index);
 	Node* getChildByName(std::string name);
+	int getChildrenCount() { return m_children.size(); }
 private:
 	Node* m_parent;
 	Scene* m_scene;

@@ -1,13 +1,13 @@
 @import url(https://cdn.jsdelivr.net/gh/moonspam/NanumSquare@2.0/nanumsquare.css);
 .engineDiv{
-  background-color:#505050;
-  height: calc(100vh - 60px);
+  background-color:#868686;
+  height: calc(100vh - 130px);
   width: calc(100% -  650px);
   float: left;
   text-align: center;
 }
 .musicPlayer{
-  height: 60px;
+  height: 90px;
   width: calc(100% -  650px);
   float: left;
 }
@@ -18,7 +18,7 @@
   width: 50px;
 }
 .hierarchy{
-  background-color: #2e2e2e;
+  background-color: #000000;
   font-family: 'NanumSquare';
   color: white;
   height: 100vh;
@@ -26,7 +26,7 @@
   float: left;
 }
 .attribute{
-  background-color: #2e2e2e;
+  background-color: #000000;
   font-family: 'NanumSquare';
   color: white;
   height: 100vh;

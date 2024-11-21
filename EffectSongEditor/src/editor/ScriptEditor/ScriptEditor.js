@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import Editor, { loader } from "@monaco-editor/react";
 import { Box} from "@mui/material";
-import ShaderSettings from './ShaderSettings';
 
 function ScriptEditor({ module, vertexShader, setVertexShader}) {
     useEffect(() => {
@@ -97,16 +96,15 @@ function ScriptEditor({ module, vertexShader, setVertexShader}) {
         <Box
             sx={{
                 position: "fixed",
-                top: "0px",
+                top: "40px",
                 left: "300px",
                 width: "calc(100% -  650px)",
-                height: "calc(100vh - 60px)",
+                height: "calc(100vh - 130px)",
                 backgroundColor: "rgba(0.0, 0, 0, 0.2)",
                 boxShadow: 3,
                 pointerEvents: "auto"
             }}
         >
-            <ShaderSettings module={module}/>
             <Editor
                 height="calc(100% - 50px)"
                 defaultLanguage="glsles"

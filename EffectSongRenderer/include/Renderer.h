@@ -36,6 +36,7 @@ class Renderer {
   void removeScene(Scene* scene);
   Scene* getSceneAt(int index);
   Scene* getSceneByName(std::string name);
+  int getSceneCount() { return m_scenes.size(); }
 
   void setActiveCamera(Camera* camera);
   Camera* getActiveCamera();

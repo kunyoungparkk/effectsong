@@ -266,7 +266,8 @@ EMSCRIPTEN_BINDINGS(GLTF){
     .function("getName", &Node::getName, allow_raw_pointers())
     .function("setName", &Node::setName, allow_raw_pointers())
     .function("getChildAt", &Node::getChildAt, allow_raw_pointers())
-    .function("getChildByName", &Node::getChildByName, allow_raw_pointers());
+    .function("getChildByName", &Node::getChildByName, allow_raw_pointers())
+	.function("getChildrenCount", &Node::getChildrenCount);
   class_<Camera>("Camera")
 	.constructor<Node*>()
 	.property("aspectRatio", &Camera::aspectRatio)
@@ -291,6 +292,7 @@ EMSCRIPTEN_BINDINGS(SINGLETON){
     .class_function("getInstance", &Renderer::getInstance, allow_raw_pointers())
     .function("getSceneAt", &Renderer::getSceneAt, allow_raw_pointers())
     .function("getSceneByName", &Renderer::getSceneByName, allow_raw_pointers())
+	.function("getSceneCount", &Renderer::getSceneCount)
     .function("setAudioFile", &Renderer::setAudioFile, allow_raw_pointers())
     .function("setActiveCamera", &Renderer::setActiveCamera , allow_raw_pointers())
     .function("getCurrentEnergy", &Renderer::getCurrentEnergy);
