@@ -116,7 +116,7 @@ void main() {
         }}
       >
         <Grid item xs={0.3} key="primitive-select-icon">
-          <CategoryIcon sx={{ fontSize: "20px", paddingTop: "7px" }} />
+          <CategoryIcon sx={{ fontSize: "20px", paddingTop: "7px", color:"#868686" }} />
         </Grid>
         <Grid item xs={1.3} key="primitive-select">
           <NativeSelect
@@ -131,6 +131,7 @@ void main() {
               module.ArtShader.getInstance().setPrimitiveMode(e.target.value);
               setPrimitiveMode(e.target.value);
             }}
+            style={{color:"#868686"}}
           >
             {primitiveTypes.map((value, index) => {
               return (
@@ -142,7 +143,7 @@ void main() {
           </NativeSelect>
         </Grid>
         <Grid item xs={0.3} key="vertex-count-icon">
-          <ScatterPlotIcon sx={{ fontSize: "20px", paddingTop: "7px" }} />
+          <ScatterPlotIcon sx={{ fontSize: "20px", paddingTop: "7px", color:"#868686" }} />
         </Grid>
         <Grid item xs={2.0} key="vertex-count">
           <TextField
@@ -156,22 +157,22 @@ void main() {
                 setVertexCount(intValue);
               }
             }}
+            inputProps={{style:{color: "#868686"}}}
             color="secondary"
           />
         </Grid>
-
         <Grid item xs={1.0} key="script-visible-button">
           <IconButton
             aria-label="shader-visible"
             onClick={() => {
               setScriptVisible(!scriptVisible);
             }}
-            style={{paddingTop:4}} 
+            style={{paddingTop:4, color:"#868686"}} 
           >
             {scriptVisible ? (
-              <VisibilityIcon/>
+              <VisibilityIcon sx={{color:"#868686"}}/>
             ) : (
-              <VisibilityOffIcon/>
+              <VisibilityOffIcon sx={{color:"#868686"}}/>
             )}
           </IconButton>
         </Grid>

@@ -9,7 +9,7 @@
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
-#include <emscripten/html5.h>
+//#include <emscripten/html5.h>
 #include <emscripten/bind.h>
 using namespace emscripten;
 #endif
@@ -225,11 +225,24 @@ int main(int argc, char* argv[]) {
 }
 
 #elif defined(__EMSCRIPTEN__)
+float (*jsGetCurrentTime)(void) = nullptr;
+bool (*jsGetIsPlay)(void) = nullptr;
+void loopWeb() {
+	float musicTime = jsGetCurrentTime();
+	bool isPlay = jsGetIsPlay();
+	loop(musicTime, isPlay);
+}
+void initializeWeb(int width, int height, int getCurrentTimePtr, int getIsPlayPtr) {
+	jsGetCurrentTime = (float(*)(void))getCurrentTimePtr;
+	jsGetIsPlay = (bool(*)(void))getIsPlayPtr;
+	initialize(width, height);
+	emscripten_set_main_loop(loopWeb, TARGET_FPS, false);
+}
 std::string getRootPath() {
 	return EFFECTSONG_ROOT;
 }
 EMSCRIPTEN_BINDINGS(CORE){
-  emscripten::function("initialize", &initialize);
+  emscripten::function("initialize", &initializeWeb);
   emscripten::function("deInitialize", &deInitialize);
   emscripten::function("loop", &loop);
   emscripten::function("loadGLTFData", &util::loadGLTFData, allow_raw_pointers());
@@ -332,9 +345,9 @@ EMSCRIPTEN_BINDINGS(BIND_GLM){
 #endif
 
 void initialize(int width, int height) {
-#ifdef __EMSCRIPTEN__
-	emscripten_html5_remove_all_event_listeners();
-#endif
+//#ifdef __EMSCRIPTEN__
+//	emscripten_html5_remove_all_event_listeners();
+//#endif
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("SDL Initialization Fail: %s\n", SDL_GetError());
 		exit(0);

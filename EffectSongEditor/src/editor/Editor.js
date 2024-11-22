@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import useUtil from "./Util.js";
-import MusicPlayer from "./MusicPlayer/MusicPlayer.js";
+import AudioPlayer from "react-h5-audio-player";
+import "react-h5-audio-player/lib/styles.css";
 import ScriptEditor from "./ScriptEditor/ScriptEditor.js";
 import ShaderSettings from "./ScriptEditor/ShaderSettings.js";
 import LeftTab from "./LeftPanel/LeftTab.js";
@@ -12,6 +13,7 @@ import { floor } from "mathjs";
 //import { rotationMatrix, multiply } from 'mathjs';
 export default function Editor() {
   const [module, setModule] = useState(null);
+  const audioRef = useRef(null);
   const canvasRef = useRef(null);
   const canvasDivRef = useRef(null);
   const widthVal = useRef(1200);
@@ -46,7 +48,7 @@ export default function Editor() {
     for (let i = 0; i < renderer.getSceneCount(); i++) {
       let scene = renderer.getSceneAt(i);
       for (let j = 0; j < scene.getChildrenCount(); j++) {
-        recursiveWriteNodes(scene.getChildAt(j), i+'-'+j);
+        recursiveWriteNodes(scene.getChildAt(j), i + "-" + j);
       }
     }
     setHierarchyData(data);
@@ -143,7 +145,10 @@ export default function Editor() {
   //엔진 초기화 시점에 호출
   function onEngineInitialized() {
     window.EFFECTSONG_CORE.canvas = document.getElementById("canvas");
-    window.EFFECTSONG_CORE.initialize(widthVal.current, heightVal.current);
+    window.EFFECTSONG_CORE.initialize(widthVal.current, heightVal.current,
+      window.EFFECTSONG_CORE.addFunction(function(){return audioRef.current.audio.current.currentTime;}, 'f'),
+      window.EFFECTSONG_CORE.addFunction(function(){return audioRef.current.isPlaying();}, 'i'),
+    );
     onResizeEngine();
     setModule(window.EFFECTSONG_CORE);
   }
@@ -214,8 +219,14 @@ export default function Editor() {
         ></canvas>
       </div>
       <div className="musicPlayer">
-        <MusicPlayer module={module} />
-        <div style={{width: "90px", height:"80px"}}></div>
+        <AudioPlayer
+          ref={audioRef}
+          volume={0.8}
+          showSkipControls
+          progressUpdateInterval={100}
+          src="test.wav"
+        />
+        {/* <div style={{ width: "90px", height: "80px" }}></div> */}
       </div>
       <div className="attribute">
         <RightTab onChangedIndex={setRightTabIndex} />

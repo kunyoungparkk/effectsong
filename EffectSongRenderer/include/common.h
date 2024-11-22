@@ -1,7 +1,8 @@
 #pragma once
 #define _CRT_SECURE_NO_WARNINGS
 #define GLM_ENABLE_EXPERIMENTAL
-#define FIXED_DELTATIME (1.0f/60.0f)
+#define TARGET_FPS (60)
+#define FIXED_DELTATIME (1.0f/TARGET_FPS.0f)
 #ifdef _WIN64
 #include "GL/glew.h"
 #define EFFECTSONG_ROOT "../../"
