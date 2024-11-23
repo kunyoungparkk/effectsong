@@ -27,75 +27,76 @@ Material::Material(cgltf_material* material) : m_material(material) {
 }
 
 void Material::bind(GLuint shaderProgram) {
-  //초기화시 텍스처(2) + IBL 텍스처(spec, diffuse, ggx) + sound texture(2)를 이미 추가한 뒤
-  int textureIndex = 7;
-  
+  //초기화시 텍스처(1) + IBL 텍스처(spec, diffuse, ggx) + sound texture(2)를 이미 추가한 뒤
+  int textureIndex = 6;
+  if (m_shaderProgram != shaderProgram) {
+      m_shaderProgram = shaderProgram;
+      m_baseColorTexLoc = glGetUniformLocation(shaderProgram, "baseColorTexture");
+      m_useBaseColorTexLoc = glGetUniformLocation(shaderProgram, "useBaseColorTexture");
+      m_metallicRoughnessTexLoc = glGetUniformLocation(shaderProgram, "metallicRoughnessTexture");
+      m_useMetallicRoughnessTexLoc = glGetUniformLocation(shaderProgram, "useMetallicRoughnessTexture");
+      m_emissiveTexLoc = glGetUniformLocation(shaderProgram, "emissiveTexture");
+      m_useEmissiveTexLoc = glGetUniformLocation(shaderProgram, "useEmissiveTexture");
+      m_normalTexLoc = glGetUniformLocation(shaderProgram, "normalTexture");
+      m_useNormalTexLoc = glGetUniformLocation(shaderProgram, "useNormalTexture");
+      m_occlusionTexLoc = glGetUniformLocation(shaderProgram, "occlusionTexture");
+      m_useOcclusionTexLoc = glGetUniformLocation(shaderProgram, "useOcclusionTexture");
+      m_baseColorLoc = glGetUniformLocation(shaderProgram, "material.baseColor");
+      m_specularColorLoc = glGetUniformLocation(shaderProgram, "material.specularColor");
+      m_emissionColorLoc = glGetUniformLocation(shaderProgram, "material.emissionColor");
+      m_metallicLoc = glGetUniformLocation(shaderProgram, "material.metallic");
+      m_roughnessLoc = glGetUniformLocation(shaderProgram, "material.roughness");
+  }
+
   if (m_baseColorTexture) {
       m_baseColorTexture->bind(textureIndex);
-      GLint baseColorTexLoc =
-          glGetUniformLocation(shaderProgram, "baseColorTexture");
-      glUniform1i(baseColorTexLoc, textureIndex);
+      glUniform1i(m_baseColorTexLoc, textureIndex);
       textureIndex++;
-
-      glUniform1i(glGetUniformLocation(shaderProgram, "useBaseColorTexture"), GL_TRUE);
+      glUniform1i(m_useBaseColorTexLoc, GL_TRUE);
   }
   else {
-      glUniform1i(glGetUniformLocation(shaderProgram, "useBaseColorTexture"), GL_FALSE);
+      glUniform1i(m_useBaseColorTexLoc, GL_FALSE);
   }
   if (m_metallicRoughnessTexture) {
       m_metallicRoughnessTexture->bind(textureIndex);
-      GLint metallicRoughnessTexLoc = glGetUniformLocation(shaderProgram, "metallicRoughnessTexture");
-      glUniform1i(metallicRoughnessTexLoc, textureIndex);
+      glUniform1i(m_metallicRoughnessTexLoc, textureIndex);
       textureIndex++;
-      glUniform1i(glGetUniformLocation(shaderProgram, "useMetallicRoughnessTexture"), GL_TRUE);
+      glUniform1i(m_useMetallicRoughnessTexLoc, GL_TRUE);
   }
   else {
-      glUniform1i(glGetUniformLocation(shaderProgram, "useMetallicRoughnessTexture"), GL_FALSE);
+      glUniform1i(m_useMetallicRoughnessTexLoc, GL_FALSE);
   }
   if (m_emissiveTexture) {
       m_emissiveTexture->bind(textureIndex);
-      GLint emissiveTexLoc = glGetUniformLocation(shaderProgram, "emissiveTexture");
-      glUniform1i(emissiveTexLoc, textureIndex);
+      glUniform1i(m_emissiveTexLoc, textureIndex);
       textureIndex++;
-      glUniform1i(glGetUniformLocation(shaderProgram, "useEmissiveTexture"), GL_TRUE);
+      glUniform1i(m_useEmissiveTexLoc, GL_TRUE);
   }
   else {
-      glUniform1i(glGetUniformLocation(shaderProgram, "useEmissiveTexture"), GL_FALSE);
+      glUniform1i(m_useEmissiveTexLoc, GL_FALSE);
   }
   if (m_normalTexture) {
       m_normalTexture->bind(textureIndex);
-      GLint normalTexLoc = glGetUniformLocation(shaderProgram, "normalTexture");
-      glUniform1i(normalTexLoc, textureIndex);
+      glUniform1i(m_normalTexLoc, textureIndex);
       textureIndex++;
-      glUniform1i(glGetUniformLocation(shaderProgram, "useNormalTexture"), GL_TRUE);
+      glUniform1i(m_useNormalTexLoc, GL_TRUE);
   }
   else {
-      glUniform1i(glGetUniformLocation(shaderProgram, "useNormalTexture"), GL_FALSE);
+      glUniform1i(m_useNormalTexLoc, GL_FALSE);
   }
   if (m_occlusionTexture) {
       m_occlusionTexture->bind(textureIndex);
-      GLint occlusionTexLoc = glGetUniformLocation(shaderProgram, "occlusionTexture");
-      glUniform1i(occlusionTexLoc, textureIndex);
+      glUniform1i(m_occlusionTexLoc, textureIndex);
       textureIndex++;
-      glUniform1i(glGetUniformLocation(shaderProgram, "useOcclusionTexture"), GL_TRUE);
+      glUniform1i(m_useOcclusionTexLoc, GL_TRUE);
   }
   else {
-      glUniform1i(glGetUniformLocation(shaderProgram, "useOcclusionTexture"), GL_FALSE);
+      glUniform1i(m_useOcclusionTexLoc, GL_FALSE);
   }
 
-  GLint baseColorLoc = glGetUniformLocation(shaderProgram, "material.baseColor");
-  glUniform4fv(baseColorLoc, 1, m_material->pbr_metallic_roughness.base_color_factor);
-
-  GLint specularColorLoc = glGetUniformLocation(shaderProgram, "material.specularColor");
-  glUniform3fv(specularColorLoc, 1, m_material->specular.specular_color_factor);
-
-  GLint emissionColorLoc = glGetUniformLocation(shaderProgram, "material.emissionColor");
-  glUniform3fv(emissionColorLoc, 1, m_material->emissive_factor);
-  
-  GLint metallicLoc = glGetUniformLocation(shaderProgram, "material.metallic");
-  glUniform1f(metallicLoc, m_material->pbr_metallic_roughness.metallic_factor);
-  
-  GLint roughnessLoc = glGetUniformLocation(shaderProgram, "material.roughness");
-  glUniform1f(roughnessLoc, m_material->pbr_metallic_roughness.roughness_factor);
-
+  glUniform4fv(m_baseColorLoc, 1, m_material->pbr_metallic_roughness.base_color_factor);
+  glUniform3fv(m_specularColorLoc, 1, m_material->specular.specular_color_factor);
+  glUniform3fv(m_emissionColorLoc, 1, m_material->emissive_factor);
+  glUniform1f(m_metallicLoc, m_material->pbr_metallic_roughness.metallic_factor);
+  glUniform1f(m_roughnessLoc, m_material->pbr_metallic_roughness.roughness_factor);
 }

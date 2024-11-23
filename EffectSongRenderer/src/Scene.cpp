@@ -144,7 +144,7 @@ void Scene::removeLight(Light* light)
 	lights.remove(light);
 }
 
-Node* Scene::getNodeAt(int index)
+Node* Scene::getChildAt(int index)
 {
 	if (index >= m_nodes.size()) {
 		return nullptr;
@@ -154,7 +154,7 @@ Node* Scene::getNodeAt(int index)
 	return *iter;
 }
 
-Node* Scene::getNodeByName(std::string name)
+Node* Scene::getChildByName(std::string name)
 {
 	for (auto iter = m_nodes.begin(); iter != m_nodes.end(); iter++) {
 		if (name == (*iter)->getName()) {

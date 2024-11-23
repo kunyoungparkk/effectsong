@@ -41,24 +41,16 @@ const CustomTreeItem = React.forwardRef(function MyTreeItem(props, ref) {
 
 const HierarchyView = ({ hierarchyData, selectCallback, expandIdList, setExpandIdList }) => {
   const [selectedItems, setSelectedItems] = useState([]);
-  const getStyle = (isSelected, isVisible) => {
+  const getStyle = (isSelected) => {
     if (isSelected) {
-      if (isVisible) {
-        return { backgroundColor: "purple", color: "white" };
-      } else {
-        return { backgroundColor: "purple", color: "grey" };
-      }
-    } else {
-      if (isVisible) {
-        return { backgroundColor: "#2e2e2e", color: "white" };
-      } else {
-        return { backgroundColor: "#2e2e2e", color: "grey" };
-      }
+        return { color: "white" };
+    }else {
+      return { color: "#868686" };
     }
   }
   const renderTree = (curNode) => (
-    <CustomTreeItem itemId={curNode.id} key={curNode.id} label={curNode.name ? curNode.name : ""}
-      style={getStyle(curNode.isSelected, curNode.visible)}
+    <CustomTreeItem itemId={curNode.id} key={curNode.id} label={curNode.name ? curNode.name : "Unnamed"}
+      style={getStyle(curNode.isSelected)}
     >
       {Array.isArray(curNode.children)
         ? curNode.children.map((node) => renderTree(node))
@@ -92,7 +84,8 @@ const HierarchyView = ({ hierarchyData, selectCallback, expandIdList, setExpandI
       expandedItems={expandIdList}
       onKeyDown={(e) => handleKeyDown(e)}
     >
-      {hierarchyData.length !== 0 ? renderTree(hierarchyData) : null}
+      {hierarchyData.map((node)=>renderTree(node))}
+      {/* {hierarchyData.length !== 0 ? renderTree(hierarchyData) : null} */}
     </SimpleTreeView>
   );
 };

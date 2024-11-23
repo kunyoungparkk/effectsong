@@ -79,7 +79,6 @@ private:
 	std::string vsHeader_ = R"(#version 300 es
 	precision highp float;
 	layout (location = 0) in float vertexId;
-	uniform vec2 touch;
 	uniform float volume;
 	uniform vec2 resolution;
 	uniform vec4 background;
@@ -89,6 +88,7 @@ private:
 	uniform sampler2D sound2;
 	uniform bool isStereo;
 	out vec4 v_color;
+	//uniform vec2 touch;
 	//uniform vec2 mouse;
 	//uniform sampler2D volume;
 	//uniform sampler2D floatSound;

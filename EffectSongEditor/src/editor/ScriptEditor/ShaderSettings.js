@@ -4,6 +4,7 @@ import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
 import CategoryIcon from "@mui/icons-material/Category";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import LightModeIcon from '@mui/icons-material/LightMode';
 import ScriptEditor from "./ScriptEditor";
 import useUtil from "../Util";
 
@@ -18,8 +19,9 @@ const ShaderSettings = ({ module }) => {
     "TRI_FAN",
   ];
   const [primitiveMode, setPrimitiveMode] = useState(0);
-  const [vertexCount, setVertexCount] = useState(10000);
   const [scriptVisible, setScriptVisible] = useState(true);
+  const [vertexCount, setVertexCount] = useState(0);
+  const [diffuseIBLIntensity, setDiffuseIBLIntensity] = useState(0.0);
   const Util = useUtil();
 
   const [vertexShader, setVertexShader] = useState(`//shader art sample
@@ -100,6 +102,7 @@ void main() {
     setPrimitiveMode(artShader.getPrimitiveMode());
     setVertexCount(artShader.getVertexCount());
     artShader.setVertexShader(vertexShader);
+    setDiffuseIBLIntensity(module.Renderer.getInstance().getDiffuseIBLIntensity());
   }, [module]);
   return (
     <div>
@@ -115,8 +118,23 @@ void main() {
           float: "left",
         }}
       >
+        <Grid item xs={0.7} key="script-visible-button">
+          <IconButton
+            aria-label="shader-visible"
+            onClick={() => {
+              setScriptVisible(!scriptVisible);
+            }}
+            style={{ paddingTop: 4, color: "#868686" }}
+          >
+            {scriptVisible ? (
+              <VisibilityIcon sx={{ color: "#868686" }} />
+            ) : (
+              <VisibilityOffIcon sx={{ color: "#868686" }} />
+            )}
+          </IconButton>
+        </Grid>
         <Grid item xs={0.3} key="primitive-select-icon">
-          <CategoryIcon sx={{ fontSize: "20px", paddingTop: "7px", color:"#868686" }} />
+          <CategoryIcon sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }} />
         </Grid>
         <Grid item xs={1.3} key="primitive-select">
           <NativeSelect
@@ -127,11 +145,10 @@ void main() {
             }}
             color="secondary"
             onChange={(e) => {
-              console.log(e.target.value);
               module.ArtShader.getInstance().setPrimitiveMode(e.target.value);
               setPrimitiveMode(e.target.value);
             }}
-            style={{color:"#868686"}}
+            style={{ color: "#868686" }}
           >
             {primitiveTypes.map((value, index) => {
               return (
@@ -143,7 +160,7 @@ void main() {
           </NativeSelect>
         </Grid>
         <Grid item xs={0.3} key="vertex-count-icon">
-          <ScatterPlotIcon sx={{ fontSize: "20px", paddingTop: "7px", color:"#868686" }} />
+          <ScatterPlotIcon sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }} />
         </Grid>
         <Grid item xs={2.0} key="vertex-count">
           <TextField
@@ -157,24 +174,28 @@ void main() {
                 setVertexCount(intValue);
               }
             }}
-            inputProps={{style:{color: "#868686"}}}
+            inputProps={{ style: { color: "#868686" } }}
             color="secondary"
           />
         </Grid>
-        <Grid item xs={1.0} key="script-visible-button">
-          <IconButton
-            aria-label="shader-visible"
-            onClick={() => {
-              setScriptVisible(!scriptVisible);
+        <Grid item xs={0.3} key="diffuse-ibl-intensity-icon">
+          <LightModeIcon sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }} />
+        </Grid>
+        <Grid item xs={2.0} key="diffuse-ibl-intensity">
+          <TextField
+            type="number"
+            variant="standard"
+            value={diffuseIBLIntensity}
+            onChange={(e) => {
+              if (Util.isValidNum(e.target.value)) {
+                const floatValue = parseFloat(e.target.value);
+                module.Renderer.getInstance().setDiffuseIBLIntensity(floatValue);
+                setDiffuseIBLIntensity(floatValue);
+              }
             }}
-            style={{paddingTop:4, color:"#868686"}} 
-          >
-            {scriptVisible ? (
-              <VisibilityIcon sx={{color:"#868686"}}/>
-            ) : (
-              <VisibilityOffIcon sx={{color:"#868686"}}/>
-            )}
-          </IconButton>
+            inputProps={{ style: { color: "#868686" } }}
+            color="secondary"
+          />
         </Grid>
       </Grid>
 

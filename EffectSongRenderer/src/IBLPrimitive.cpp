@@ -31,12 +31,13 @@ IBLPrimitive::IBLPrimitive(std::vector<glm::vec3>& vertices, std::vector<GLuint>
 	glBindVertexArray(0);
 }
 
-void IBLPrimitive::render(GLuint shaderProgram) {
+void IBLPrimitive::render() {
 	glBindVertexArray(VAO);
-
-	GLint specularIBLTexLoc = glGetUniformLocation(shaderProgram, "backgroundCubeMap");
-	glUniform1i(specularIBLTexLoc, 2);
-	
-	// Draw
 	glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0);
+}
+
+void IBLPrimitive::bind(GLuint shaderProgram)
+{
+	GLint m_specularIBLTexLoc = glGetUniformLocation(shaderProgram, "backgroundCubeMap");
+	glUniform1i(m_specularIBLTexLoc, 1);
 }

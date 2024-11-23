@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import useUtil from "./Util.js";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
-import ScriptEditor from "./ScriptEditor/ScriptEditor.js";
 import ShaderSettings from "./ScriptEditor/ShaderSettings.js";
 import LeftTab from "./LeftPanel/LeftTab.js";
 import RightTab from "./RightPanel/RightTab.js";
@@ -43,13 +42,10 @@ export default function Editor() {
     return curNode;
   };
   const updateHierarchy = () => {
-    let data;
+    let data = [];
     let renderer = module.Renderer.getInstance();
     for (let i = 0; i < renderer.getSceneCount(); i++) {
-      let scene = renderer.getSceneAt(i);
-      for (let j = 0; j < scene.getChildrenCount(); j++) {
-        recursiveWriteNodes(scene.getChildAt(j), i + "-" + j);
-      }
+      data.push(recursiveWriteNodes(renderer.getSceneAt(i), i.toString()));
     }
     setHierarchyData(data);
   };
@@ -61,20 +57,18 @@ export default function Editor() {
       isSelected: false,
       children: [],
     };
-
-    if (curNode === selectedNode) {
+    if (curNode.$$.ptr === selectedNode?.$$.ptr) {
       currentData.isSelected = true;
     } else {
       currentData.isSelected = false;
     }
 
     //0:scene, 1~: node
-    for (let i = 0; i < curNode.getNumChildren(); i++) {
+    for (let i = 0; i < curNode.getChildrenCount(); i++) {
       let currentChildNode = curNode.getChildAt(i);
       currentData.children.push(
         recursiveWriteNodes(currentChildNode, id + "-" + i)
       );
-      currentChildNode.delete();
     }
     return currentData;
   };
@@ -129,7 +123,7 @@ export default function Editor() {
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("resize", handleResize);
       console.log("deinitialize");
-      //종료 시 보유한 엔진 스마트포인터 및 addFunction 삭제 필요
+      //종료 시 addFunction 삭제 필요
       window.EFFECTSONG_CORE.deInitialize();
     };
   }, []);
@@ -181,6 +175,7 @@ export default function Editor() {
     module.loadGLTFData(
       module.getRootPath() + "res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"
     );
+    updateHierarchy();
     module.Renderer.getInstance().setAudioFile(
       module.getRootPath() + "res/music/test.wav"
     );

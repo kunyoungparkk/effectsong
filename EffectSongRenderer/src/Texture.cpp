@@ -70,6 +70,7 @@ Texture::Texture(std::string& path)
 	}
 
 	glGenTextures(1, &m_textureID);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 
 	// �ؽ�ó ����
@@ -98,6 +99,7 @@ Texture::Texture(std::string& path)
 Texture::Texture(int width, int height, int nrChannels, GLint wrapS, GLint wrapT, GLint minFilter, GLint maxFilter)
 	: m_cgltfTexture(nullptr), m_data(nullptr) {
 	glGenTextures(1, &m_textureID);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 
 	// �ؽ�ó ����
@@ -152,7 +154,7 @@ SpecularIBLTexture::SpecularIBLTexture()
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R,
 		GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER,
-		GL_LINEAR);
+		GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER,
 		GL_LINEAR);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
@@ -165,6 +167,7 @@ SpecularIBLTexture::~SpecularIBLTexture() {
 void SpecularIBLTexture::bind(int texIdx) {
 	glActiveTexture(GL_TEXTURE0 + texIdx);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_textureID);
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 }
 
 DiffuseIBLTexture::DiffuseIBLTexture(int width, int height, int nrChannels, GLint wrapS, GLint wrapT, GLint minFilter, GLint maxFilter)

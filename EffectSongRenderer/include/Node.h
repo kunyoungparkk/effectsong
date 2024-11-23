@@ -59,5 +59,8 @@ private:
 	glm::vec3 m_scale = glm::vec3(1, 1, 1);
 	std::string m_name = "";
 
+	GLuint m_shaderProgram = -1;
+	GLuint m_worldMatLoc = -1;
+
 	cgltf_node* m_cgltf_node;
 };

@@ -2,7 +2,7 @@
 #include <list>
 #include <unordered_map>
 #include "common.h"
-#define IBL_DIFFUSE_LENGTH 128
+#define IBL_DIFFUSE_LENGTH 64
 class Scene;
 class Material;
 class Texture;
@@ -65,6 +65,7 @@ class Renderer {
   static Renderer* instance;
   GLuint m_shaderProgram = 0;
   GLuint m_iblShaderProgram = 0;
+  
 
   Camera* m_activeCamera = nullptr;
 
@@ -72,8 +73,8 @@ class Renderer {
   std::unordered_map<std::string, Material*> m_materials;
   std::unordered_map<std::string, Texture*> m_textures;
 
-  //Scene* m_active_scene = nullptr;
   IBLPrimitive* m_skybox = nullptr;
+  GLint m_skyboxViewProjMatLoc = -1;
 
   SpecularIBLTexture* m_specularIBLTexture = nullptr;
   DiffuseIBLTexture* m_diffuseIBLTexture = nullptr;
@@ -89,6 +90,24 @@ class Renderer {
   GLuint m_diffuseIBLFrameBuffer = 0;
   SoundTexture* m_soundTexture = nullptr;
   float m_currentTime = 0.0f;
-  float m_diffuseIBLIntensity = 1.0f;
+  float m_diffuseIBLIntensity = 10.0f;
   glm::vec4 m_backgroundColor = glm::vec4(0.0f);
+
+  GLint m_artProgram = -1;
+  GLint m_volumeUniformLoc = -1;
+  GLint m_resolutionUniformLoc = -1;
+  GLint m_backgroundUniformLoc = -1;
+  GLint m_timeUniformLoc = -1;
+  GLint m_vertexCountUniformLoc = -1;
+  GLint m_soundUniformLoc = -1;
+  GLint m_soundUniformLoc2 = -1;
+  GLint m_isStereoUniformLoc = -1;
+
+  GLint m_specularIBLMapLoc = -1;
+  GLint m_diffuseIBLColorLoc = -1;
+  GLint m_lutGGXLoc = -1;
+  GLint m_iblIntensityLoc = -1;
+  GLint m_cameraWorldPosLoc = -1;
+  GLint m_viewMatLoc = -1;
+  GLint m_projMatLoc = -1;
 };

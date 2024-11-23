@@ -17,10 +17,13 @@ class Scene {
   std::string getName() { return m_name; }
   void setName(std::string name) { m_name = name; }
 
-  Node* getNodeAt(int index);
-  Node* getNodeByName(std::string name);
+  Node* getChildAt(int index);
+  Node* getChildByName(std::string name);
   void addNode(Node* node);
- private:
+
+  int getChildrenCount() { return m_nodes.size(); }
+
+private:
   std::list<Node*> m_nodes;
   std::list<Light*> lights;
   std::string m_name = "";

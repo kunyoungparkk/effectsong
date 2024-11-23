@@ -114,9 +114,13 @@ void Node::render(GLuint shaderProgram) {
 	}
 
 	//vertex shader
+	if (shaderProgram != m_shaderProgram) {
+		m_shaderProgram = shaderProgram;
+		m_worldMatLoc = glGetUniformLocation(shaderProgram, "worldMat");
+	}
+
 	glm::mat4 modelMatrix = getModelMatrix();
-	GLint worldMatLoc = glGetUniformLocation(shaderProgram, "worldMat");
-	glUniformMatrix4fv(worldMatLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
+	glUniformMatrix4fv(m_worldMatLoc, 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
 	for (int primIdx = 0; primIdx < m_primitives.size(); primIdx++) {
 		m_primitives[primIdx]->render(shaderProgram);
