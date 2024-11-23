@@ -5,10 +5,13 @@ import CategoryIcon from "@mui/icons-material/Category";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import LightModeIcon from '@mui/icons-material/LightMode';
+import HeightIcon from '@mui/icons-material/Height';
 import ScriptEditor from "./ScriptEditor";
 import useUtil from "../Util";
+import Slider from '@mui/material/Slider';
 
-const ShaderSettings = ({ module }) => {
+const ShaderSettings = ({ module, onResizeEngine }) => {
+  const [scriptOpacity, setScriptOpacity] = useState(0.2);
   const primitiveTypes = [
     "POINTS",
     "LINES",
@@ -22,6 +25,8 @@ const ShaderSettings = ({ module }) => {
   const [scriptVisible, setScriptVisible] = useState(true);
   const [vertexCount, setVertexCount] = useState(0);
   const [diffuseIBLIntensity, setDiffuseIBLIntensity] = useState(0.0);
+  const [width, setWidth] = useState(0);
+  const [height, setHeight] = useState(0);
   const Util = useUtil();
 
   const [vertexShader, setVertexShader] = useState(`//shader art sample
@@ -102,7 +107,11 @@ void main() {
     setPrimitiveMode(artShader.getPrimitiveMode());
     setVertexCount(artShader.getVertexCount());
     artShader.setVertexShader(vertexShader);
-    setDiffuseIBLIntensity(module.Renderer.getInstance().getDiffuseIBLIntensity());
+
+    const renderer = module.Renderer.getInstance();
+    setDiffuseIBLIntensity(renderer.getDiffuseIBLIntensity());
+    setWidth(renderer.getWidth());
+    setHeight(renderer.getHeight());
   }, [module]);
   return (
     <div>
@@ -118,7 +127,7 @@ void main() {
           float: "left",
         }}
       >
-        <Grid item xs={0.7} key="script-visible-button">
+        <Grid item xs={0.5} key="script-visible-button">
           <IconButton
             aria-label="shader-visible"
             onClick={() => {
@@ -133,6 +142,19 @@ void main() {
             )}
           </IconButton>
         </Grid>
+        <Grid item xs={1.0} key="script-visible-opacity">
+          <Slider
+            size="small"
+            value={scriptOpacity}
+            aria-label="script-visible-opacity"
+            step={0.01}
+            min={0.0}
+            max={1.0}
+            onChange={(e) => { setScriptOpacity(e.target.value); }}
+            style={{ paddingTop: 17, color: "#868686" }}
+          />
+        </Grid>
+        <Grid item xs={0.3} key ="space0"></Grid>
         <Grid item xs={0.3} key="primitive-select-icon">
           <CategoryIcon sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }} />
         </Grid>
@@ -162,26 +184,32 @@ void main() {
         <Grid item xs={0.3} key="vertex-count-icon">
           <ScatterPlotIcon sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }} />
         </Grid>
-        <Grid item xs={2.0} key="vertex-count">
+        <Grid item xs={1.0} key="vertex-count">
           <TextField
             type="number"
             variant="standard"
             value={vertexCount}
             onChange={(e) => {
               if (Util.isValidNum(e.target.value)) {
-                const intValue = parseInt(e.target.value);
+                let intValue = parseInt(e.target.value);
+                intValue = Math.min(1000000, intValue);
+                intValue = Math.max(0, intValue);
                 module.ArtShader.getInstance().setVertexCount(intValue);
                 setVertexCount(intValue);
+              } else {
+                module.ArtShader.getInstance().setVertexCount(0);
+                setVertexCount(e.target.value);
               }
             }}
             inputProps={{ style: { color: "#868686" } }}
             color="secondary"
           />
         </Grid>
+        <Grid item xs={0.2} key ="space1"></Grid>
         <Grid item xs={0.3} key="diffuse-ibl-intensity-icon">
-          <LightModeIcon sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }} />
+          <LightModeIcon sx={{ fontSize: "20px", paddingTop: "5px", color: "#868686" }} />
         </Grid>
-        <Grid item xs={2.0} key="diffuse-ibl-intensity">
+        <Grid item xs={1.0} key="diffuse-ibl-intensity">
           <TextField
             type="number"
             variant="standard"
@@ -191,6 +219,63 @@ void main() {
                 const floatValue = parseFloat(e.target.value);
                 module.Renderer.getInstance().setDiffuseIBLIntensity(floatValue);
                 setDiffuseIBLIntensity(floatValue);
+              } else {
+                module.Renderer.getInstance().setDiffuseIBLIntensity(0.0);
+                setDiffuseIBLIntensity(e.target.value);
+              }
+            }}
+            inputProps={{ style: { color: "#868686" } }}
+            color="secondary"
+          />
+        </Grid>
+        <Grid item xs={0.1} key ="space2"></Grid>
+        <Grid item xs={0.35} key="width-icon">
+          <HeightIcon sx={{ fontSize: "20px", paddingLeft: "10px", color: "#868686", transform: 'rotate(90deg)' }} />
+        </Grid>
+        <Grid item xs={1.0} key="width-size">
+          <TextField
+            type="number"
+            variant="standard"
+            value={width}
+            onChange={(e) => {
+              if (Util.isValidNum(e.target.value)) {
+                let intValue = parseInt(e.target.value);
+                intValue = Math.min(10000, intValue);
+                intValue = Math.max(0, intValue);
+                module.Renderer.getInstance().resize(intValue, height);
+                setWidth(intValue);
+                onResizeEngine(intValue, height);
+              } else {
+                module.Renderer.getInstance().resize(0, height);
+                setWidth(e.target.value);
+                onResizeEngine(0, height);
+              }
+            }}
+            inputProps={{ style: { color: "#868686" } }}
+            color="secondary"
+          />
+        </Grid>
+
+        <Grid item xs={0.25} key="height-icon">
+          <HeightIcon sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }} />
+        </Grid>
+        <Grid item xs={1.0} key="height-size">
+          <TextField
+            type="number"
+            variant="standard"
+            value={height}
+            onChange={(e) => {
+              if (Util.isValidNum(e.target.value)) {
+                let intValue = parseInt(e.target.value);
+                intValue = Math.min(10000, intValue);
+                intValue = Math.max(0, intValue);
+                module.Renderer.getInstance().resize(width, intValue);
+                setHeight(intValue);
+                onResizeEngine(width, intValue);
+              } else {
+                module.Renderer.getInstance().resize(width, 0);
+                setHeight(e.target.value);
+                onResizeEngine(width, 0);
               }
             }}
             inputProps={{ style: { color: "#868686" } }}
@@ -201,9 +286,9 @@ void main() {
 
       {scriptVisible ? (
         <ScriptEditor
-          module={module}
           vertexShader={vertexShader}
           setVertexShader={setVertexShader}
+          opacity={scriptOpacity}
         ></ScriptEditor>
       ) : (
         <></>

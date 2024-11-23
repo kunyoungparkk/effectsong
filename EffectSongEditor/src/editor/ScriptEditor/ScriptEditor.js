@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import Editor, { loader } from "@monaco-editor/react";
 import { Box} from "@mui/material";
 
-function ScriptEditor({ module, vertexShader, setVertexShader}) {
+function ScriptEditor({ vertexShader, setVertexShader, opacity }) {
     useEffect(() => {
         loader.init().then((monaco) => {
             // 언어 등록
@@ -100,7 +100,7 @@ function ScriptEditor({ module, vertexShader, setVertexShader}) {
                 left: "300px",
                 width: "calc(100% -  650px)",
                 height: "calc(100vh - 130px)",
-                backgroundColor: "rgba(0.0, 0, 0, 0.2)",
+                backgroundColor: `rgba(0.0, 0, 0, ${opacity})`,
                 boxShadow: 3,
                 pointerEvents: "auto"
             }}

@@ -6,17 +6,18 @@ import ShaderSettings from "./ScriptEditor/ShaderSettings.js";
 import LeftTab from "./LeftPanel/LeftTab.js";
 import RightTab from "./RightPanel/RightTab.js";
 import HierarchyView from "./LeftPanel/HierarchyView.js";
+import Typography from '@mui/material/Typography';
 import { floor } from "mathjs";
 //import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Modal, CircularProgress, Snackbar, Alert } from '@mui/material';
 //import JSZip from 'jszip';
 //import { rotationMatrix, multiply } from 'mathjs';
 export default function Editor() {
+  const currentWidth = useRef(1400);
+  const currentHeight = useRef(900);
   const [module, setModule] = useState(null);
   const audioRef = useRef(null);
   const canvasRef = useRef(null);
   const canvasDivRef = useRef(null);
-  const widthVal = useRef(1200);
-  const heightVal = useRef(900);
 
   const [leftTabIndex, setLeftTabIndex] = useState(0);
   const [rightTabIndex, setRightTabIndex] = useState(0);
@@ -101,14 +102,14 @@ export default function Editor() {
       }
     };
     const handleResize = (e) => {
-      onResizeEngine();
+      onResizeEngine(currentWidth.current, currentHeight.current);
     };
 
-    const handleScroll = (e) => {};
+    const handleScroll = (e) => { };
 
-    const handleMouseOver = (e) => {};
+    const handleMouseOver = (e) => { };
 
-    const handleMouseOut = (e) => {};
+    const handleMouseOut = (e) => { };
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
@@ -139,22 +140,24 @@ export default function Editor() {
   //엔진 초기화 시점에 호출
   function onEngineInitialized() {
     window.EFFECTSONG_CORE.canvas = document.getElementById("canvas");
-    window.EFFECTSONG_CORE.initialize(widthVal.current, heightVal.current,
-      window.EFFECTSONG_CORE.addFunction(function(){return audioRef.current.audio.current.currentTime;}, 'f'),
-      window.EFFECTSONG_CORE.addFunction(function(){return audioRef.current.isPlaying();}, 'i'),
+    window.EFFECTSONG_CORE.initialize(currentWidth.current, currentHeight.current,
+      window.EFFECTSONG_CORE.addFunction(function () { return audioRef.current.audio.current.currentTime; }, 'f'),
+      window.EFFECTSONG_CORE.addFunction(function () { return audioRef.current.isPlaying(); }, 'i'),
     );
-    onResizeEngine();
+    onResizeEngine(currentWidth.current, currentHeight.current);
     setModule(window.EFFECTSONG_CORE);
   }
 
-  //resize된 크기에 맞게 캔버스 관련 변경 : 엔진 resize 혹은 브라우저 resize 시에 실행 필요
-  const onResizeEngine = () => {
-    const engineAspectRatio = parseFloat(widthVal.current) / heightVal.current;
+  const onResizeEngine = (width, height) => {
+    currentWidth.current = width;
+    currentHeight.current = height;
+
+    const engineAspectRatio = parseFloat(width) / height;
     const divAspectRatio = parseFloat(
       canvasDivRef.current.offsetWidth / canvasDivRef.current.offsetHeight
     );
-    canvasRef.current.width = widthVal.current;
-    canvasRef.current.height = heightVal.current;
+    canvasRef.current.width = width;
+    canvasRef.current.height = height;
     if (engineAspectRatio > divAspectRatio) {
       canvasRef.current.style.setProperty("width", "100%");
       canvasRef.current.style.setProperty(
@@ -194,6 +197,27 @@ export default function Editor() {
   return (
     <div className="editor">
       <div className="hierarchy">
+        <Typography
+          variant="h5" // 글자 크기
+          sx={{
+            color: 'white', // 기본 텍스트 색상
+            textShadow: `
+            0 0 10px #33f,
+            0 0 20px #33f,
+            0 0 30px #33f,
+            0 0 40px #33f,
+            0 0 50px #33f,
+            0 0 60px #33f,
+          `,
+            fontWeight: 'bold',
+            fontFamily: 'Roboto, sans-serif',
+            textAlign: 'center',
+            width: 300,
+            height: 40
+          }}
+        >
+          EffectSong.
+        </Typography>
         <LeftTab onChangedIndex={setLeftTabIndex} />
         <HierarchyView
           hierarchyData={hierarchyData}
@@ -202,7 +226,7 @@ export default function Editor() {
           setExpandIdList={setExpandIdList}
         />
       </div>
-      <ShaderSettings module={module} />
+      <ShaderSettings module={module} onResizeEngine={onResizeEngine} />
       <div className="engineDiv" id="engineDiv" ref={canvasDivRef}>
         <canvas
           id="canvas"
@@ -224,7 +248,7 @@ export default function Editor() {
         {/* <div style={{ width: "90px", height: "80px" }}></div> */}
       </div>
       <div className="attribute">
-        <RightTab onChangedIndex={setRightTabIndex} />
+        <RightTab onChangedIndex={setRightTabIndex} module={module} targetNode={selectedNode}/>
       </div>
     </div>
   );

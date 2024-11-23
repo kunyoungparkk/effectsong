@@ -37,19 +37,10 @@ export default function useUtil() {
             });
         },
         isValidNum : (text)=>{
-            let parsedValue = parseFloat(text);
-            if (!isNaN(parsedValue) || text === '-' || text === ''){
-                return true;
-            }else{
+            if (text === '-' || text === '' || isNaN(parseFloat(text))){
                 return false;
-            }
-        },
-        getValidNum: (text) =>{
-            let parsedValue = parseFloat(text);
-            if (!isNaN(parsedValue)) {
-                return parsedValue;
-            }else if(text === '-' || text === ''){
-                return 0.0;
+            }else{
+                return true;
             }
         },
         getParsedNumber: (text)=>{

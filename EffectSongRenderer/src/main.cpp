@@ -262,7 +262,7 @@ EMSCRIPTEN_BINDINGS(GLTF){
     .function("getChildrenCount", &Scene::getChildrenCount);
   class_<Node>("Node")
 	.constructor<Scene*, Node*>()
-    .function("getPosition", &Node::setPosition, allow_raw_pointers())
+    .function("getPosition", &Node::getPosition, allow_raw_pointers())
     .function("getRotation", &Node::getRotation, allow_raw_pointers())
     .function("getScale", &Node::getScale, allow_raw_pointers())
     .function("getFront", &Node::getFront, allow_raw_pointers())
@@ -308,6 +308,9 @@ EMSCRIPTEN_BINDINGS(SINGLETON){
     .class_function("getInstance", &Renderer::getInstance, allow_raw_pointers())
     .function("getSceneAt", &Renderer::getSceneAt, allow_raw_pointers())
     .function("getSceneByName", &Renderer::getSceneByName, allow_raw_pointers())
+	.function("getWidth", &Renderer::getWidth)
+	.function("getHeight", &Renderer::getHeight)
+	.function("resize", &Renderer::resize)
 	.function("getSceneCount", &Renderer::getSceneCount)
     .function("setAudioFile", &Renderer::setAudioFile, allow_raw_pointers())
     .function("setActiveCamera", &Renderer::setActiveCamera , allow_raw_pointers())

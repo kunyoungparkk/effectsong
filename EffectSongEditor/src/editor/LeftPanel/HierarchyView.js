@@ -71,7 +71,7 @@ const HierarchyView = ({ hierarchyData, selectCallback, expandIdList, setExpandI
       aria-label="HierarchyView"
       id="Hierarchy"
       sx={{
-        height: 'calc(100% - 80px)', flexGrow: 1, maxWidth: 300, overflowY: 'auto', scrollbarWidth: 'thin', scrollbarColor: "#9c27b0 #2e2e2e"
+        height: 'calc(100% - 120px)', flexGrow: 1, maxWidth: 300, overflowY: 'auto', scrollbarWidth: 'thin', scrollbarColor: "#9c27b0 #2e2e2e"
       }}
       selectedItems={selectedItems}
       onItemSelectionToggle={selectCallback}

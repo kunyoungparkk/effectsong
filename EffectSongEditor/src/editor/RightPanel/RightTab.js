@@ -4,6 +4,7 @@ import { styled } from '@mui/material/styles';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
+import NodeView from './NodeView.js';
 
 const StyledTabs = styled((props) => (
     <Tabs
@@ -39,16 +40,33 @@ const StyledTab = styled((props) => <Tab disableRipple {...props} />)(
     }),
 );
 
-export default function RightTab({ onChangedIndex }) {
+export default function RightTab({ onChangedIndex, module, targetNode }) {
     const [value, setValue] = React.useState(0);
-
+    const isNode = targetNode?.$$.ptrType.name === "Node*";
     const handleChange = (event, newValue) => {
         setValue(newValue);
         onChangedIndex(newValue);
     };
+
+    const getPage = (index, isNode) => {
+        if(!targetNode || !isNode){
+            return <></>
+        }
+        switch(index){
+            case 0:
+                return <NodeView module={module} targetNode={targetNode}/>
+                break;
+            case 1:
+                return <></>
+                break;
+            case 2:
+                return <></>
+                break;
+        }
+    }
     return (
-        <Box sx={{ width: '100%', height: '70px' }}>
-            <Box>
+        <Box>
+            <Box sx={{ width: '100%', height: '70px' }}>
                 <StyledTabs
                     value={value}
                     onChange={handleChange}
@@ -60,6 +78,7 @@ export default function RightTab({ onChangedIndex }) {
                 </StyledTabs>
                 <Box sx={{ p: 3 }} />
             </Box>
+            {getPage(value, isNode)}
         </Box>
     );
 }
