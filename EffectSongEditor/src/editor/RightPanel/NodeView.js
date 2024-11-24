@@ -18,9 +18,9 @@ const NodeView = ({ module, targetNode }) => {
         const inputEuler = Util.eulerFromQuat(inputRot.w, inputRot.x, inputRot.y, inputRot.z);
         const inputScale = targetNode.getScale();
 
-        setPosition([inputPos.x, inputPos.y, inputPos.z]);
-        setRotation(inputEuler);
-        setScale([inputScale.x, inputScale.y, inputScale.z]);
+        setPosition([Util.roundToNearestStep(inputPos.x), Util.roundToNearestStep(inputPos.y), Util.roundToNearestStep(inputPos.z)]);
+        setRotation([Util.roundToNearestStep(inputEuler[0]), Util.roundToNearestStep(inputEuler[1]), Util.roundToNearestStep(inputEuler[2])]);
+        setScale([Util.roundToNearestStep(inputScale.x), Util.roundToNearestStep(inputScale.y), Util.roundToNearestStep(inputScale.z)]);
     }, [targetNode])
     return (
         <Box>
@@ -163,15 +163,18 @@ const NodeView = ({ module, targetNode }) => {
                                     id="rotation-y"
                                     value={rotation[1]}
                                     onChange={(e) => {
-                                        let tempRot = [];
                                         if (Util.isValidNum(e.target.value)) {
-                                            tempRot = [rotation[0], parseFloat(e.target.value), rotation[2]];
+                                            let tempRot = [rotation[0], parseFloat(e.target.value), rotation[2]];
+                                            const tempQuat = Util.quatFromEuler(tempRot[0], tempRot[1], tempRot[2]);
+                                            targetNode.setRotation(new module.quat(tempQuat.w, tempQuat.x, tempQuat.y, tempQuat.z));
+                                            setRotation(tempRot);
                                         } else {
-                                            tempRot = [rotation[0], 0.0, rotation[2]];
+                                            let tempRot = [rotation[0], 0.0, rotation[2]];
+                                            const tempQuat = Util.quatFromEuler(tempRot[0], tempRot[1], tempRot[2]);
+                                            targetNode.setRotation(new module.quat(tempQuat.w, tempQuat.x, tempQuat.y, tempQuat.z));
+                                            tempRot[1] = e.target.value;
+                                            setRotation(tempRot);
                                         }
-                                        const tempQuat = Util.quatFromEuler(tempRot[0], tempRot[1], tempRot[2]);
-                                        targetNode.setRotation(new module.quat(tempQuat.w, tempQuat.x, tempQuat.y, tempQuat.z));
-                                        setRotation(tempRot);
                                     }}
                                     inputProps={{ style: { color: "#868686" } }}
                                     color="secondary"
@@ -187,15 +190,18 @@ const NodeView = ({ module, targetNode }) => {
                                     id="rotation-z"
                                     value={rotation[2]}
                                     onChange={(e) => {
-                                        let tempRot = [];
                                         if (Util.isValidNum(e.target.value)) {
-                                            tempRot = [rotation[0], rotation[1], parseFloat(e.target.value)];
+                                            let tempRot = [rotation[0], rotation[1], parseFloat(e.target.value)];
+                                            const tempQuat = Util.quatFromEuler(tempRot[0], tempRot[1], tempRot[2]);
+                                            targetNode.setRotation(new module.quat(tempQuat.w, tempQuat.x, tempQuat.y, tempQuat.z));
+                                            setRotation(tempRot);
                                         } else {
-                                            tempRot = [rotation[0], rotation[1], 0.0];
+                                            let tempRot = [rotation[0], rotation[1], 0.0];
+                                            const tempQuat = Util.quatFromEuler(tempRot[0], tempRot[1], tempRot[2]);
+                                            targetNode.setRotation(new module.quat(tempQuat.w, tempQuat.x, tempQuat.y, tempQuat.z));
+                                            tempRot[2] = e.target.value;
+                                            setRotation(tempRot);
                                         }
-                                        const tempQuat = Util.quatFromEuler(tempRot[0], tempRot[1], tempRot[2]);
-                                        targetNode.setRotation(new module.quat(tempQuat.w, tempQuat.x, tempQuat.y, tempQuat.z));
-                                        setRotation(tempRot);
                                     }}
                                     inputProps={{ style: { color: "#868686" } }}
                                     color="secondary"
