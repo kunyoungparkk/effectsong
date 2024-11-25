@@ -40,12 +40,11 @@ const StyledTab = styled((props) => <Tab disableRipple {...props} />)(
     }),
 );
 
-export default function RightTab({ onChangedIndex, module, targetNode }) {
+export default function RightTab({ updateHierarchy, module, targetNode }) {
     const [value, setValue] = React.useState(0);
     const isNode = targetNode?.$$.ptrType.name === "Node*";
     const handleChange = (event, newValue) => {
         setValue(newValue);
-        onChangedIndex(newValue);
     };
 
     const getPage = (index, isNode) => {
@@ -54,14 +53,11 @@ export default function RightTab({ onChangedIndex, module, targetNode }) {
         }
         switch(index){
             case 0:
-                return <NodeView module={module} targetNode={targetNode}/>
-                break;
+                return <NodeView module={module} targetNode={targetNode} updateHierarchy={updateHierarchy}/>
             case 1:
                 return <></>
-                break;
             case 2:
                 return <></>
-                break;
         }
     }
     return (

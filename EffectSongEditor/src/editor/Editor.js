@@ -5,12 +5,14 @@ import "react-h5-audio-player/lib/styles.css";
 import ShaderSettings from "./ScriptEditor/ShaderSettings.js";
 import LeftTab from "./LeftPanel/LeftTab.js";
 import RightTab from "./RightPanel/RightTab.js";
-import HierarchyView from "./LeftPanel/HierarchyView.js";
-import Typography from '@mui/material/Typography';
+import Typography from "@mui/material/Typography";
 import { floor } from "mathjs";
-//import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Modal, CircularProgress, Snackbar, Alert } from '@mui/material';
+import MusicImport from "./Import/MusicImport.js";
+import GLTFImport from "./Import/GLTFImport.js";
+import { Grid } from "@mui/material";
 //import JSZip from 'jszip';
 //import { rotationMatrix, multiply } from 'mathjs';
+
 export default function Editor() {
   const currentWidth = useRef(1400);
   const currentHeight = useRef(900);
@@ -18,9 +20,6 @@ export default function Editor() {
   const audioRef = useRef(null);
   const canvasRef = useRef(null);
   const canvasDivRef = useRef(null);
-
-  const [leftTabIndex, setLeftTabIndex] = useState(0);
-  const [rightTabIndex, setRightTabIndex] = useState(0);
 
   //Hierarchy Data State
   const [hierarchyData, setHierarchyData] = useState([]);
@@ -31,6 +30,60 @@ export default function Editor() {
       updateHierarchy();
     }
   }, [selectedNode]);
+
+  useEffect(() => {
+    //setShowLoading(true);
+    if (!window.EFFECTSONG_CORE) {
+      //모듈 초기 로드시 - 초기화
+      window.initializeModule(onEngineInitialized);
+    } else {
+      //두번째 로드시부턴 초기화하지말고 개별적으로 startEngine 함수 호출
+      onEngineInitialized();
+    }
+    //키보드 이벤트 등록
+    const handleKeyDown = (e) => {
+      switch (e.key) {
+      }
+    };
+    const handleKeyUp = (e) => {
+      switch (e.key) {
+      }
+    };
+    const handleResize = (e) => {
+      onResizeEngine(currentWidth.current, currentHeight.current);
+    };
+
+    const handleScroll = (e) => {};
+
+    const handleMouseOver = (e) => {};
+
+    const handleMouseOut = (e) => {};
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("resize", handleResize);
+    document.body.addEventListener("wheel", handleScroll);
+    document.body.addEventListener("mouseover", handleMouseOver);
+    document.body.addEventListener("mouseout", handleMouseOut);
+
+    return () => {
+      //키보드 이벤트 제거
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("resize", handleResize);
+      console.log("deinitialize");
+      //종료 시 addFunction 삭제 필요
+      window.EFFECTSONG_CORE.deInitialize();
+    };
+  }, []);
+
+  //모듈 초기화
+  useEffect(() => {
+    if (!module) {
+      return;
+    }
+    startEngine();
+  }, [module]);
 
   const getNodeById = (id) => {
     const idxList = id.split("-");
@@ -80,69 +133,18 @@ export default function Editor() {
 
     setSelectedNode(getNodeById(id));
   };
-
-  const Util = useUtil();
-
-  useEffect(() => {
-    //setShowLoading(true);
-    if (!window.EFFECTSONG_CORE) {
-      //모듈 초기 로드시 - 초기화
-      window.initializeModule(onEngineInitialized);
-    } else {
-      //두번째 로드시부턴 초기화하지말고 개별적으로 startEngine 함수 호출
-      onEngineInitialized();
-    }
-    //키보드 이벤트 등록
-    const handleKeyDown = (e) => {
-      switch (e.key) {
-      }
-    };
-    const handleKeyUp = (e) => {
-      switch (e.key) {
-      }
-    };
-    const handleResize = (e) => {
-      onResizeEngine(currentWidth.current, currentHeight.current);
-    };
-
-    const handleScroll = (e) => { };
-
-    const handleMouseOver = (e) => { };
-
-    const handleMouseOut = (e) => { };
-
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-    window.addEventListener("resize", handleResize);
-    document.body.addEventListener("wheel", handleScroll);
-    document.body.addEventListener("mouseover", handleMouseOver);
-    document.body.addEventListener("mouseout", handleMouseOut);
-
-    return () => {
-      //키보드 이벤트 제거
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-      window.removeEventListener("resize", handleResize);
-      console.log("deinitialize");
-      //종료 시 addFunction 삭제 필요
-      window.EFFECTSONG_CORE.deInitialize();
-    };
-  }, []);
-
-  //모듈 초기화
-  useEffect(() => {
-    if (!module) {
-      return;
-    }
-    startEngine();
-  }, [module]);
-
   //엔진 초기화 시점에 호출
   function onEngineInitialized() {
     window.EFFECTSONG_CORE.canvas = document.getElementById("canvas");
-    window.EFFECTSONG_CORE.initialize(currentWidth.current, currentHeight.current,
-      window.EFFECTSONG_CORE.addFunction(function () { return audioRef.current.audio.current.currentTime; }, 'f'),
-      window.EFFECTSONG_CORE.addFunction(function () { return audioRef.current.isPlaying(); }, 'i'),
+    window.EFFECTSONG_CORE.initialize(
+      currentWidth.current,
+      currentHeight.current,
+      window.EFFECTSONG_CORE.addFunction(function () {
+        return audioRef.current.audio.current.currentTime;
+      }, "f"),
+      window.EFFECTSONG_CORE.addFunction(function () {
+        return audioRef.current.isPlaying();
+      }, "i")
     );
     onResizeEngine(currentWidth.current, currentHeight.current);
     setModule(window.EFFECTSONG_CORE);
@@ -180,7 +182,7 @@ export default function Editor() {
     );
     updateHierarchy();
     module.Renderer.getInstance().setAudioFile(
-      module.getRootPath() + "res/music/test.wav"
+      module.getRootPath() + "res/music/poison.mp3"
     );
     let camNode = new module.Node(
       module.Renderer.getInstance().getSceneAt(0),
@@ -200,23 +202,23 @@ export default function Editor() {
         <Typography
           variant="h5" // 글자 크기
           sx={{
-            color: 'white', // 기본 텍스트 색상
-            fontWeight: 'bold',
-            fontFamily: 'Roboto, sans-serif',
-            textAlign: 'center',
+            color: "white", // 기본 텍스트 색상
+            fontWeight: "bold",
+            fontFamily: "Roboto, sans-serif",
+            textAlign: "center",
             width: 300,
-            height: 40
+            height: 40,
           }}
         >
           EffectSong.
         </Typography>
         <LeftTab
-          onChangedIndex={setLeftTabIndex}
           module={module}
           hierarchyData={hierarchyData}
           selectCallback={onSelectHierarchyObj}
           expandIdList={expandIdList}
-          setExpandIdList={setExpandIdList} />
+          setExpandIdList={setExpandIdList}
+        />
       </div>
       <ShaderSettings module={module} onResizeEngine={onResizeEngine} />
       <div className="engineDiv" id="engineDiv" ref={canvasDivRef}>
@@ -235,12 +237,33 @@ export default function Editor() {
           volume={0.8}
           showSkipControls
           progressUpdateInterval={100}
-          src="test.wav"
+          src="poison.mp3"
         />
         {/* <div style={{ width: "90px", height: "80px" }}></div> */}
       </div>
       <div className="attribute">
-        <RightTab onChangedIndex={setRightTabIndex} module={module} targetNode={selectedNode} />
+        <div className="import" style={{ width: "100%", height: "40px" }}>
+          <Grid
+            container
+            columnSpacing={{ xs: 1, sm: 2, md: 3 }}
+            sx={{
+              paddingLeft: 1,
+              paddingRight: 1
+            }}
+          >
+            <Grid item xs={6}>
+              <GLTFImport module={module} />
+            </Grid>
+            <Grid item xs={6}>
+              <MusicImport module={module} />
+            </Grid>
+          </Grid>
+        </div>
+        <RightTab
+          updateHierarchy={updateHierarchy}
+          module={module}
+          targetNode={selectedNode}
+        />
       </div>
     </div>
   );

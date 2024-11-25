@@ -14,6 +14,11 @@ class Scene {
   void addLight(Light* light);
   void removeLight(Light* light);
 
+  void addCamera(Camera* camera);
+  void removeCamera(Camera* camera);
+  Camera* getCameraAt(int index);
+  int getCameraCount() { return m_cameras.size(); }
+
   std::string getName() { return m_name; }
   void setName(std::string name) { m_name = name; }
 
@@ -25,7 +30,8 @@ class Scene {
 
 private:
   std::list<Node*> m_nodes;
-  std::list<Light*> lights;
+  std::list<Light*> m_lights;
+  std::list<Camera*> m_cameras;
   std::string m_name = "";
   cgltf_scene& m_cgltf_scene;
 };

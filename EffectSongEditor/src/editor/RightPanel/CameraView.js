@@ -68,10 +68,13 @@ const CameraView = ({ targetNode }) => {
                                     setFov(e.target.value);
                                 }
                             }}
-                            inputProps={{ style: { color: "#868686" } }}
+                            InputLabelProps={{
+                                shrink: true, style: { color: '#868686' }
+                            }}
+                            inputProps={{ style: { color: "white" } }}
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={6}>
                         <TextField
                             type="number"
                             variant="standard"
@@ -87,10 +90,13 @@ const CameraView = ({ targetNode }) => {
                                     setNear(e.target.value);
                                 }
                             }}
-                            inputProps={{ style: { color: "#868686" } }}
+                            InputLabelProps={{
+                                shrink: true, style: { color: '#868686' }
+                            }}
+                            inputProps={{ style: { color: "white" } }}
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={6}>
                         <TextField
                             type="number"
                             variant="standard"
@@ -106,10 +112,13 @@ const CameraView = ({ targetNode }) => {
                                     setFar(e.target.value);
                                 }
                             }}
-                            inputProps={{ style: { color: "#868686" } }}
+                            InputLabelProps={{
+                                shrink: true, style: { color: '#868686' }
+                            }}
+                            inputProps={{ style: { color: "white" } }}
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={6}>
                         <TextField
                             type="number"
                             variant="standard"
@@ -125,10 +134,13 @@ const CameraView = ({ targetNode }) => {
                                     setXMag(e.target.value);
                                 }
                             }}
-                            inputProps={{ style: { color: "#868686" } }}
+                            InputLabelProps={{
+                                shrink: true, style: { color: '#868686' }
+                            }}
+                            inputProps={{ style: { color: "white" } }}
                         />
                     </Grid>
-                    <Grid item xs={12}>
+                    <Grid item xs={6}>
                         <TextField
                             type="number"
                             variant="standard"
@@ -144,7 +156,10 @@ const CameraView = ({ targetNode }) => {
                                     setYMag(e.target.value);
                                 }
                             }}
-                            inputProps={{ style: { color: "#868686" } }}
+                            InputLabelProps={{
+                                shrink: true, style: { color: '#868686' }
+                            }}
+                            inputProps={{ style: { color: "white" } }}
                         />
                     </Grid>
 

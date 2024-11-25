@@ -96,7 +96,7 @@ void main() {
       return;
     }
     let success = module.ArtShader.getInstance().setVertexShader(vertexShader);
-    console.log(success);
+    console.log('compile: ' + success);
   }, [vertexShader]);
 
   useEffect(() => {
@@ -121,7 +121,7 @@ void main() {
           width: "calc(100% -  650px)",
           height: "40px",
           backgroundColor: "white",
-          textAlign: "left",
+          textAlign: "right",
           paddingLeft: "15px",
           paddingTop: "3px",
           float: "left",
@@ -154,8 +154,7 @@ void main() {
             style={{ paddingTop: 17, color: "#868686" }}
           />
         </Grid>
-        <Grid item xs={0.3} key ="space0"></Grid>
-        <Grid item xs={0.3} key="primitive-select-icon">
+        <Grid item xs={0.5} key="primitive-select-icon">
           <CategoryIcon sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }} />
         </Grid>
         <Grid item xs={1.3} key="primitive-select">
@@ -180,9 +179,10 @@ void main() {
             })}
           </NativeSelect>
         </Grid>
-        <Grid item xs={0.3} key="vertex-count-icon">
+        <Grid item xs={0.5} key="vertex-count-icon">
           <ScatterPlotIcon sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }} />
         </Grid>
+        <Grid item xs={0.1} key="space0"/>
         <Grid item xs={1.0} key="vertex-count">
           <TextField
             type="number"
@@ -203,10 +203,10 @@ void main() {
             inputProps={{ style: { color: "#868686" } }}
           />
         </Grid>
-        <Grid item xs={0.2} key ="space1"></Grid>
-        <Grid item xs={0.3} key="diffuse-ibl-intensity-icon">
+        <Grid item xs={0.5} key="diffuse-ibl-intensity-icon">
           <LightModeIcon sx={{ fontSize: "20px", paddingTop: "5px", color: "#868686" }} />
         </Grid>
+        <Grid item xs={0.1} key="space1"/>
         <Grid item xs={1.0} key="diffuse-ibl-intensity">
           <TextField
             type="number"
@@ -225,10 +225,10 @@ void main() {
             inputProps={{ style: { color: "#868686" } }}
           />
         </Grid>
-        <Grid item xs={0.1} key ="space2"></Grid>
-        <Grid item xs={0.35} key="width-icon">
+        <Grid item xs={0.5} key="width-icon">
           <HeightIcon sx={{ fontSize: "20px", paddingLeft: "10px", color: "#868686", transform: 'rotate(90deg)' }} />
         </Grid>
+        <Grid item xs={0.1} key="space2"/>
         <Grid item xs={1.0} key="width-size">
           <TextField
             type="number"
@@ -252,9 +252,10 @@ void main() {
           />
         </Grid>
 
-        <Grid item xs={0.25} key="height-icon">
+        <Grid item xs={0.5} key="height-icon">
           <HeightIcon sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }} />
         </Grid>
+        <Grid item xs={0.1} key="space3"/>
         <Grid item xs={1.0} key="height-size">
           <TextField
             type="number"

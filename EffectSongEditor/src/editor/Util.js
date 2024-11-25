@@ -1,5 +1,3 @@
-import Quaternion from 'quaternion';
-
 export default function useUtil() {
     return {
         cross: (A, B) => {
@@ -26,7 +24,7 @@ export default function useUtil() {
                 return true;
             }
         },
-        roundToNearestStep: (value, step = 0.0000001, epsilon = 1e-6) => {
+        roundToNearestStep: (value, step = 0.0001, epsilon = 1e-7) => {
             const nearest = Math.round(value / step) * step;
             return Math.abs(value - nearest) < epsilon ? nearest : value;
         }

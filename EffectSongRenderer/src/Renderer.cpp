@@ -530,7 +530,7 @@ void Renderer::render() {
 	{
 		glm::mat4 projectionMatrix = glm::perspective(
 			glm::radians(m_activeCamera->fov), (float)m_width / m_height,
-			m_activeCamera->zNear, m_activeCamera->zFar);
+			0.1f, 100.0f);
 		glm::mat4 viewMatrix = glm::inverse(m_activeCamera->getNode()->getModelMatrix());
 
 		glm::mat4 viewProjMatrix = projectionMatrix * glm::mat4(glm::mat3(viewMatrix));

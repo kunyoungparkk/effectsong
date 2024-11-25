@@ -32,7 +32,7 @@ void Scene::render(GLuint shaderProgram) {
 	int spotLightCnt = 0;
 	std::string uniformName;
 	//TODO: Light의 Position은 global position을 넣어줘야 함.
-	for (auto iter = lights.begin(); iter != lights.end(); iter++) {
+	for (auto iter = m_lights.begin(); iter != m_lights.end(); iter++) {
 		Light* light = (*iter);
 		switch (light->lightType) {
 		case Light::LightType::DIRECTIONAL_LIGHT:
@@ -136,12 +136,32 @@ void Scene::render(GLuint shaderProgram) {
 
 void Scene::addLight(Light* light)
 {
-	lights.push_back(light);
+	m_lights.push_back(light);
 }
 
 void Scene::removeLight(Light* light)
 {
-	lights.remove(light);
+	m_lights.remove(light);
+}
+
+void Scene::addCamera(Camera* camera)
+{
+	m_cameras.push_back(camera);
+}
+
+void Scene::removeCamera(Camera* camera)
+{
+	m_cameras.remove(camera);
+}
+
+Camera* Scene::getCameraAt(int index)
+{
+	if (index >= m_cameras.size()) {
+		return nullptr;
+	}
+	auto iter = m_cameras.begin();
+	std::advance(iter, index);
+	return *iter;
 }
 
 Node* Scene::getChildAt(int index)

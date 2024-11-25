@@ -62,13 +62,11 @@ Node::Node(cgltf_node* cgltfNode, Node* parent, Scene* scene)
 		}
 		//camera
 		if (m_cgltf_node->camera) {
-			m_camera = new Camera(this, m_cgltf_node->camera);
+			setCamera(new Camera(this, m_cgltf_node->camera));
 		}
 		//light
 		if (m_cgltf_node->light) {
-			m_light = new Light(this, m_cgltf_node->light);
-			//TODO: ���⼭ Scene�� ����ϴ� ���� �´��� �����غ���
-			m_scene->addLight(m_light);
+			setLight(new Light(this, m_cgltf_node->light));
 		}
 
 		for (int childIdx = 0; childIdx < cgltfNode->children_count; childIdx++) {
@@ -207,8 +205,10 @@ Light* Node::getLight()
 void Node::setLight(Light* light)
 {
 	if (m_light) {
+		m_scene->removeLight(m_light);
 		delete m_light;
 	}
+	m_scene->addLight(light);
 	m_light = light;
 }
 
@@ -220,8 +220,10 @@ Camera* Node::getCamera()
 void Node::setCamera(Camera* camera)
 {
 	if (m_camera) {
+		m_scene->removeCamera(m_camera);
 		delete m_camera;
 	}
+	m_scene->addCamera(camera);
 	m_camera = camera;
 }
 

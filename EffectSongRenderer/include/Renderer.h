@@ -90,7 +90,7 @@ class Renderer {
   GLuint m_diffuseIBLFrameBuffer = 0;
   SoundTexture* m_soundTexture = nullptr;
   float m_currentTime = 0.0f;
-  float m_diffuseIBLIntensity = 10.0f;
+  float m_diffuseIBLIntensity = 1.0f;
   glm::vec4 m_backgroundColor = glm::vec4(0.0f);
 
   GLint m_artProgram = -1;
