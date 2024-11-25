@@ -201,14 +201,6 @@ export default function Editor() {
           variant="h5" // 글자 크기
           sx={{
             color: 'white', // 기본 텍스트 색상
-            textShadow: `
-            0 0 10px #33f,
-            0 0 20px #33f,
-            0 0 30px #33f,
-            0 0 40px #33f,
-            0 0 50px #33f,
-            0 0 60px #33f,
-          `,
             fontWeight: 'bold',
             fontFamily: 'Roboto, sans-serif',
             textAlign: 'center',
@@ -218,13 +210,13 @@ export default function Editor() {
         >
           EffectSong.
         </Typography>
-        <LeftTab onChangedIndex={setLeftTabIndex} />
-        <HierarchyView
+        <LeftTab
+          onChangedIndex={setLeftTabIndex}
+          module={module}
           hierarchyData={hierarchyData}
           selectCallback={onSelectHierarchyObj}
           expandIdList={expandIdList}
-          setExpandIdList={setExpandIdList}
-        />
+          setExpandIdList={setExpandIdList} />
       </div>
       <ShaderSettings module={module} onResizeEngine={onResizeEngine} />
       <div className="engineDiv" id="engineDiv" ref={canvasDivRef}>
@@ -248,7 +240,7 @@ export default function Editor() {
         {/* <div style={{ width: "90px", height: "80px" }}></div> */}
       </div>
       <div className="attribute">
-        <RightTab onChangedIndex={setRightTabIndex} module={module} targetNode={selectedNode}/>
+        <RightTab onChangedIndex={setRightTabIndex} module={module} targetNode={selectedNode} />
       </div>
     </div>
   );

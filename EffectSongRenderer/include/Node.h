@@ -17,11 +17,13 @@ public:
 	/*TRS*/
 	glm::vec3 getPosition() const;
 	glm::quat getRotation() const;
+	glm::vec3 getEulerRotation() const;
 	glm::vec3 getScale() const;
 	glm::vec3 getFront();
 	glm::vec3 getLeft();
 	void setPosition(glm::vec3 position);
 	void setRotation(glm::quat rotation);
+	void setRotationByEuler(glm::vec3 euler);
 	void setScale(glm::vec3 scale);
 	glm::vec3 getGlobalPosition() const;
 	glm::quat getGlobalRotation() const;
@@ -49,7 +51,7 @@ private:
 
 	Light* m_light = nullptr;
 	Camera* m_camera = nullptr;
-	//TODO: Mesh, Skin Ãß°¡
+	//TODO: Mesh, Skin ï¿½ß°ï¿½
 
 	std::vector<Node*> m_children;
 	std::vector<Primitive*> m_primitives;

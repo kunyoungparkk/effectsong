@@ -73,8 +73,7 @@ export default function RightTab({ onChangedIndex, module, targetNode }) {
                     aria-label="styled tabs example"
                 >
                     <StyledTab label="Node" />
-                    <StyledTab label="Light" />
-                    <StyledTab label="Camera" />
+                    <StyledTab label="Audio Reactive" />
                 </StyledTabs>
                 <Box sx={{ p: 3 }} />
             </Box>

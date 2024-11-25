@@ -2,10 +2,10 @@
 #include "Scene.h"
 
 bool decomposeMatrix(const glm::mat4& matrix, glm::vec3& position, glm::quat& rotation, glm::vec3& scale) {
-	// À§Ä¡
+	// ï¿½ï¿½Ä¡
 	position = glm::vec3(matrix[3]);
 
-	// ½ºÄÉÀÏ
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	glm::vec3 col0 = glm::vec3(matrix[0]);
 	glm::vec3 col1 = glm::vec3(matrix[1]);
 	glm::vec3 col2 = glm::vec3(matrix[2]);
@@ -13,13 +13,13 @@ bool decomposeMatrix(const glm::mat4& matrix, glm::vec3& position, glm::quat& ro
 	scale.y = glm::length(col1);
 	scale.z = glm::length(col2);
 
-	// ½ºÄÉÀÏÀ» Á¦°ÅÇÑ È¸Àü Çà·Ä
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È¸ï¿½ï¿½ ï¿½ï¿½ï¿½
 	glm::mat3 rotationMatrix = glm::mat3(matrix);
 	if (scale.x != 0) rotationMatrix[0] /= scale.x;
 	if (scale.y != 0) rotationMatrix[1] /= scale.y;
 	if (scale.z != 0) rotationMatrix[2] /= scale.z;
 
-	// È¸Àü Çà·ÄÀ» ÄõÅÍ´Ï¾ðÀ¸·Î º¯È¯
+	// È¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Í´Ï¾ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯
 	rotation = glm::quat_cast(rotationMatrix);
 
 	return true;
@@ -45,7 +45,7 @@ Node::Node(cgltf_node* cgltfNode, Node* parent, Scene* scene)
 			m_scale = *(glm::vec3*)cgltfNode->scale;
 		}
 		if (!m_cgltf_node->has_translation && !m_cgltf_node->has_rotation && !m_cgltf_node->has_scale && m_cgltf_node->matrix) {
-			decomposeMatrix(glm::make_mat4(m_cgltf_node->matrix), m_position, m_rotation, m_scale); // `matrix` ¼Ó¼º »ç¿ë
+			decomposeMatrix(glm::make_mat4(m_cgltf_node->matrix), m_position, m_rotation, m_scale); // `matrix` ï¿½Ó¼ï¿½ ï¿½ï¿½ï¿½
 		}
 		//skin
 
@@ -67,7 +67,7 @@ Node::Node(cgltf_node* cgltfNode, Node* parent, Scene* scene)
 		//light
 		if (m_cgltf_node->light) {
 			m_light = new Light(this, m_cgltf_node->light);
-			//TODO: ¿©±â¼­ Scene¿¡ µî·ÏÇÏ´Â °ÍÀÌ ¸Â´ÂÁö »ý°¢ÇØº¸±â
+			//TODO: ï¿½ï¿½ï¿½â¼­ Sceneï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Â´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½ï¿½ï¿½
 			m_scene->addLight(m_light);
 		}
 
@@ -138,17 +138,21 @@ glm::mat4 Node::getModelMatrix() {
 	}
 	return model;
 }
-//TODO: global transform Get, Set ÇÊ¿ä
+//TODO: global transform Get, Set ï¿½Ê¿ï¿½
 
 glm::vec3 Node::getPosition() const { return m_position; }
 
 glm::quat Node::getRotation() const { return m_rotation; }
+
+glm::vec3 Node::getEulerRotation() const { return glm::eulerAngles(m_rotation) * 180.0f / glm::pi<float>(); }
 
 glm::vec3 Node::getScale() const { return m_scale; }
 
 void Node::setPosition(glm::vec3 position) { m_position = position; }
 
 void Node::setRotation(glm::quat rotation) { m_rotation = rotation; }
+
+void Node::setRotationByEuler(glm::vec3 euler) { m_rotation = glm::quat(euler / 180.0f * glm::pi<float>()); }
 
 void Node::setScale(glm::vec3 scale) { m_scale = scale; }
 

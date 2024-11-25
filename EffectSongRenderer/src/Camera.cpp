@@ -6,6 +6,8 @@ Camera::Camera(Node* node, cgltf_camera* cgltf_camera)
 	m_cgltf_camera = cgltf_camera;
 	m_node = node;
 
+	m_node->setCamera(this);
+
 	if (!m_cgltf_camera) {
 		// TODO: ERROR!
 		exit(0);
@@ -49,6 +51,8 @@ Camera::Camera(Node* node)
 {
 	m_cgltf_camera = nullptr;
 	m_node = node;
+	
+	m_node->setCamera(this);
 }
 
 Node* Camera::getNode()

@@ -165,7 +165,6 @@ void main() {
               name: "Primitive",
               id: "primitive-select",
             }}
-            color="secondary"
             onChange={(e) => {
               module.ArtShader.getInstance().setPrimitiveMode(e.target.value);
               setPrimitiveMode(e.target.value);
@@ -202,7 +201,6 @@ void main() {
               }
             }}
             inputProps={{ style: { color: "#868686" } }}
-            color="secondary"
           />
         </Grid>
         <Grid item xs={0.2} key ="space1"></Grid>
@@ -225,7 +223,6 @@ void main() {
               }
             }}
             inputProps={{ style: { color: "#868686" } }}
-            color="secondary"
           />
         </Grid>
         <Grid item xs={0.1} key ="space2"></Grid>
@@ -252,7 +249,6 @@ void main() {
               }
             }}
             inputProps={{ style: { color: "#868686" } }}
-            color="secondary"
           />
         </Grid>
 
@@ -279,7 +275,6 @@ void main() {
               }
             }}
             inputProps={{ style: { color: "#868686" } }}
-            color="secondary"
           />
         </Grid>
       </Grid>

@@ -5,6 +5,9 @@ Light::Light(Node* node, cgltf_light* cgltf_light)
 {
 	m_node = node;
 	m_cgltf_light = cgltf_light;
+
+	m_node->setLight(this);
+	
 	if (!m_cgltf_light) {
 		return;
 	}
@@ -30,7 +33,7 @@ Light::Light(Node* node, cgltf_light* cgltf_light)
 	color[2] = cgltf_light->color[2];
 
 	intensity = cgltf_light->intensity;
-	//TODO: blender range ¾Èµé¾î¿À´Â Çö»ó
+	//TODO: blender range ï¿½Èµï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 	if (cgltf_light->range < 0.1f) {
 		range = 5.0;// cgltf_light->range;
 	}

@@ -3,6 +3,7 @@ import { styled } from '@mui/material/styles';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
+import HierarchyView from './HierarchyView';
 
 const StyledTabs = styled((props) => (
   <Tabs
@@ -38,7 +39,7 @@ const StyledTab = styled((props) => <Tab disableRipple {...props} />)(
   }),
 );
 
-export default function LeftTab({onChangedIndex}) {
+export default function LeftTab({ onChangedIndex, module, hierarchyData, selectCallback, expandIdList, setExpandIdList }) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event, newValue) => {
@@ -46,9 +47,25 @@ export default function LeftTab({onChangedIndex}) {
     onChangedIndex(newValue);
   };
 
+  const getPage = (index) => {
+    switch (index) {
+      case 0:
+        return <HierarchyView
+          hierarchyData={hierarchyData}
+          selectCallback={selectCallback}
+          expandIdList={expandIdList}
+          setExpandIdList={setExpandIdList}
+        />
+        break;
+      case 1:
+        return <></>
+        break;
+    }
+  }
+
   return (
-    <Box sx={{ width: '100%', height: '70px'}}>
-      <Box>
+    <Box>
+      <Box sx={{ width: '100%', height: '70px' }}>
         <StyledTabs
           value={value}
           onChange={handleChange}
@@ -59,6 +76,7 @@ export default function LeftTab({onChangedIndex}) {
         </StyledTabs>
         <Box sx={{ p: 3 }} />
       </Box>
+      {getPage(value)}
     </Box>
   );
 }

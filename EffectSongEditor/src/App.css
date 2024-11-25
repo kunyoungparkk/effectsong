@@ -8,7 +8,7 @@
 }
 .musicPlayer{
   height: 90px;
-  width: calc(100% -  750px);
+  width: calc(100% -  650px);
   float: left;
 }
 .editor{
