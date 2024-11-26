@@ -257,7 +257,6 @@ void main() {
 
     vec3 F0 = mix(vec3(0.04), baseColorTextureColor, metallic);
 
-    //TODO: diffuseIBL.a 적용?
     vec3 diffuseIBL = diffuseIBLColor.rgb * (baseColorTextureColor / 3.141592);
     vec3 specularIBL = calculateIBLSpecular(normal, view, roughness, F0);
     result = iblIntensity * (diffuseIBL + specularIBL) * ao + emissiveTextureColor;
@@ -530,8 +529,8 @@ void Renderer::render() {
 	{
 		glm::mat4 projectionMatrix = glm::perspective(
 			glm::radians(m_activeCamera->fov), (float)m_width / m_height,
-			0.1f, 100.0f);
-		glm::mat4 viewMatrix = glm::inverse(m_activeCamera->getNode()->getModelMatrix());
+			0.1f, 10.0f);
+		glm::mat4 viewMatrix = glm::inverse(m_activeCamera->getViewMatrix());
 
 		glm::mat4 viewProjMatrix = projectionMatrix * glm::mat4(glm::mat3(viewMatrix));
 		glUniformMatrix4fv(m_skyboxViewProjMatLoc, 1, GL_FALSE, glm::value_ptr(viewProjMatrix));
@@ -552,7 +551,7 @@ void Renderer::render() {
 			glm::radians(m_activeCamera->fov),
 			(float)Renderer::getInstance()->getWidth() / Renderer::getInstance()->getHeight(),
 			m_activeCamera->zNear, m_activeCamera->zFar);
-		viewMatrix = glm::inverse(m_activeCamera->getNode()->getModelMatrix());
+		viewMatrix = glm::inverse(m_activeCamera->getViewMatrix());
 		glUniform3fv(m_cameraWorldPosLoc, 1, glm::value_ptr(m_activeCamera->getNode()->getGlobalPosition()));
 	}
 	glUniformMatrix4fv(m_viewMatLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
@@ -628,6 +627,5 @@ void Renderer::resize(int width, int height)
 
 bool Renderer::setAudioFile(std::string filePath)
 {
-	//TODO: extend mp3, flac..
 	return m_soundTexture->loadAudioFile(filePath);
 }

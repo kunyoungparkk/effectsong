@@ -30,8 +30,8 @@ private:
     GLuint m_textureID;
     GLuint m_textureID2;
 
-    int m_texBindIdx = 5;
-    int m_texBindIdx2 = 6;
+    int m_texBindIdx = 4;
+    int m_texBindIdx2 = 5;
 
     float m_textureBuffer[SOUND_TEXTURE_LENGTH][SOUND_TEXTURE_LENGTH] = { 0.0f };
     //use when stereo

@@ -45,13 +45,18 @@ public:
 	Node* getChildAt(int index);
 	Node* getChildByName(std::string name);
 	int getChildrenCount() { return m_children.size(); }
+
+	//TODO: temporary code, refactor required
+	bool m_bAudioReactiveScale = false;
+	float m_reactiveOriginScale = 1.0f;
+	float m_reactiveChangingScale = 0.0f;
 private:
 	Node* m_parent;
 	Scene* m_scene;
 
 	Light* m_light = nullptr;
 	Camera* m_camera = nullptr;
-	//TODO: Mesh, Skin �߰�
+	//TODO: add Mesh(refactor), Skin
 
 	std::vector<Node*> m_children;
 	std::vector<Primitive*> m_primitives;
@@ -63,6 +68,4 @@ private:
 
 	GLuint m_shaderProgram = -1;
 	GLuint m_worldMatLoc = -1;
-
-	cgltf_node* m_cgltf_node;
 };

@@ -96,14 +96,6 @@ private:
 	//uniform float _dontUseDirectly_pointSize; : multiflydevicePixelRatio
 	)";
 	std::string vs_ = R"(
-#define PI radians(180.0)
-
-vec3 hsv2rgb(vec3 c) {
-  c = vec3(c.x, clamp(c.yz, 0.0, 1.0));
-  vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-  return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-}
 void main() {
   float across = floor(sqrt(vertexCount));
   float down = floor(vertexCount / across);

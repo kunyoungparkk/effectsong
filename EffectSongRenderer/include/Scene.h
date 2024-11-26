@@ -7,6 +7,7 @@
 class Scene {
  public:
   Scene(cgltf_scene& cgltfScene);
+  Scene();
   ~Scene();
   void update();
   void render(GLuint shaderProgram);
@@ -33,5 +34,4 @@ private:
   std::list<Light*> m_lights;
   std::list<Camera*> m_cameras;
   std::string m_name = "";
-  cgltf_scene& m_cgltf_scene;
 };

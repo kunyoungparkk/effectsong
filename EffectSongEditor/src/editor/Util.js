@@ -24,7 +24,7 @@ export default function useUtil() {
                 return true;
             }
         },
-        roundToNearestStep: (value, step = 0.0001, epsilon = 1e-7) => {
+        roundToNearestStep: (value, step = 0.0001, epsilon = 1e-4) => {
             const nearest = Math.round(value / step) * step;
             return Math.abs(value - nearest) < epsilon ? nearest : value;
         }

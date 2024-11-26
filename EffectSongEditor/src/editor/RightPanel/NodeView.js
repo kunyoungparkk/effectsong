@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
-import { Box, TextField, Grid } from "@mui/material";
+import { Box, TextField, Grid, IconButton } from "@mui/material";
 import useUtil from "../Util";
 import CameraView from "./CameraView";
 import LightView from "./LightView";
+import MusicNoteIcon from "@mui/icons-material/MusicNote";
+import MusicOffIcon from "@mui/icons-material/MusicOff";
 const NodeView = ({ module, targetNode, updateHierarchy }) => {
   const Util = useUtil();
   const [name, setName] = useState("");
   const [position, setPosition] = useState([0.0, 0.0, 0.0]);
   const [rotation, setRotation] = useState([0.0, 0.0, 0.0]);
   const [scale, setScale] = useState([0.0, 0.0, 0.0]);
+
+  const [audioReactiveScale, setAudioReactiveScale] = useState(false);
+  const [reactiveOriginScale, setReactiveOriginScale] = useState(0.0);
+  const [reactiveChangingScale, setReactiveChangingScale] = useState(0.0);
 
   useEffect(() => {
     if (!module || !targetNode) {
@@ -34,6 +40,14 @@ const NodeView = ({ module, targetNode, updateHierarchy }) => {
       Util.roundToNearestStep(inputScale.y),
       Util.roundToNearestStep(inputScale.z),
     ]);
+
+    setAudioReactiveScale(targetNode.m_bAudioReactiveScale);
+    setReactiveOriginScale(
+      Util.roundToNearestStep(targetNode.m_reactiveOriginScale)
+    );
+    setReactiveChangingScale(
+      Util.roundToNearestStep(targetNode.m_reactiveChangingScale)
+    );
   }, [targetNode]);
   return (
     <Box
@@ -66,10 +80,11 @@ const NodeView = ({ module, targetNode, updateHierarchy }) => {
               updateHierarchy();
             }}
             InputLabelProps={{
-                shrink: true, style: { color: '#868686' }
+              shrink: true,
+              style: { color: "#868686" },
             }}
             inputProps={{ style: { color: "white" } }}
-            sx={{width:'100%'}}
+            sx={{ width: "100%" }}
           />
         </Grid>
         <Grid item xs={12}>
@@ -107,7 +122,8 @@ const NodeView = ({ module, targetNode, updateHierarchy }) => {
                   }
                 }}
                 InputLabelProps={{
-                    shrink: true, style: { color: '#868686' }
+                  shrink: true,
+                  style: { color: "#868686" },
                 }}
                 inputProps={{ style: { color: "white" } }}
               />
@@ -134,7 +150,8 @@ const NodeView = ({ module, targetNode, updateHierarchy }) => {
                   }
                 }}
                 InputLabelProps={{
-                    shrink: true, style: { color: '#868686' }
+                  shrink: true,
+                  style: { color: "#868686" },
                 }}
                 inputProps={{ style: { color: "white" } }}
               />
@@ -161,7 +178,8 @@ const NodeView = ({ module, targetNode, updateHierarchy }) => {
                   }
                 }}
                 InputLabelProps={{
-                    shrink: true, style: { color: '#868686' }
+                  shrink: true,
+                  style: { color: "#868686" },
                 }}
                 inputProps={{ style: { color: "white" } }}
               />
@@ -192,7 +210,8 @@ const NodeView = ({ module, targetNode, updateHierarchy }) => {
                   }
                 }}
                 InputLabelProps={{
-                    shrink: true, style: { color: '#868686' }
+                  shrink: true,
+                  style: { color: "#868686" },
                 }}
                 inputProps={{ style: { color: "white" } }}
               />
@@ -220,7 +239,8 @@ const NodeView = ({ module, targetNode, updateHierarchy }) => {
                   }
                 }}
                 InputLabelProps={{
-                    shrink: true, style: { color: '#868686' }
+                  shrink: true,
+                  style: { color: "#868686" },
                 }}
                 inputProps={{ style: { color: "white" } }}
               />
@@ -248,95 +268,178 @@ const NodeView = ({ module, targetNode, updateHierarchy }) => {
                   }
                 }}
                 InputLabelProps={{
-                    shrink: true, style: { color: '#868686' }
+                  shrink: true,
+                  style: { color: "#868686" },
                 }}
                 inputProps={{ style: { color: "white" } }}
               />
             </Grid>
-            <Grid item xs={12}>
+            {/*Audio Reactive Scale*/}
+            <Grid item xs={1}>
+              <IconButton
+                aria-label="use-reactive-scale"
+                onClick={() => {
+                  targetNode.m_bAudioReactiveScale = !audioReactiveScale;
+                  //when disable reactivescale
+                  if (audioReactiveScale) {
+                    const inputScale = targetNode.getScale();
+                    setScale([
+                      Util.roundToNearestStep(inputScale.x),
+                      Util.roundToNearestStep(inputScale.y),
+                      Util.roundToNearestStep(inputScale.z),
+                    ]);
+                  }
+                  setAudioReactiveScale(!audioReactiveScale);
+                }}
+                style={{ color: "#868686", padding: 0 }}
+              >
+                {audioReactiveScale ? (
+                  <MusicNoteIcon sx={{ color: "white" }} />
+                ) : (
+                  <MusicOffIcon sx={{ color: "white" }} />
+                )}
+              </IconButton>
+            </Grid>
+            <Grid item xs={11}>
               Scale
             </Grid>
-            <Grid item xs={4}>
-              <TextField
-                type="number"
-                variant="standard"
-                id="scale-x"
-                label="x"
-                value={scale[0]}
-                onChange={(e) => {
-                  let tempScale = targetNode.getScale();
-                  if (Util.isValidNum(e.target.value)) {
-                    const floatValue = parseFloat(e.target.value);
-                    tempScale.x = floatValue;
-                    targetNode.setScale(tempScale);
+            {audioReactiveScale ? (
+              <>
+                <Grid item xs={6}>
+                  <TextField
+                    type="number"
+                    variant="standard"
+                    id="reactive-origin-scale"
+                    label="origin scale"
+                    value={reactiveOriginScale}
+                    onChange={(e) => {
+                      if (Util.isValidNum(e.target.value)) {
+                        const floatValue = parseFloat(e.target.value);
+                        targetNode.m_reactiveOriginScale = floatValue;
+                        setReactiveOriginScale(floatValue);
+                      } else {
+                        setReactiveOriginScale(e.target.value);
+                      }
+                    }}
+                    InputLabelProps={{
+                      shrink: true,
+                      style: { color: "#868686" },
+                    }}
+                    inputProps={{ style: { color: "white" } }}
+                  />
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    type="number"
+                    variant="standard"
+                    id="reactive-changing-scale"
+                    label="reactive scale"
+                    value={reactiveChangingScale}
+                    onChange={(e) => {
+                      if (Util.isValidNum(e.target.value)) {
+                        const floatValue = parseFloat(e.target.value);
+                        targetNode.m_reactiveChangingScale = floatValue;
+                        setReactiveChangingScale(floatValue);
+                      } else {
+                        setReactiveChangingScale(e.target.value);
+                      }
+                    }}
+                    InputLabelProps={{
+                      shrink: true,
+                      style: { color: "#868686" },
+                    }}
+                    inputProps={{ style: { color: "white" } }}
+                  />
+                </Grid>
+              </>
+            ) : (
+              <>
+                <Grid item xs={4}>
+                  <TextField
+                    type="number"
+                    variant="standard"
+                    id="scale-x"
+                    label="x"
+                    value={scale[0]}
+                    onChange={(e) => {
+                      let tempScale = targetNode.getScale();
+                      if (Util.isValidNum(e.target.value)) {
+                        const floatValue = parseFloat(e.target.value);
+                        tempScale.x = floatValue;
+                        targetNode.setScale(tempScale);
 
-                    setScale([floatValue, scale[1], scale[2]]);
-                  } else {
-                    tempScale.x = 0.0;
-                    targetNode.setScale(tempScale);
-                    setScale([e.target.value, position[1], position[2]]);
-                  }
-                }}
-                InputLabelProps={{
-                    shrink: true, style: { color: '#868686' }
-                }}
-                inputProps={{ style: { color: "white" } }}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                type="number"
-                variant="standard"
-                id="scale-y"
-                label="y"
-                value={scale[1]}
-                onChange={(e) => {
-                  let tempScale = targetNode.getScale();
-                  if (Util.isValidNum(e.target.value)) {
-                    const floatValue = parseFloat(e.target.value);
-                    tempScale.y = floatValue;
-                    targetNode.setScale(tempScale);
+                        setScale([floatValue, scale[1], scale[2]]);
+                      } else {
+                        tempScale.x = 0.0;
+                        targetNode.setScale(tempScale);
+                        setScale([e.target.value, position[1], position[2]]);
+                      }
+                    }}
+                    InputLabelProps={{
+                      shrink: true,
+                      style: { color: "#868686" },
+                    }}
+                    inputProps={{ style: { color: "white" } }}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <TextField
+                    type="number"
+                    variant="standard"
+                    id="scale-y"
+                    label="y"
+                    value={scale[1]}
+                    onChange={(e) => {
+                      let tempScale = targetNode.getScale();
+                      if (Util.isValidNum(e.target.value)) {
+                        const floatValue = parseFloat(e.target.value);
+                        tempScale.y = floatValue;
+                        targetNode.setScale(tempScale);
 
-                    setScale([scale[0], floatValue, scale[2]]);
-                  } else {
-                    tempScale.y = 0.0;
-                    targetNode.setScale(tempScale);
-                    setScale([scale[0], e.target.value, scale[2]]);
-                  }
-                }}
-                InputLabelProps={{
-                    shrink: true, style: { color: '#868686' }
-                }}
-                inputProps={{ style: { color: "white" } }}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                type="number"
-                variant="standard"
-                id="scale-z"
-                label="z"
-                value={scale[2]}
-                onChange={(e) => {
-                  let tempScale = targetNode.getScale();
-                  if (Util.isValidNum(e.target.value)) {
-                    const floatValue = parseFloat(e.target.value);
-                    tempScale.z = floatValue;
-                    targetNode.setScale(tempScale);
+                        setScale([scale[0], floatValue, scale[2]]);
+                      } else {
+                        tempScale.y = 0.0;
+                        targetNode.setScale(tempScale);
+                        setScale([scale[0], e.target.value, scale[2]]);
+                      }
+                    }}
+                    InputLabelProps={{
+                      shrink: true,
+                      style: { color: "#868686" },
+                    }}
+                    inputProps={{ style: { color: "white" } }}
+                  />
+                </Grid>
+                <Grid item xs={4}>
+                  <TextField
+                    type="number"
+                    variant="standard"
+                    id="scale-z"
+                    label="z"
+                    value={scale[2]}
+                    onChange={(e) => {
+                      let tempScale = targetNode.getScale();
+                      if (Util.isValidNum(e.target.value)) {
+                        const floatValue = parseFloat(e.target.value);
+                        tempScale.z = floatValue;
+                        targetNode.setScale(tempScale);
 
-                    setScale([scale[0], scale[2], floatValue]);
-                  } else {
-                    tempScale.z = 0.0;
-                    targetNode.setScale(tempScale);
-                    setScale([scale[0], scale[2], e.target.value]);
-                  }
-                }}
-                InputLabelProps={{
-                    shrink: true, style: { color: '#868686' }
-                }}
-                inputProps={{ style: { color: "white" } }}
-              />
-            </Grid>
+                        setScale([scale[0], scale[1], floatValue]);
+                      } else {
+                        tempScale.z = 0.0;
+                        targetNode.setScale(tempScale);
+                        setScale([scale[0], scale[1], e.target.value]);
+                      }
+                    }}
+                    InputLabelProps={{
+                      shrink: true,
+                      style: { color: "#868686" },
+                    }}
+                    inputProps={{ style: { color: "white" } }}
+                  />
+                </Grid>
+              </>
+            )}
           </Grid>
         </Grid>
 

@@ -1,5 +1,6 @@
 #include "Node.h"
 #include "Scene.h"
+#include "Renderer.h"
 
 bool decomposeMatrix(const glm::mat4& matrix, glm::vec3& position, glm::quat& rotation, glm::vec3& scale) {
 	// ��ġ
@@ -26,8 +27,8 @@ bool decomposeMatrix(const glm::mat4& matrix, glm::vec3& position, glm::quat& ro
 }
 
 Node::Node(cgltf_node* cgltfNode, Node* parent, Scene* scene)
-	: m_parent(parent), m_scene(scene), m_cgltf_node(cgltfNode) {
-	if (m_cgltf_node) {
+	: m_parent(parent), m_scene(scene){
+	if (cgltfNode) {
 		if (cgltfNode->name) {
 			m_name = cgltfNode->name;
 		}
@@ -44,8 +45,8 @@ Node::Node(cgltf_node* cgltfNode, Node* parent, Scene* scene)
 		if (cgltfNode->has_scale) {
 			m_scale = *(glm::vec3*)cgltfNode->scale;
 		}
-		if (!m_cgltf_node->has_translation && !m_cgltf_node->has_rotation && !m_cgltf_node->has_scale && m_cgltf_node->matrix) {
-			decomposeMatrix(glm::make_mat4(m_cgltf_node->matrix), m_position, m_rotation, m_scale); // `matrix` �Ӽ� ���
+		if (!cgltfNode->has_translation && !cgltfNode->has_rotation && !cgltfNode->has_scale && cgltfNode->matrix) {
+			decomposeMatrix(glm::make_mat4(cgltfNode->matrix), m_position, m_rotation, m_scale); // `matrix` �Ӽ� ���
 		}
 		//skin
 
@@ -61,12 +62,12 @@ Node::Node(cgltf_node* cgltfNode, Node* parent, Scene* scene)
 			}
 		}
 		//camera
-		if (m_cgltf_node->camera) {
-			setCamera(new Camera(this, m_cgltf_node->camera));
+		if (cgltfNode->camera) {
+			setCamera(new Camera(this, cgltfNode->camera));
 		}
 		//light
-		if (m_cgltf_node->light) {
-			setLight(new Light(this, m_cgltf_node->light));
+		if (cgltfNode->light) {
+			setLight(new Light(this, cgltfNode->light));
 		}
 
 		for (int childIdx = 0; childIdx < cgltfNode->children_count; childIdx++) {
@@ -78,7 +79,7 @@ Node::Node(cgltf_node* cgltfNode, Node* parent, Scene* scene)
 }
 
 Node::Node(Scene* scene, Node* parent)
-	: m_parent(parent), m_scene(scene), m_cgltf_node(nullptr)
+	: m_parent(parent), m_scene(scene)
 {
 
 }
@@ -104,6 +105,14 @@ Node::~Node()
 }
 
 void Node::update() {
+	for (int i = 0; i < m_children.size(); i++) {
+		m_children[i]->update();
+	}
+	//TODO: temporary reactive scale
+	if (m_bAudioReactiveScale) {
+		float scaleFactor = m_reactiveOriginScale + m_reactiveChangingScale * Renderer::getInstance()->getCurrentEnergy();
+		this->setScale(glm::vec3(scaleFactor));
+	}
 }
 
 void Node::render(GLuint shaderProgram) {

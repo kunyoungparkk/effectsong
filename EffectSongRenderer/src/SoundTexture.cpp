@@ -28,14 +28,8 @@ SoundTexture::SoundTexture() {
 	//TODO: just fix it?
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
-	if (m_channels == 2) {
-		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, m_textureID2);
-	}
-	else {
-		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, m_textureID);
-	}
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, m_textureID2);
 
 	// FFT 메모리와 계획 설정
 	in = (fftwf_complex*)fftwf_malloc(sizeof(fftwf_complex) * FFT_SIZE);
@@ -124,9 +118,6 @@ void SoundTexture::update(float currentTime, bool isPlay) {
 				magnitude = glm::clamp(magnitude, minMagnitude, maxMagnitude);
 				magnitude = (magnitude - minMagnitude) / (maxMagnitude - minMagnitude);
 				magnitude = (1.0f - smoothingFactor) * magnitude + smoothingFactor * m_textureBuffer2[0][i];
-				if (magnitude > 0.3f) {
-					int a = 3;
-				}
 				newRowData[1][i] = magnitude;
 				m_currentEnergy += magnitude;
 			}
@@ -140,13 +131,16 @@ void SoundTexture::update(float currentTime, bool isPlay) {
 	glActiveTexture(GL_TEXTURE0 + m_texBindIdx);
 	glBindTexture(GL_TEXTURE_2D, m_textureID);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, SOUND_TEXTURE_LENGTH, SOUND_TEXTURE_LENGTH, GL_RED, GL_FLOAT, m_textureBuffer);
-
 	if (m_channels == 2) {
 		memmove(m_textureBuffer2[1], m_textureBuffer2[0], (SOUND_TEXTURE_LENGTH - 1) * SOUND_TEXTURE_LENGTH * sizeof(float));
 		memcpy(m_textureBuffer2[0], newRowData[1], SOUND_TEXTURE_LENGTH * sizeof(float));
 		glActiveTexture(GL_TEXTURE0 + m_texBindIdx2);
 		glBindTexture(GL_TEXTURE_2D, m_textureID2);
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, SOUND_TEXTURE_LENGTH, SOUND_TEXTURE_LENGTH, GL_RED, GL_FLOAT, m_textureBuffer2);
+	}
+	else {
+		glActiveTexture(GL_TEXTURE0 + m_texBindIdx2);
+		glBindTexture(GL_TEXTURE_2D, m_textureID);
 	}
 }
 

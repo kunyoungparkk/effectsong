@@ -1,14 +1,24 @@
 import { useState, useEffect } from "react";
-import { NativeSelect, TextField, Grid, IconButton } from "@mui/material";
+import {
+  NativeSelect,
+  TextField,
+  Grid,
+  IconButton,
+  Button,
+  Modal,
+  Typography,
+  Box,
+} from "@mui/material";
 import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
 import CategoryIcon from "@mui/icons-material/Category";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import LightModeIcon from '@mui/icons-material/LightMode';
-import HeightIcon from '@mui/icons-material/Height';
+import LightModeIcon from "@mui/icons-material/LightMode";
+import HeightIcon from "@mui/icons-material/Height";
+import HelpIcon from "@mui/icons-material/Help";
 import ScriptEditor from "./ScriptEditor";
 import useUtil from "../Util";
-import Slider from '@mui/material/Slider';
+import Slider from "@mui/material/Slider";
 
 const ShaderSettings = ({ module, onResizeEngine }) => {
   const [scriptOpacity, setScriptOpacity] = useState(0.2);
@@ -27,6 +37,9 @@ const ShaderSettings = ({ module, onResizeEngine }) => {
   const [diffuseIBLIntensity, setDiffuseIBLIntensity] = useState(0.0);
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
+
+  const [helpModalOpen, setHelpModalOpen] = useState(false);
+
   const Util = useUtil();
 
   const [vertexShader, setVertexShader] = useState(`//shader art sample
@@ -49,19 +62,21 @@ void main() {
     float offset = count * 0.02;
     float angle = point * PI * 2.0 / NUM_SEGMENTS - offset;
     float spread = 0.02;
-    float off = 0.1;
+    float off = 0.01;
     float speed = count * 0.004;
     float snd = 1.0;
 
-    if (num < 0.9) {
-        off = 0.2;
+    if (isStereo && num > 0.9) {
+        snd *= (
+            texture(sound2, vec2(off + spread * 0., speed)).r +
+            texture(sound2, vec2(off + spread * 1., speed)).r +
+            texture(sound2, vec2(off + spread * 2., speed)).r) / 3.;
     } else {
-        off = 0.1;
-    }
         snd *= (
             texture(sound, vec2(off + spread * 0., speed)).r +
             texture(sound, vec2(off + spread * 1., speed)).r +
             texture(sound, vec2(off + spread * 2., speed)).r) / 3.;
+    }
     
     float leftTarget =  texture(sound, vec2(off, 0.0)).r;
     float rightTarget =  texture(sound2, vec2(off, 0.0)).r;
@@ -90,13 +105,36 @@ void main() {
     v_color = mix(color, background, radius - cPulse);
 }
 `);
-
+const soundTextureVS = `
+void main() {
+  float across = floor(sqrt(vertexCount));
+  float down = floor(vertexCount / across);
+  
+  float x = mod(vertexId, across);
+  float y = floor(vertexId / across);
+  
+  float u = x / across;
+  float v = y / across;
+  
+  vec2 xy = vec2(u * 2.0 - 1.0, v * 2.0 - 1.0);
+  gl_Position = vec4(xy, 0, 1);
+  gl_PointSize = max(0.1, ceil(resolution.x / across));
+  
+  float s;
+  if(!isStereo || u<0.5){
+    s = texture(sound, vec2(u * 2.0, v)).r;
+  }else{
+    s = texture(sound2, vec2((u - 0.5) * 2.0, v)).r;
+  }  
+  v_color = vec4(s, s, s, 1.0);
+}
+`
   useEffect(() => {
     if (!module) {
       return;
     }
     let success = module.ArtShader.getInstance().setVertexShader(vertexShader);
-    console.log('compile: ' + success);
+    console.log("compile: " + success);
   }, [vertexShader]);
 
   useEffect(() => {
@@ -106,7 +144,7 @@ void main() {
     let artShader = module.ArtShader.getInstance();
     setPrimitiveMode(artShader.getPrimitiveMode());
     setVertexCount(artShader.getVertexCount());
-    artShader.setVertexShader(vertexShader);
+    artShader.setVertexShader(vertexShader);//soundTextureVS
 
     const renderer = module.Renderer.getInstance();
     setDiffuseIBLIntensity(renderer.getDiffuseIBLIntensity());
@@ -142,6 +180,7 @@ void main() {
             )}
           </IconButton>
         </Grid>
+        <Grid item xs={0.3} key="space" />
         <Grid item xs={1.0} key="script-visible-opacity">
           <Slider
             size="small"
@@ -150,12 +189,16 @@ void main() {
             step={0.01}
             min={0.0}
             max={1.0}
-            onChange={(e) => { setScriptOpacity(e.target.value); }}
+            onChange={(e) => {
+              setScriptOpacity(e.target.value);
+            }}
             style={{ paddingTop: 17, color: "#868686" }}
           />
         </Grid>
         <Grid item xs={0.5} key="primitive-select-icon">
-          <CategoryIcon sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }} />
+          <CategoryIcon
+            sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }}
+          />
         </Grid>
         <Grid item xs={1.3} key="primitive-select">
           <NativeSelect
@@ -180,9 +223,11 @@ void main() {
           </NativeSelect>
         </Grid>
         <Grid item xs={0.5} key="vertex-count-icon">
-          <ScatterPlotIcon sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }} />
+          <ScatterPlotIcon
+            sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }}
+          />
         </Grid>
-        <Grid item xs={0.1} key="space0"/>
+        <Grid item xs={0.1} key="space0" />
         <Grid item xs={1.0} key="vertex-count">
           <TextField
             type="number"
@@ -204,9 +249,11 @@ void main() {
           />
         </Grid>
         <Grid item xs={0.5} key="diffuse-ibl-intensity-icon">
-          <LightModeIcon sx={{ fontSize: "20px", paddingTop: "5px", color: "#868686" }} />
+          <LightModeIcon
+            sx={{ fontSize: "20px", paddingTop: "5px", color: "#868686" }}
+          />
         </Grid>
-        <Grid item xs={0.1} key="space1"/>
+        <Grid item xs={0.1} key="space1" />
         <Grid item xs={1.0} key="diffuse-ibl-intensity">
           <TextField
             type="number"
@@ -215,7 +262,9 @@ void main() {
             onChange={(e) => {
               if (Util.isValidNum(e.target.value)) {
                 const floatValue = parseFloat(e.target.value);
-                module.Renderer.getInstance().setDiffuseIBLIntensity(floatValue);
+                module.Renderer.getInstance().setDiffuseIBLIntensity(
+                  floatValue
+                );
                 setDiffuseIBLIntensity(floatValue);
               } else {
                 module.Renderer.getInstance().setDiffuseIBLIntensity(0.0);
@@ -226,9 +275,16 @@ void main() {
           />
         </Grid>
         <Grid item xs={0.5} key="width-icon">
-          <HeightIcon sx={{ fontSize: "20px", paddingLeft: "10px", color: "#868686", transform: 'rotate(90deg)' }} />
+          <HeightIcon
+            sx={{
+              fontSize: "20px",
+              paddingLeft: "10px",
+              color: "#868686",
+              transform: "rotate(90deg)",
+            }}
+          />
         </Grid>
-        <Grid item xs={0.1} key="space2"/>
+        <Grid item xs={0.1} key="space2" />
         <Grid item xs={1.0} key="width-size">
           <TextField
             type="number"
@@ -253,9 +309,11 @@ void main() {
         </Grid>
 
         <Grid item xs={0.5} key="height-icon">
-          <HeightIcon sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }} />
+          <HeightIcon
+            sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }}
+          />
         </Grid>
-        <Grid item xs={0.1} key="space3"/>
+        <Grid item xs={0.1} key="space3" />
         <Grid item xs={1.0} key="height-size">
           <TextField
             type="number"
@@ -277,6 +335,64 @@ void main() {
             }}
             inputProps={{ style: { color: "#868686" } }}
           />
+        </Grid>
+        <Grid item xs={0.5} key="space4" />
+        <Grid item xs={1.0} key="help">
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<HelpIcon />}
+            sx={{ width: "100%" }}
+            onClick={() => {
+              setHelpModalOpen(true);
+            }}
+          >
+            help
+          </Button>
+          <Modal
+            open={helpModalOpen}
+            onClose={() => {
+              setHelpModalOpen(false);
+            }}
+            aria-labelledby="help-modal"
+            aria-describedby="help-modal-description"
+          >
+            <Box
+              sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: 400,
+                bgcolor: "background.paper",
+                border: "2px solid #000",
+                boxShadow: 24,
+                p: 4,
+              }}
+            >
+              <Typography id="help-title" variant="h5" component="h2">
+                Shader Parameter Guide
+              </Typography>
+              <Typography id="help-subtitle" component="h5">
+                (GLSL 3.0 vertex shader)
+              </Typography>
+              <Typography sx={{ mt: 2 }}>
+                float vertexId : current vertexId (0 ~ vertexCount - 1)
+              </Typography>
+              <Typography sx={{ mt: 2 }}>float volume : current volume</Typography>
+              <Typography sx={{ mt: 2 }}>vec2 resolution : shader art texture resolution (maybe 2048, 2048)</Typography>
+              <Typography sx={{ mt: 2 }}>vec4 background : background color</Typography>
+              <Typography sx={{ mt: 2 }}>float time : current music time</Typography>
+              <Typography sx={{ mt: 2 }}>float vertexCount : total vertex counts</Typography>
+              <Typography sx={{ mt: 2 }}>sampler2D sound : left sound texture (2048, 2048), use r channel</Typography>
+              <Typography sx={{ mt: 2 }}>sampler2D sound2 : right sound texture (2048, 2048), use r channel</Typography>
+              <Typography sx={{ mt: 2 }}>bool isStereo : if stereo, it is true. if mono, it is false</Typography>
+              <hr/>
+              <Typography sx={{ mt: 2 }}>vec4 v_color : output color</Typography>
+              <Typography sx={{ mt: 2 }}>vec4 gl_Position : output position (NDC)</Typography>
+              <Typography sx={{ mt: 2 }}>float gl_PointSize : output point size</Typography>
+            </Box>
+          </Modal>
         </Grid>
       </Grid>
 

@@ -35,9 +35,9 @@ void windowTestProc()
 	util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/Duck/glTF/Duck.gltf"));
 	// util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/Lantern/glTF/Lantern.gltf"));
 	// util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/WaterBottle/glTF/WaterBottle.gltf"));
-	Renderer::getInstance()->getSceneAt(0)->getNodeAt(0)->setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
+	Renderer::getInstance()->getSceneAt(0)->getChildAt(0)->setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
 
-	Renderer::getInstance()->getSceneAt(1)->getNodeAt(0)->setPosition(glm::vec3(-1.0f, 0.0f, 0.0f));
+	Renderer::getInstance()->getSceneAt(1)->getChildAt(0)->setPosition(glm::vec3(-1.0f, 0.0f, 0.0f));
 	//Renderer::getInstance()->getSceneAt(2)->getNodeAt(0)->setPosition(glm::vec3(2.0f, 1.0f, 0.0f));
 	//Renderer::getInstance()->getSceneAt(2)->getNodeAt(0)->setScale(glm::vec3(3.0f));
 	//Renderer::getInstance()->setBackgroundColor(glm::vec4(0.5f, 0.5f, 0.0f, 1.0f));
@@ -111,7 +111,7 @@ void main() {
 }
 
 )");
-	Renderer::getInstance()->setAudioFile(EFFECTSONG_ROOT + std::string("res/music/test.wav"));
+	Renderer::getInstance()->setAudioFile(EFFECTSONG_ROOT + std::string("res/music/effectsong.mp3"));
 	SDL_Event event;
 	bool running = true;
 	// camera control
@@ -246,12 +246,12 @@ std::string getRootPath() {
 EMSCRIPTEN_BINDINGS(CORE){
   emscripten::function("initialize", &initializeWeb);
   emscripten::function("deInitialize", &deInitialize);
-  emscripten::function("loop", &loop);
   emscripten::function("loadGLTFData", &util::loadGLTFData, allow_raw_pointers());
   emscripten::function("getRootPath", &getRootPath, allow_raw_pointers());
 }
 EMSCRIPTEN_BINDINGS(GLTF){
   class_<Scene>("Scene")
+	.constructor<>()
     .function("getName", &Scene::getName, allow_raw_pointers())
     .function("setName", &Scene::setName, allow_raw_pointers())
     .function("addLight", &Scene::addLight, allow_raw_pointers())
@@ -266,6 +266,9 @@ EMSCRIPTEN_BINDINGS(GLTF){
     .function("getChildrenCount", &Scene::getChildrenCount);
   class_<Node>("Node")
 	.constructor<Scene*, Node*>()
+	.property("m_bAudioReactiveScale", &Node::m_bAudioReactiveScale)
+	.property("m_reactiveOriginScale", &Node::m_reactiveOriginScale)
+	.property("m_reactiveChangingScale", &Node::m_reactiveChangingScale)
     .function("getPosition", &Node::getPosition, allow_raw_pointers())
     .function("getRotation", &Node::getRotation, allow_raw_pointers())
     .function("getEulerRotation", &Node::getEulerRotation, allow_raw_pointers())
@@ -312,19 +315,26 @@ EMSCRIPTEN_BINDINGS(GLTF){
 EMSCRIPTEN_BINDINGS(SINGLETON){
   class_<Renderer>("Renderer")
     .class_function("getInstance", &Renderer::getInstance, allow_raw_pointers())
+	.function("addScene", &Renderer::addScene, allow_raw_pointers())
+	.function("removeScene", &Renderer::removeScene, allow_raw_pointers())
     .function("getSceneAt", &Renderer::getSceneAt, allow_raw_pointers())
     .function("getSceneByName", &Renderer::getSceneByName, allow_raw_pointers())
 	.function("getSceneCount", &Renderer::getSceneCount)
 	.function("setActiveCamera", &Renderer::setActiveCamera, allow_raw_pointers())
 	.function("getActiveCamera", &Renderer::getActiveCamera, allow_raw_pointers())
+	.function("getMaterial", &Renderer::getMaterial, allow_raw_pointers())
+	.function("addMaterial", &Renderer::addMaterial, allow_raw_pointers())
+	.function("getTexture", &Renderer::getTexture, allow_raw_pointers())
+	.function("addTexture", &Renderer::addTexture, allow_raw_pointers())
 	.function("getWidth", &Renderer::getWidth)
 	.function("getHeight", &Renderer::getHeight)
 	.function("resize", &Renderer::resize)
     .function("setAudioFile", &Renderer::setAudioFile, allow_raw_pointers())
-    .function("setActiveCamera", &Renderer::setActiveCamera , allow_raw_pointers())
-    .function("getCurrentEnergy", &Renderer::getCurrentEnergy)
+	.function("getBackgroundColor", &Renderer::getBackgroundColor, allow_raw_pointers())
+	.function("setBackgroundColor", &Renderer::setBackgroundColor, allow_raw_pointers())
     .function("getDiffuseIBLIntensity", &Renderer::getDiffuseIBLIntensity)
-    .function("setDiffuseIBLIntensity", &Renderer::setDiffuseIBLIntensity);
+    .function("setDiffuseIBLIntensity", &Renderer::setDiffuseIBLIntensity)
+	.function("getCurrentEnergy", &Renderer::getCurrentEnergy);
   class_<ArtShader>("ArtShader")
     .class_function("getInstance", &ArtShader::getInstance, allow_raw_pointers())
     .function("getVertexShader", &ArtShader::getVertexShader , allow_raw_pointers())

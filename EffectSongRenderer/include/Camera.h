@@ -28,6 +28,8 @@ class Camera {
   std::string name;
 
   Node* getNode();
+
+  glm::mat4 getViewMatrix();
 private:
   cgltf_camera* m_cgltf_camera = nullptr;
   Node* m_node;

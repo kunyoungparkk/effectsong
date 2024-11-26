@@ -5,6 +5,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import NodeView from './NodeView.js';
+import SceneView from './SceneView.js';
 
 const StyledTabs = styled((props) => (
     <Tabs
@@ -42,18 +43,21 @@ const StyledTab = styled((props) => <Tab disableRipple {...props} />)(
 
 export default function RightTab({ updateHierarchy, module, targetNode }) {
     const [value, setValue] = React.useState(0);
-    const isNode = targetNode?.$$.ptrType.name === "Node*";
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
 
-    const getPage = (index, isNode) => {
-        if(!targetNode || !isNode){
+    const getPage = (index) => {
+        if(!targetNode){
             return <></>
         }
         switch(index){
             case 0:
-                return <NodeView module={module} targetNode={targetNode} updateHierarchy={updateHierarchy}/>
+                if(targetNode?.$$.ptrType.name === "Node*"){
+                    return <NodeView module={module} targetNode={targetNode} updateHierarchy={updateHierarchy}/>
+                }else if(targetNode?.$$.ptrType.name === "Scene*"){
+                    return <SceneView module={module} targetScene={targetNode} updateHierarchy={updateHierarchy}/>
+                }
             case 1:
                 return <></>
             case 2:
@@ -69,11 +73,11 @@ export default function RightTab({ updateHierarchy, module, targetNode }) {
                     aria-label="styled tabs example"
                 >
                     <StyledTab label="Node" />
-                    <StyledTab label="Audio Reactive" />
+                    <StyledTab label="Visual Script" />
                 </StyledTabs>
                 <Box sx={{ p: 3 }} />
             </Box>
-            {getPage(value, isNode)}
+            {getPage(value)}
         </Box>
     );
 }

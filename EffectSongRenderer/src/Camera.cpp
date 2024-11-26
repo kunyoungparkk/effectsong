@@ -59,3 +59,29 @@ Node* Camera::getNode()
 {
 	return m_node;
 }
+
+glm::mat4 Camera::getViewMatrix()
+{
+	if (!m_node) {
+		return glm::mat4(0.0);
+	}
+	glm::mat4 modelMatrix = m_node->getModelMatrix();
+
+	glm::vec3 translation = glm::vec3(modelMatrix[3]);
+	glm::vec3 scale = glm::vec3(
+		glm::length(glm::vec3(modelMatrix[0])),
+		glm::length(glm::vec3(modelMatrix[1])),
+		glm::length(glm::vec3(modelMatrix[2]))
+	);
+	glm::mat3 rotationMatrix = glm::mat3(
+		glm::vec3(modelMatrix[0]) / scale.x,
+		glm::vec3(modelMatrix[1]) / scale.y,
+		glm::vec3(modelMatrix[2]) / scale.z
+	);
+
+	glm::mat4 modelMatrixNoScale = glm::mat4(1.0f);
+	modelMatrixNoScale = glm::translate(modelMatrixNoScale, translation);
+	modelMatrixNoScale = modelMatrixNoScale * glm::mat4(rotationMatrix);
+
+	return glm::inverse(modelMatrixNoScale);
+}

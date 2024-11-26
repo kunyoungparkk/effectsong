@@ -177,32 +177,40 @@ export default function Editor() {
 
   const startEngine = () => {
     //module.canvas.addEventListener("webglcontextlost", (e) => { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
-    module.loadGLTFData(
-      module.getRootPath() + "res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"
-    );
-    updateHierarchy();
-    module.Renderer.getInstance().setAudioFile(
-      module.getRootPath() + "res/music/poison.mp3"
-    );
-    let camNode = new module.Node(
-      module.Renderer.getInstance().getSceneAt(0),
-      null
-    );
+    const startMusicPath = module.getRootPath() + "res/music/effectsong.mp3";
+    module.Renderer.getInstance().setAudioFile(startMusicPath);
+
+    let arrayBuffer = module.FS.readFile(startMusicPath);
+    const blob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
+    const url = URL.createObjectURL(blob);
+    audioRef.current.audio.current.src = url;
+
+    module.FS.unlink(startMusicPath);
+
+    //DefaultScene
+    let scene = new module.Scene();
+    scene.setName("DefaultScene");
+    let camNode = new module.Node(scene, null);
+    camNode.setName("DefaultCamera")
+    scene.addNode(camNode);
+
     let cam = new module.Camera(camNode);
     camNode.setPosition(new module.vec3(0, 0, -5));
     camNode.setRotation(new module.quat(0, 0, 1, 0));
+
+    module.Renderer.getInstance().addScene(scene);
+
     module.Renderer.getInstance().setActiveCamera(cam);
-    module.Renderer.getInstance().getSceneAt(0).addNode(camNode);
-    module.loop(0.0, false);
+    updateHierarchy();
   };
 
   return (
     <div className="editor">
       <div className="hierarchy">
         <Typography
-          variant="h5" // 글자 크기
+          variant="h5"
           sx={{
-            color: "white", // 기본 텍스트 색상
+            color: "white",
             fontWeight: "bold",
             fontFamily: "Roboto, sans-serif",
             textAlign: "center",
@@ -237,7 +245,7 @@ export default function Editor() {
           volume={0.8}
           showSkipControls
           progressUpdateInterval={100}
-          src="poison.mp3"
+          autoPlay= {true}
         />
         {/* <div style={{ width: "90px", height: "80px" }}></div> */}
       </div>
@@ -247,15 +255,19 @@ export default function Editor() {
             container
             columnSpacing={{ xs: 1, sm: 2, md: 3 }}
             sx={{
-              paddingLeft: 1,
-              paddingRight: 1
+              paddingTop: 0.5,
+              paddingLeft: 2,
+              paddingRight: 2,
+              paddingBottom: 0.5,
+              width: "100%",
+              height: "100%"
             }}
           >
             <Grid item xs={6}>
-              <GLTFImport module={module} />
+              <GLTFImport module={module} updateHierarchy={updateHierarchy}/>
             </Grid>
             <Grid item xs={6}>
-              <MusicImport module={module} />
+              <MusicImport module={module} audioPlayerRef={audioRef}/>
             </Grid>
           </Grid>
         </div>

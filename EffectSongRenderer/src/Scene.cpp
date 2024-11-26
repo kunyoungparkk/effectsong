@@ -2,15 +2,17 @@
 #include "Renderer.h"
 #include <string>
 
-Scene::Scene(cgltf_scene& cgltfScene) : m_cgltf_scene(cgltfScene) {
-	if (m_cgltf_scene.name) {
-		m_name = m_cgltf_scene.name;
+Scene::Scene(cgltf_scene& cgltfScene){
+	if (cgltfScene.name) {
+		m_name = cgltfScene.name;
 	}
-	for (int i = 0; i < m_cgltf_scene.nodes_count; i++) {
-		Node* node = new Node(m_cgltf_scene.nodes[i], nullptr, this);
+	for (int i = 0; i < cgltfScene.nodes_count; i++) {
+		Node* node = new Node(cgltfScene.nodes[i], nullptr, this);
 		m_nodes.push_back(node);
 	}
 }
+
+Scene::Scene(){}
 
 Scene::~Scene()
 {
@@ -31,7 +33,6 @@ void Scene::render(GLuint shaderProgram) {
 	int pointLightCnt = 0;
 	int spotLightCnt = 0;
 	std::string uniformName;
-	//TODO: Light의 Position은 global position을 넣어줘야 함.
 	for (auto iter = m_lights.begin(); iter != m_lights.end(); iter++) {
 		Light* light = (*iter);
 		switch (light->lightType) {
