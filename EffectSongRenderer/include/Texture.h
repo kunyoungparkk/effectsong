@@ -2,7 +2,7 @@
 #include "common.h"
 class Texture {
  public:
-  Texture(std::string& gltfPath, cgltf_texture* cgltf_texture);
+  Texture(std::string& gltfPath, cgltf_texture* cgltf_texture, bool isSRGB = false);
   Texture(std::string& path);
   Texture(int width, int height, int nrChannels, GLint wrapS, GLint wrapT, GLint minFilter, GLint maxFilter);
   ~Texture();

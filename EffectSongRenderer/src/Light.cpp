@@ -5,8 +5,6 @@ Light::Light(Node* node, cgltf_light* cgltf_light)
 {
 	m_node = node;
 	m_cgltf_light = cgltf_light;
-
-	m_node->setLight(this);
 	
 	if (!m_cgltf_light) {
 		return;
@@ -32,13 +30,12 @@ Light::Light(Node* node, cgltf_light* cgltf_light)
 	color[1] = cgltf_light->color[1];
 	color[2] = cgltf_light->color[2];
 
-	intensity = cgltf_light->intensity;
-	//TODO: blender range �ȵ����� ����
-	if (cgltf_light->range < 0.1f) {
+	//TODO: how to recognize light intensity exactly? intensity value of gltf is too big
+	intensity = cgltf_light->intensity * 0.01f;
+	//TODO: gltf doesn't contain range of blender works
+	range = cgltf_light->range;
+	if (range < 0.1f) {
 		range = 5.0;// cgltf_light->range;
-	}
-	else {
-		range = cgltf_light->range;
 	}
 	innerConeAngle = cgltf_light->spot_inner_cone_angle;
 	outerConeAngle = cgltf_light->spot_outer_cone_angle;
@@ -46,6 +43,10 @@ Light::Light(Node* node, cgltf_light* cgltf_light)
 	{
 		name = cgltf_light->name;
 	}
+}
+
+Light::Light(Node* node) : m_node(node)
+{
 }
 
 Node* Light::getNode()

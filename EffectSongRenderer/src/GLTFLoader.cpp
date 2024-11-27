@@ -24,13 +24,8 @@ namespace util {
 		}
 		size_t offset = file_path.find_last_of('/');
 		std::string gltfPath = file_path.substr(0, offset + 1);
-		for (size_t i = 0; i < data->textures_count; i++) {
-			Texture* texture = new Texture(gltfPath, &data->textures[i]);
-			//texture key »ý¼º
-			renderer->addTexture(&data->textures[i], texture, gltfPath);
-		}
 		for (size_t i = 0; i < data->materials_count; i++) {
-			renderer->addMaterial(data->materials[i].name,
+			renderer->addMaterial(&data->materials[i],
 				new Material(&data->materials[i], gltfPath));
 		}
 

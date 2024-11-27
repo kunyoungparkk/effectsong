@@ -48,6 +48,40 @@ std::string generateTextureKey(const cgltf_texture* texture, std::string& gltfPa
 	return "unknown_texture";
 }
 
+//TODO: extend it
+std::string generateMaterialKey(const cgltf_material* material) {
+	size_t hash = 0;
+	std::hash<float> floatHasher;
+	std::hash<void*> pointerHasher;
+	std::hash<std::string> stringHasher;
+
+	if (material->name) {
+		hash ^= stringHasher(material->name);
+	}
+	for (int i = 0; i < 4; ++i) {
+		hash ^= floatHasher(material->pbr_metallic_roughness.base_color_factor[i]) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+	}
+	hash ^= floatHasher(material->pbr_metallic_roughness.metallic_factor) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+	hash ^= floatHasher(material->pbr_metallic_roughness.roughness_factor) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+	if (material->pbr_metallic_roughness.base_color_texture.texture) {
+		hash ^= pointerHasher(material->pbr_metallic_roughness.base_color_texture.texture) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+	}
+	if (material->pbr_metallic_roughness.metallic_roughness_texture.texture) {
+		hash ^= pointerHasher(material->pbr_metallic_roughness.metallic_roughness_texture.texture) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+	}
+	if (material->emissive_texture.texture) {
+		hash ^= pointerHasher(material->emissive_texture.texture) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+	}
+	if (material->normal_texture.texture) {
+		hash ^= pointerHasher(material->normal_texture.texture) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+	}
+	if (material->occlusion_texture.texture) {
+		hash ^= pointerHasher(material->occlusion_texture.texture) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+	}
+
+	return std::to_string(hash);
+}
+
 float Renderer::getCurrentEnergy() const
 {
 	if (m_soundTexture) {
@@ -657,16 +691,33 @@ Camera* Renderer::getActiveCamera()
 	return m_activeCamera;
 }
 
-Material* Renderer::getMaterial(std::string name) { return m_materials[name]; }
-
-void Renderer::addMaterial(std::string name, Material* material) {
-	m_materials[name] = material;
+Material* Renderer::getMaterial(cgltf_material* cgltfMaterial) { 
+	std::string key = generateMaterialKey(cgltfMaterial);
+	if (m_materials.find(key) == m_materials.end()) {
+		return nullptr;
+	}
+	
+	return m_materials[key];
 }
 
-Texture* Renderer::getTexture(cgltf_texture* cgltf_texture, std::string gltfPath) { return m_textures[generateTextureKey(cgltf_texture, gltfPath)]; }
+void Renderer::addMaterial(cgltf_material* cgltfMaterial, Material* material) {
+	std::string key = generateMaterialKey(cgltfMaterial);
+	//if has key -> ignore
+	if (m_materials.find(key) != m_materials.end()) {
+		return;
+	}
+	//get key
+	m_materials[key] = material;
+}
 
-void Renderer::addTexture(cgltf_texture* cgltf_texture, Texture* texture, std::string gltfPath) {
-	m_textures[generateTextureKey(cgltf_texture, gltfPath)] = texture;
+Texture* Renderer::getTexture(cgltf_texture* cgltf_texture, std::string gltfPath, bool isSRGB) {
+	std::string key = generateTextureKey(cgltf_texture, gltfPath);
+	auto iter = m_textures.find(key);
+	if (iter == m_textures.end()) {
+		m_textures[key] = new Texture(gltfPath, cgltf_texture, isSRGB);
+	}
+	
+	return m_textures[key];
 }
 
 int Renderer::getWidth() const

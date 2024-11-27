@@ -41,11 +41,10 @@ class Renderer {
   void setActiveCamera(Camera* camera);
   Camera* getActiveCamera();
 
-  Material* getMaterial(std::string name);
-  void addMaterial(std::string name, Material* material);
+  Material* getMaterial(cgltf_material* cgltfMaterial);
+  void addMaterial(cgltf_material* cgltfMaterial, Material* material);
 
-  Texture* getTexture(cgltf_texture* cgltf_texture, std::string gltfPath);
-  void addTexture(cgltf_texture* cgltf_texture, Texture* texture, std::string gltfPath);
+  Texture* getTexture(cgltf_texture* cgltf_texture, std::string gltfPath, bool isSRGB = false);
 
   int getWidth() const;
   int getHeight() const;

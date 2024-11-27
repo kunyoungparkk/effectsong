@@ -1,9 +1,9 @@
 #pragma once
 #include "common.h"
 #include "Primitive.h"
-#include "Camera.h"
-#include "Light.h"
 
+class Camera;
+class Light;
 class Scene;
 class Node {
 public:

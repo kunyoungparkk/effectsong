@@ -5,7 +5,7 @@
 Material::Material(cgltf_material* material, std::string& gltfPath) : m_material(material) {
   if (m_material->pbr_metallic_roughness.base_color_texture.texture) {
       m_baseColorTexture = Renderer::getInstance()->getTexture(
-          m_material->pbr_metallic_roughness.base_color_texture.texture, gltfPath);
+          m_material->pbr_metallic_roughness.base_color_texture.texture, gltfPath, true);
   }
   if (m_material->pbr_metallic_roughness.metallic_roughness_texture.texture){
       m_metallicRoughnessTexture = Renderer::getInstance()->getTexture(
@@ -13,7 +13,7 @@ Material::Material(cgltf_material* material, std::string& gltfPath) : m_material
   }
   if (m_material->emissive_texture.texture) {
       m_emissiveTexture = Renderer::getInstance()->getTexture(
-          m_material->emissive_texture.texture, gltfPath);
+          m_material->emissive_texture.texture, gltfPath, true);
   }
   if (m_material->normal_texture.texture) {
       m_normalTexture = Renderer::getInstance()->getTexture(

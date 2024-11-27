@@ -7,10 +7,10 @@
 #include "Scene.h"
 #include "ArtShader.h"
 #include "Camera.h"
+#include "Light.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
-//#include <emscripten/html5.h>
 #include <emscripten/bind.h>
 using namespace emscripten;
 #endif
@@ -32,7 +32,8 @@ void windowTestProc()
 {
 	const float targetDeltaTime = 1.0f / TARGET_FPS;
 
-	util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"));
+	util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/LightsPunctualLamp/glTF/LightsPunctualLamp.gltf"));
+	//util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"));
 	//util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb"));
 	//util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/DamagedHelmet/glTF-Embedded/DamagedHelmet.gltf"));
 	util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/Duck/glTF/Duck.gltf"));
@@ -137,7 +138,7 @@ void main() {
 		glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	Renderer::getInstance()->getSceneAt(0)->addNode(camNode);
 	Renderer::getInstance()->setDiffuseIBLIntensity(10.0f);
-	
+
 	while (running) {
 		frameStart = SDL_GetTicks();
 		const uint8_t* state = SDL_GetKeyboardState(nullptr);
@@ -208,9 +209,9 @@ void main() {
 		uint32_t curTime = SDL_GetTicks();
 		frameTime = curTime - frameStart;
 		//fixed deltatime
-		if (1000.0/ TARGET_FPS > frameTime)
+		if (1000.0 / TARGET_FPS > frameTime)
 		{
-			SDL_Delay((uint32_t)(1000.0/ TARGET_FPS) - frameTime);
+			SDL_Delay((uint32_t)(1000.0 / TARGET_FPS) - frameTime);
 		}
 		musicTime = (curTime - musicStartTime) / 1000.0f;
 		if (musicTime > printTime) {
@@ -246,141 +247,147 @@ void initializeWeb(int width, int height, int getCurrentTimePtr, int getIsPlayPt
 std::string getRootPath() {
 	return EFFECTSONG_ROOT;
 }
-EMSCRIPTEN_BINDINGS(CORE){
-  emscripten::function("initialize", &initializeWeb);
-  emscripten::function("deInitialize", &deInitialize);
-  emscripten::function("loadGLTFData", &util::loadGLTFData, allow_raw_pointers());
-  emscripten::function("getRootPath", &getRootPath, allow_raw_pointers());
+EMSCRIPTEN_BINDINGS(CORE) {
+	emscripten::function("initialize", &initializeWeb);
+	emscripten::function("deInitialize", &deInitialize);
+	emscripten::function("loadGLTFData", &util::loadGLTFData, allow_raw_pointers());
+	emscripten::function("getRootPath", &getRootPath, allow_raw_pointers());
 }
-EMSCRIPTEN_BINDINGS(GLTF){
-  class_<Scene>("Scene")
-	.constructor<>()
-    .function("getName", &Scene::getName, allow_raw_pointers())
-    .function("setName", &Scene::setName, allow_raw_pointers())
-    .function("addLight", &Scene::addLight, allow_raw_pointers())
-    .function("removeLight", &Scene::removeLight, allow_raw_pointers())
-	.function("addCamera", &Scene::addCamera, allow_raw_pointers())
-	.function("removeCamera", &Scene::removeCamera, allow_raw_pointers())
-	.function("getCameraAt", &Scene::getCameraAt, allow_raw_pointers())
-	.function("getCameraCount", &Scene::getCameraCount)
-    .function("addNode", &Scene::addNode, allow_raw_pointers())
-    .function("getChildAt", &Scene::getChildAt, allow_raw_pointers())
-    .function("getChildByName", &Scene::getChildByName, allow_raw_pointers())
-    .function("getChildrenCount", &Scene::getChildrenCount);
-  class_<Node>("Node")
-	.constructor<Scene*, Node*>()
-	.property("m_bAudioReactiveScale", &Node::m_bAudioReactiveScale)
-	.property("m_reactiveOriginScale", &Node::m_reactiveOriginScale)
-	.property("m_reactiveChangingScale", &Node::m_reactiveChangingScale)
-    .function("getPosition", &Node::getPosition, allow_raw_pointers())
-    .function("getRotation", &Node::getRotation, allow_raw_pointers())
-    .function("getEulerRotation", &Node::getEulerRotation, allow_raw_pointers())
-    .function("getScale", &Node::getScale, allow_raw_pointers())
-    .function("getFront", &Node::getFront, allow_raw_pointers())
-    .function("getLeft", &Node::getLeft, allow_raw_pointers())
-    .function("setPosition", &Node::setPosition, allow_raw_pointers())
-    .function("setRotation", &Node::setRotation, allow_raw_pointers())
-    .function("setRotationByEuler", &Node::setRotationByEuler, allow_raw_pointers())
-    .function("setScale", &Node::setScale, allow_raw_pointers())
-    .function("getGlobalPosition", &Node::getGlobalPosition, allow_raw_pointers())
-    .function("getGlobalRotation", &Node::getGlobalRotation, allow_raw_pointers())
-    .function("getGlobalScale", &Node::getGlobalScale, allow_raw_pointers())
-    .function("getGlobalFront", &Node::getGlobalFront, allow_raw_pointers())
-    .function("getGlobalLeft", &Node::getGlobalLeft, allow_raw_pointers())
-    .function("getLight", &Node::getLight, allow_raw_pointers())
-    .function("setLight", &Node::setLight, allow_raw_pointers())
-    .function("getCamera", &Node::getCamera, allow_raw_pointers())
-    .function("setCamera", &Node::setCamera, allow_raw_pointers())
-    .function("getName", &Node::getName, allow_raw_pointers())
-    .function("setName", &Node::setName, allow_raw_pointers())
-    .function("getChildAt", &Node::getChildAt, allow_raw_pointers())
-    .function("getChildByName", &Node::getChildByName, allow_raw_pointers())
-	.function("getChildrenCount", &Node::getChildrenCount);
-  enum_<ProjectionType>("ProjectionType")
-	.value("PERSPECTIVE", ProjectionType::PERSPECTIVE)
-	.value("ORTHOGRAPHIC", ProjectionType::ORTHOGRAPHIC);
-  class_<Camera>("Camera")
-	.constructor<Node*>()
-	.property("projectionType", &Camera::projectionType)
-	.property("aspectRatio", &Camera::aspectRatio)
-	.property("fov", &Camera::fov)
-	.property("xMag", &Camera::xMag)
-	.property("yMag", &Camera::yMag)
-	.property("zFar", &Camera::zFar)
-	.property("zNear", &Camera::zNear)
-	.property("name", &Camera::name)
-    .function("getNode", &Camera::getNode, allow_raw_pointers());
-  class_<Light>("Light")
-	.property("color", &Light::color)
-	.property("intensity", &Light::intensity)
-	.property("range", &Light::range)
-	.property("innerConeAngle", &Light::innerConeAngle)
-	.property("outerConeAngle", &Light::outerConeAngle)
-	.property("name", &Light::name)
-    .function("getNode", &Light::getNode, allow_raw_pointers());
+EMSCRIPTEN_BINDINGS(GLTF) {
+	class_<Scene>("Scene")
+		.constructor<>()
+		.function("getName", &Scene::getName, allow_raw_pointers())
+		.function("setName", &Scene::setName, allow_raw_pointers())
+		.function("addLight", &Scene::addLight, allow_raw_pointers())
+		.function("removeLight", &Scene::removeLight, allow_raw_pointers())
+		.function("addCamera", &Scene::addCamera, allow_raw_pointers())
+		.function("removeCamera", &Scene::removeCamera, allow_raw_pointers())
+		.function("getCameraAt", &Scene::getCameraAt, allow_raw_pointers())
+		.function("getCameraCount", &Scene::getCameraCount)
+		.function("addNode", &Scene::addNode, allow_raw_pointers())
+		.function("getChildAt", &Scene::getChildAt, allow_raw_pointers())
+		.function("getChildByName", &Scene::getChildByName, allow_raw_pointers())
+		.function("getChildrenCount", &Scene::getChildrenCount);
+	class_<Node>("Node")
+		.constructor<Scene*, Node*>()
+		.property("m_bAudioReactiveScale", &Node::m_bAudioReactiveScale)
+		.property("m_reactiveOriginScale", &Node::m_reactiveOriginScale)
+		.property("m_reactiveChangingScale", &Node::m_reactiveChangingScale)
+		.function("getPosition", &Node::getPosition, allow_raw_pointers())
+		.function("getRotation", &Node::getRotation, allow_raw_pointers())
+		.function("getEulerRotation", &Node::getEulerRotation, allow_raw_pointers())
+		.function("getScale", &Node::getScale, allow_raw_pointers())
+		.function("getFront", &Node::getFront, allow_raw_pointers())
+		.function("getLeft", &Node::getLeft, allow_raw_pointers())
+		.function("setPosition", &Node::setPosition, allow_raw_pointers())
+		.function("setRotation", &Node::setRotation, allow_raw_pointers())
+		.function("setRotationByEuler", &Node::setRotationByEuler, allow_raw_pointers())
+		.function("setScale", &Node::setScale, allow_raw_pointers())
+		.function("getGlobalPosition", &Node::getGlobalPosition, allow_raw_pointers())
+		.function("getGlobalRotation", &Node::getGlobalRotation, allow_raw_pointers())
+		.function("getGlobalScale", &Node::getGlobalScale, allow_raw_pointers())
+		.function("getGlobalFront", &Node::getGlobalFront, allow_raw_pointers())
+		.function("getGlobalLeft", &Node::getGlobalLeft, allow_raw_pointers())
+		.function("getLight", &Node::getLight, allow_raw_pointers())
+		.function("setLight", &Node::setLight, allow_raw_pointers())
+		.function("getCamera", &Node::getCamera, allow_raw_pointers())
+		.function("setCamera", &Node::setCamera, allow_raw_pointers())
+		.function("getName", &Node::getName, allow_raw_pointers())
+		.function("setName", &Node::setName, allow_raw_pointers())
+		.function("getChildAt", &Node::getChildAt, allow_raw_pointers())
+		.function("getChildByName", &Node::getChildByName, allow_raw_pointers())
+		.function("getChildrenCount", &Node::getChildrenCount);
+	enum_<ProjectionType>("ProjectionType")
+		.value("PERSPECTIVE", ProjectionType::PERSPECTIVE)
+		.value("ORTHOGRAPHIC", ProjectionType::ORTHOGRAPHIC);
+	class_<Camera>("Camera")
+		.constructor<Node*>()
+		.property("projectionType", &Camera::projectionType)
+		.property("aspectRatio", &Camera::aspectRatio)
+		.property("fov", &Camera::fov)
+		.property("xMag", &Camera::xMag)
+		.property("yMag", &Camera::yMag)
+		.property("zFar", &Camera::zFar)
+		.property("zNear", &Camera::zNear)
+		.property("name", &Camera::name)
+		.function("getNode", &Camera::getNode, allow_raw_pointers());
+	enum_<Light::LightType>("LightType")
+		.value("NONE", Light::LightType::NONE)
+		.value("DIRECTIONAL_LIGHT", Light::LightType::DIRECTIONAL_LIGHT)
+		.value("POINT_LIGHT", Light::LightType::POINT_LIGHT)
+		.value("SPOT_LIGHT", Light::LightType::SPOT_LIGHT);
+	class_<Light>("Light")
+		.constructor<Node*>()
+		.property("color", &Light::color)
+		.property("intensity", &Light::intensity)
+		.property("range", &Light::range)
+		.property("innerConeAngle", &Light::innerConeAngle)
+		.property("outerConeAngle", &Light::outerConeAngle)
+		.property("lightType", &Light::lightType)
+		.property("name", &Light::name)
+		.function("getNode", &Light::getNode, allow_raw_pointers());
 }
-EMSCRIPTEN_BINDINGS(SINGLETON){
-  class_<Renderer>("Renderer")
-    .class_function("getInstance", &Renderer::getInstance, allow_raw_pointers())
-	.function("addScene", &Renderer::addScene, allow_raw_pointers())
-	.function("removeScene", &Renderer::removeScene, allow_raw_pointers())
-    .function("getSceneAt", &Renderer::getSceneAt, allow_raw_pointers())
-    .function("getSceneByName", &Renderer::getSceneByName, allow_raw_pointers())
-	.function("getSceneCount", &Renderer::getSceneCount)
-	.function("setActiveCamera", &Renderer::setActiveCamera, allow_raw_pointers())
-	.function("getActiveCamera", &Renderer::getActiveCamera, allow_raw_pointers())
-	.function("getMaterial", &Renderer::getMaterial, allow_raw_pointers())
-	.function("addMaterial", &Renderer::addMaterial, allow_raw_pointers())
-	.function("getTexture", &Renderer::getTexture, allow_raw_pointers())
-	.function("addTexture", &Renderer::addTexture, allow_raw_pointers())
-	.function("getWidth", &Renderer::getWidth)
-	.function("getHeight", &Renderer::getHeight)
-	.function("resize", &Renderer::resize)
-    .function("setAudioFile", &Renderer::setAudioFile, allow_raw_pointers())
-	.function("getBackgroundColor", &Renderer::getBackgroundColor, allow_raw_pointers())
-	.function("setBackgroundColor", &Renderer::setBackgroundColor, allow_raw_pointers())
-    .function("getDiffuseIBLIntensity", &Renderer::getDiffuseIBLIntensity)
-    .function("setDiffuseIBLIntensity", &Renderer::setDiffuseIBLIntensity)
-	.function("getCurrentEnergy", &Renderer::getCurrentEnergy);
-  class_<ArtShader>("ArtShader")
-    .class_function("getInstance", &ArtShader::getInstance, allow_raw_pointers())
-    .function("getVertexShader", &ArtShader::getVertexShader , allow_raw_pointers())
-    .function("setVertexShader", &ArtShader::setVertexShader , allow_raw_pointers())
-    .function("getPrimitiveMode", &ArtShader::getPrimitiveMode , allow_raw_pointers())
-    .function("setPrimitiveMode", &ArtShader::setPrimitiveMode , allow_raw_pointers())
-    .function("getVertexCount", &ArtShader::getVertexCount , allow_raw_pointers())
-    .function("setVertexCount", &ArtShader::setVertexCount , allow_raw_pointers());
+EMSCRIPTEN_BINDINGS(SINGLETON) {
+	class_<Renderer>("Renderer")
+		.class_function("getInstance", &Renderer::getInstance, allow_raw_pointers())
+		.function("addScene", &Renderer::addScene, allow_raw_pointers())
+		.function("removeScene", &Renderer::removeScene, allow_raw_pointers())
+		.function("getSceneAt", &Renderer::getSceneAt, allow_raw_pointers())
+		.function("getSceneByName", &Renderer::getSceneByName, allow_raw_pointers())
+		.function("getSceneCount", &Renderer::getSceneCount)
+		.function("setActiveCamera", &Renderer::setActiveCamera, allow_raw_pointers())
+		.function("getActiveCamera", &Renderer::getActiveCamera, allow_raw_pointers())
+		.function("getMaterial", &Renderer::getMaterial, allow_raw_pointers())
+		.function("addMaterial", &Renderer::addMaterial, allow_raw_pointers())
+		.function("getTexture", &Renderer::getTexture, allow_raw_pointers())
+		.function("getWidth", &Renderer::getWidth)
+		.function("getHeight", &Renderer::getHeight)
+		.function("resize", &Renderer::resize)
+		.function("setAudioFile", &Renderer::setAudioFile, allow_raw_pointers())
+		.function("getBackgroundColor", &Renderer::getBackgroundColor, allow_raw_pointers())
+		.function("setBackgroundColor", &Renderer::setBackgroundColor, allow_raw_pointers())
+		.function("getDiffuseIBLIntensity", &Renderer::getDiffuseIBLIntensity)
+		.function("setDiffuseIBLIntensity", &Renderer::setDiffuseIBLIntensity)
+		.function("getCurrentEnergy", &Renderer::getCurrentEnergy);
+	class_<ArtShader>("ArtShader")
+		.class_function("getInstance", &ArtShader::getInstance, allow_raw_pointers())
+		.function("getVertexShader", &ArtShader::getVertexShader, allow_raw_pointers())
+		.function("setVertexShader", &ArtShader::setVertexShader, allow_raw_pointers())
+		.function("getPrimitiveMode", &ArtShader::getPrimitiveMode, allow_raw_pointers())
+		.function("setPrimitiveMode", &ArtShader::setPrimitiveMode, allow_raw_pointers())
+		.function("getVertexCount", &ArtShader::getVertexCount, allow_raw_pointers())
+		.function("setVertexCount", &ArtShader::setVertexCount, allow_raw_pointers());
 }
 
-EMSCRIPTEN_BINDINGS(BIND_GLM){
-  class_<glm::vec2>("vec2")
-        .constructor<float, float>()
-        .property("x", &glm::vec2::x)
-        .property("y", &glm::vec2::y);
-  class_<glm::vec3>("vec3")
-        .constructor<float, float, float>()
-        .property("x", &glm::vec3::x)
-        .property("y", &glm::vec3::y)
-        .property("z", &glm::vec3::z);
-  class_<glm::vec4>("vec4")
-        .constructor<float, float, float, float>()
-        .property("x", &glm::vec4::x)
-        .property("y", &glm::vec4::y)
-        .property("z", &glm::vec4::z)
-        .property("w", &glm::vec4::w);
-  class_<glm::quat>("quat")
-        .constructor<float, float, float, float>()
-        .property("x", &glm::quat::x)
-        .property("y", &glm::quat::y)
-        .property("z", &glm::quat::z)
-        .property("w", &glm::quat::w);
+EMSCRIPTEN_BINDINGS(BIND_GLM) {
+	class_<glm::vec2>("vec2")
+		.constructor<float, float>()
+		.property("x", &glm::vec2::x)
+		.property("y", &glm::vec2::y);
+	class_<glm::vec3>("vec3")
+		.constructor<float, float, float>()
+		.property("x", &glm::vec3::x)
+		.property("y", &glm::vec3::y)
+		.property("z", &glm::vec3::z);
+	class_<glm::vec4>("vec4")
+		.constructor<float, float, float, float>()
+		.property("x", &glm::vec4::x)
+		.property("y", &glm::vec4::y)
+		.property("z", &glm::vec4::z)
+		.property("w", &glm::vec4::w);
+	class_<glm::quat>("quat")
+		.constructor<float, float, float, float>()
+		.property("x", &glm::quat::x)
+		.property("y", &glm::quat::y)
+		.property("z", &glm::quat::z)
+		.property("w", &glm::quat::w);
 }
 #endif
 
 void initialize(int width, int height) {
-//#ifdef __EMSCRIPTEN__
-//	emscripten_html5_remove_all_event_listeners();
-//#endif
+	//#ifdef __EMSCRIPTEN__
+	//	emscripten_html5_remove_all_event_listeners();
+	//#endif
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		printf("SDL Initialization Fail: %s\n", SDL_GetError());
 		exit(0);

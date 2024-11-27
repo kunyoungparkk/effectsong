@@ -35,7 +35,7 @@ std::vector<unsigned char> decodeBase64(const std::string& encodedString) {
 	return decodedData;
 }
 
-Texture::Texture(std::string& gltfPath, cgltf_texture* cgltf_texture)
+Texture::Texture(std::string& gltfPath, cgltf_texture* cgltf_texture, bool isSRGB)
 	: m_cgltfTexture(cgltf_texture) {
 
 	int width, height, nrChannels;
@@ -97,17 +97,16 @@ Texture::Texture(std::string& gltfPath, cgltf_texture* cgltf_texture)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, defaultMin);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, defaultMag);
 	}
-
+	//TODO: emscripten SRGB is not working at mipmap
 	if (nrChannels == 4) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+		glTexImage2D(GL_TEXTURE_2D, 0, /*isSRGB ? GL_SRGB8_ALPHA8 : */GL_RGBA, width, height, 0, GL_RGBA,
 			GL_UNSIGNED_BYTE, m_data);
 	}
 	else {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+		glTexImage2D(GL_TEXTURE_2D, 0, /*isSRGB ? GL_SRGB8 :*/ GL_RGB, width, height, 0, GL_RGB,
 			GL_UNSIGNED_BYTE, m_data);
 	}
 	glGenerateMipmap(GL_TEXTURE_2D);
-
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 

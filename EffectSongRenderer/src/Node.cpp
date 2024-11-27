@@ -1,6 +1,8 @@
 #include "Node.h"
 #include "Scene.h"
 #include "Renderer.h"
+#include "Camera.h"
+#include "Light.h"
 
 bool decomposeMatrix(const glm::mat4& matrix, glm::vec3& position, glm::quat& rotation, glm::vec3& scale) {
 	// ��ġ

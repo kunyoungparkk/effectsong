@@ -159,7 +159,7 @@ Primitive::Primitive(cgltf_primitive* cgltfPrimitive) {
 	}
 
 	//material ¿¬°á
-	m_material = Renderer::getInstance()->getMaterial(cgltfPrimitive->material->name);
+	m_material = Renderer::getInstance()->getMaterial(cgltfPrimitive->material);
 
 	//bind
 	glGenVertexArrays(1, &VAO);

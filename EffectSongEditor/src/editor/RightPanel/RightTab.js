@@ -6,7 +6,7 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import NodeView from './NodeView.js';
 import SceneView from './SceneView.js';
-
+import VisualScriptView from './VisualScriptView.js';
 const StyledTabs = styled((props) => (
     <Tabs
         {...props}
@@ -59,7 +59,7 @@ export default function RightTab({ updateHierarchy, module, targetNode }) {
                     return <SceneView module={module} targetScene={targetNode} updateHierarchy={updateHierarchy}/>
                 }
             case 1:
-                return <></>
+                return <VisualScriptView/>
             case 2:
                 return <></>
         }

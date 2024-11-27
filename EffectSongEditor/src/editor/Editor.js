@@ -198,6 +198,7 @@ export default function Editor() {
     camNode.setPosition(new module.vec3(0, 0, -5));
     camNode.setRotation(new module.quat(0, 0, 1, 0));
 
+    camNode.setCamera(cam);
     module.Renderer.getInstance().addScene(scene);
 
     module.Renderer.getInstance().setActiveCamera(cam);

@@ -2,20 +2,27 @@ import { useState, useEffect } from "react";
 import { Grid, FormControl, InputLabel, NativeSelect } from "@mui/material";
 
 const SettingsView = ({ module }) => {
-  const [currentCamera, setCurrentCamera] = useState(
-    module?.Renderer?.getInstance().getActiveCamera()
-  );
+  const [cameraList, setCameraList] = useState([]);
+  const [activeCameraIndex, setActiveCameraIndex] = useState(0);
 
-  let cameraList = [];
-  const renderer = module.Renderer.getInstance();
-  for (let i = 0; i < renderer.getSceneCount(); i++) {
-    const scene = renderer.getSceneAt(i);
-    for (let j = 0; j < scene.getCameraCount(); j++) {
-      const camera = scene.getCameraAt(j);
-      cameraList.push(camera.getNode());
+
+  useEffect(() => {
+    let tempCameraList = [];
+    const renderer = module.Renderer.getInstance();
+    const activeCamera = renderer.getActiveCamera();
+
+    for (let i = 0; i < renderer.getSceneCount(); i++) {
+      const scene = renderer.getSceneAt(i);
+      for (let j = 0; j < scene.getCameraCount(); j++) {
+        const camera = scene.getCameraAt(j);
+        if (camera.$$.ptr == activeCamera.$$.ptr) {
+          setActiveCameraIndex(tempCameraList.length);
+        }
+        tempCameraList.push(camera.getNode());
+      }
     }
-  }
-  console.log(cameraList);
+    setCameraList(tempCameraList);
+  }, [module]);
 
   return (
     <Grid
@@ -37,22 +44,23 @@ const SettingsView = ({ module }) => {
             Active Camera
           </InputLabel>
           <NativeSelect
-            value={currentCamera?.getNode().getName()}
+            value={activeCameraIndex}
             inputProps={{
               name: "active-camera",
               id: "active-camera",
             }}
             style={{ color: "white" }}
             onChange={(e) => {
-              renderer.setActiveCamera(e.target.value);
-              setCurrentCamera(e.target.value);
+              let newActiveCamera = cameraList[e.target.value].getCamera();
+              module.Renderer.getInstance().setActiveCamera(newActiveCamera);
+              setActiveCameraIndex(e.target.value);
             }}
           >
-            {cameraList.map((cameraNode) => {
+            {cameraList.map((cameraNode, index) => {
               return (
                 <option
-                  value={cameraNode}
-                  key={cameraNode}
+                  value={index}
+                  key={index}
                   style={{ color: "white", backgroundColor: "#2e2e2e" }}
                 >
                   {cameraNode.getName()}
