@@ -7,34 +7,62 @@ const GLTFImport = ({ module, updateHierarchy }) => {
   const [modalOpen, setModalOpen] = useState(false);
 
   const procGLTFInput = (files) => {
-    let reader = new FileReader();
+    //glb인지, gltf인지, 혹은 둘다, 혹은 없는지 확인.
+    let isGLTF = false;
+    let isGLB = false;
+    let fileName = "";
+    for(let i=0; i<files.length; i++){
+      let splittedName = files[i].name.split(".");
+      const ext = splittedName[1];
+      if(ext && ext == 'gltf'){
+        isGLTF = true;
+        fileName = splittedName[0];
+      }
+      else if(ext && ext == 'glb'){
+        isGLB = true;
+        fileName = splittedName[0];
+      }
+    }
+    if(isGLTF && isGLB){
+      //TODO: popup required
+      return;
+    }else if(!isGLTF && !isGLB){
+      //TODO: popup required
+      return;
+    }
+    const targetEXT = isGLTF? "gltf" : "glb";
+    const TARGET_GLTF_ROOT_PATH = module.getRootPath() + "res/" + fileName + "/";
+    
+    if (!module.FS.analyzePath(TARGET_GLTF_ROOT_PATH).exists) {
+        module.FS.mkdir(TARGET_GLTF_ROOT_PATH);
+    }
 
     let readFileCount = 0;
     let gltfFilePath = "";
-    const GLTF_ROOT_PATH = module.getRootPath() + "res/gltf/";
-    
-    if (!module.FS.analyzePath(GLTF_ROOT_PATH).exists) {
-        module.FS.mkdir(GLTF_ROOT_PATH);
-    }
-
+    let reader = new FileReader();
     for (let i = 0; i < files.length; i++) {
       let file = files[i];
       reader = new FileReader();
       reader.onload = function (e) {
         let arrayBuffer = e.target.result;
-        let filePath = GLTF_ROOT_PATH + file.name;
-        if (file.name.split(".")[1] === "gltf") {
+        let filePath = TARGET_GLTF_ROOT_PATH + file.name;
+
+        if (file.name.split(".")[1] === targetEXT) {
           gltfFilePath = filePath;
         }
+
         module.FS.writeFile(filePath, new Uint8Array(arrayBuffer));
         readFileCount++;
         if (readFileCount === files.length) {
           module.loadGLTFData(gltfFilePath);
 
-          const dir_info = module.FS.readdir(GLTF_ROOT_PATH);
+          //delete after read to mem
+          const dir_info = module.FS.readdir(TARGET_GLTF_ROOT_PATH);
           for (let i = 2; i < dir_info.length; i++) {
-            module.FS.unlink(GLTF_ROOT_PATH + dir_info[i]);
+            module.FS.unlink(TARGET_GLTF_ROOT_PATH + dir_info[i]);
           }
+          module.FS.rmdir(TARGET_GLTF_ROOT_PATH);
+
           updateHierarchy();
           setModalOpen(false);
         }
@@ -54,7 +82,7 @@ const GLTFImport = ({ module, updateHierarchy }) => {
           setModalOpen(true);
         }}
       >
-        gltf
+        gltf/glb
       </Button>
       <Modal
         open={modalOpen}
@@ -89,7 +117,7 @@ const GLTFImport = ({ module, updateHierarchy }) => {
               let files = e.dataTransfer?.files;
               procGLTFInput(files);
             }}
-            hoverLabel="Click or drag to upload files"
+            hoverLabel="Click or drag to upload all files (supports gltf with textures, embedded gltf, glb)"
             dropLabel="Drop files here"
           />
         </Box>

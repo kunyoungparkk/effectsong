@@ -17,3 +17,4 @@
 #include <vector>
 #include <iostream>
 #include <list>
+#include <string>

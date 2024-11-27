@@ -6,6 +6,7 @@
 #include "Node.h"
 #include "Scene.h"
 #include "ArtShader.h"
+#include "Camera.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
@@ -32,6 +33,8 @@ void windowTestProc()
 	const float targetDeltaTime = 1.0f / TARGET_FPS;
 
 	util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"));
+	//util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb"));
+	//util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/DamagedHelmet/glTF-Embedded/DamagedHelmet.gltf"));
 	util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/Duck/glTF/Duck.gltf"));
 	// util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/Lantern/glTF/Lantern.gltf"));
 	// util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/WaterBottle/glTF/WaterBottle.gltf"));
@@ -293,8 +296,12 @@ EMSCRIPTEN_BINDINGS(GLTF){
     .function("getChildAt", &Node::getChildAt, allow_raw_pointers())
     .function("getChildByName", &Node::getChildByName, allow_raw_pointers())
 	.function("getChildrenCount", &Node::getChildrenCount);
+  enum_<ProjectionType>("ProjectionType")
+	.value("PERSPECTIVE", ProjectionType::PERSPECTIVE)
+	.value("ORTHOGRAPHIC", ProjectionType::ORTHOGRAPHIC);
   class_<Camera>("Camera")
 	.constructor<Node*>()
+	.property("projectionType", &Camera::projectionType)
 	.property("aspectRatio", &Camera::aspectRatio)
 	.property("fov", &Camera::fov)
 	.property("xMag", &Camera::xMag)

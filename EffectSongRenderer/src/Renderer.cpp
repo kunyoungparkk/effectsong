@@ -16,6 +16,38 @@
 
 Renderer* Renderer::instance = nullptr;
 
+std::string generateTextureKey(const cgltf_texture* texture, std::string& gltfPath) {
+	const cgltf_image* image = texture->image;
+
+	//base64 embedded gltf
+	if (image->uri && strncmp(image->uri, "data:", 5) == 0) {
+		std::string base64Data = image->uri + 5; // after "data:"
+		size_t commaPos = base64Data.find(',');
+		if (commaPos != std::string::npos) {
+			std::string encodedData = base64Data.substr(commaPos + 1);
+			// generate hash
+			std::hash<std::string> hasher;
+			size_t hashValue = hasher(encodedData);
+
+			return "embedded_" + std::to_string(hashValue);
+		}
+		return "embedded_invalid";
+	}
+	//general gltf
+	else if (image->uri) {
+		return gltfPath + std::string(image->uri);
+	}
+	//glb
+	else if (image->buffer_view) {
+		const cgltf_buffer_view* view = image->buffer_view;
+		return "buffer_" + std::to_string(view->buffer - &image->buffer_view->buffer[0]) +
+			"_" + std::to_string(view->offset) +
+			"_" + std::to_string(view->size);
+	}
+
+	return "unknown_texture";
+}
+
 float Renderer::getCurrentEnergy() const
 {
 	if (m_soundTexture) {
@@ -154,7 +186,8 @@ out vec4 FragColor;
 /*IBL*/
 vec3 calculateIBLSpecular(vec3 N, vec3 V, float roughness, vec3 F0) {
     vec3 R = reflect(-V, N);
-    
+    R.x *= -1.;
+	R.y *= -1.;
     vec3 prefilteredColor = texture(specularIBLMap, R).rgb;
 
     vec2 envBRDF = texture(lutGGX, vec2(max(dot(N, V), 0.0), roughness)).rg;
@@ -373,6 +406,8 @@ out vec4 FragColor;
 
 void main(){
 	vec3 viewDirection = normalize(fragPos);
+	viewDirection.x *= -1.0;
+	viewDirection.y *= -1.0;
 	FragColor = texture(backgroundCubeMap, viewDirection);
 }
 )";
@@ -527,10 +562,13 @@ void Renderer::render() {
 	glUseProgram(m_iblShaderProgram);
 	if (m_activeCamera)
 	{
-		glm::mat4 projectionMatrix = glm::perspective(
+		glm::mat4 projectionMatrix = glm::mat4(1.0);
+
+		//user needs to set fov even though it is orthographic camera.
+		projectionMatrix = glm::perspective(
 			glm::radians(m_activeCamera->fov), (float)m_width / m_height,
 			0.1f, 10.0f);
-		glm::mat4 viewMatrix = glm::inverse(m_activeCamera->getViewMatrix());
+		glm::mat4 viewMatrix = m_activeCamera->getViewMatrix();
 
 		glm::mat4 viewProjMatrix = projectionMatrix * glm::mat4(glm::mat3(viewMatrix));
 		glUniformMatrix4fv(m_skyboxViewProjMatLoc, 1, GL_FALSE, glm::value_ptr(viewProjMatrix));
@@ -547,11 +585,33 @@ void Renderer::render() {
 	glm::mat4 projectionMatrix = glm::mat4(1.0f);
 	glm::mat4 viewMatrix = glm::mat4(1.0f);
 	if (m_activeCamera) {
-		projectionMatrix = glm::perspective(
-			glm::radians(m_activeCamera->fov),
-			(float)Renderer::getInstance()->getWidth() / Renderer::getInstance()->getHeight(),
-			m_activeCamera->zNear, m_activeCamera->zFar);
-		viewMatrix = glm::inverse(m_activeCamera->getViewMatrix());
+		if (m_activeCamera->projectionType == ProjectionType::PERSPECTIVE) {
+			projectionMatrix = glm::perspective(
+				glm::radians(m_activeCamera->fov),
+				(float)Renderer::getInstance()->getWidth() / Renderer::getInstance()->getHeight(),
+				m_activeCamera->zNear, m_activeCamera->zFar);
+		}
+		else if (m_activeCamera->projectionType == ProjectionType::ORTHOGRAPHIC) {
+			float aspectRatio = (float)Renderer::getInstance()->getWidth() / Renderer::getInstance()->getHeight();
+			float left, right, bottom, top;
+
+			if (aspectRatio > 1.0f) {
+				left = -m_activeCamera->xMag * aspectRatio;
+				right = m_activeCamera->xMag * aspectRatio;
+				bottom = -m_activeCamera->yMag;
+				top = m_activeCamera->yMag;
+			}
+			else {
+				left = -m_activeCamera->xMag;
+				right = m_activeCamera->xMag;
+				bottom = -m_activeCamera->yMag / aspectRatio;
+				top = m_activeCamera->yMag / aspectRatio;
+			}
+
+			projectionMatrix = glm::ortho(left, right, bottom, top, m_activeCamera->zNear, m_activeCamera->zFar);
+		}
+
+		viewMatrix = m_activeCamera->getViewMatrix();
 		glUniform3fv(m_cameraWorldPosLoc, 1, glm::value_ptr(m_activeCamera->getNode()->getGlobalPosition()));
 	}
 	glUniformMatrix4fv(m_viewMatLoc, 1, GL_FALSE, glm::value_ptr(viewMatrix));
@@ -603,10 +663,10 @@ void Renderer::addMaterial(std::string name, Material* material) {
 	m_materials[name] = material;
 }
 
-Texture* Renderer::getTexture(std::string uri) { return m_textures[uri]; }
+Texture* Renderer::getTexture(cgltf_texture* cgltf_texture, std::string gltfPath) { return m_textures[generateTextureKey(cgltf_texture, gltfPath)]; }
 
-void Renderer::addTexture(std::string uri, Texture* texture) {
-	m_textures[uri] = texture;
+void Renderer::addTexture(cgltf_texture* cgltf_texture, Texture* texture, std::string gltfPath) {
+	m_textures[generateTextureKey(cgltf_texture, gltfPath)] = texture;
 }
 
 int Renderer::getWidth() const

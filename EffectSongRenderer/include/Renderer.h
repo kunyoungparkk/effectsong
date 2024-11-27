@@ -44,8 +44,8 @@ class Renderer {
   Material* getMaterial(std::string name);
   void addMaterial(std::string name, Material* material);
 
-  Texture* getTexture(std::string uri);
-  void addTexture(std::string uri, Texture* texture);
+  Texture* getTexture(cgltf_texture* cgltf_texture, std::string gltfPath);
+  void addTexture(cgltf_texture* cgltf_texture, Texture* texture, std::string gltfPath);
 
   int getWidth() const;
   int getHeight() const;

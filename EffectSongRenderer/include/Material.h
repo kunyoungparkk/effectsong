@@ -4,7 +4,7 @@
 
 class Material {
  public:
-  Material(cgltf_material* material);
+  Material(cgltf_material* material, std::string& gltfPath);
   void bind(GLuint shaderProgram);
  private:
   cgltf_material* m_material;

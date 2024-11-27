@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { TextField, Grid } from "@mui/material";
+import { TextField, Grid, FormControl, InputLabel, NativeSelect } from "@mui/material";
 import useUtil from "../Util";
 
-const CameraView = ({ targetNode }) => {
+const CameraView = ({ module, targetNode }) => {
   const Util = useUtil();
   const camera = targetNode?.getCamera();
 
@@ -12,7 +12,9 @@ const CameraView = ({ targetNode }) => {
   const [far, setFar] = useState(0.0);
   const [xMag, setXMag] = useState(0.0);
   const [yMag, setYMag] = useState(0.0);
+  const [type, setType] = useState('');
 
+  const cameraTypes = ['Perspective', 'Orthographic'];
   useEffect(() => {
     if (!camera) {
       return;
@@ -23,6 +25,7 @@ const CameraView = ({ targetNode }) => {
     setFar(Util.roundToNearestStep(camera.zFar));
     setXMag(Util.roundToNearestStep(camera.xMag));
     setYMag(Util.roundToNearestStep(camera.yMag));
+    setType(cameraTypes[camera.projectionType.value]);
   }, [targetNode]);
 
   const getView = () => {
@@ -57,7 +60,43 @@ const CameraView = ({ targetNode }) => {
             Camera
           </Grid>
           <Grid item xs={12}>
-            type
+            <FormControl sx={{ width: "100%" }}>
+              <InputLabel
+                variant="standard"
+                htmlFor="camera-projection-type-input"
+                style={{ color: "#868686" }}
+              >
+                Projection Type
+              </InputLabel>
+              <NativeSelect
+                value={type}
+                inputProps={{
+                  name: "camera-projection-type-input",
+                  id: "camera-projection-type-input",
+                }}
+                style={{ color: "white" }}
+                onChange={(e) => {
+                  if (e.target.value === "Perspective") {
+                    camera.projectionType = module.ProjectionType.PERSPECTIVE;
+                  } else {
+                    camera.projectionType = module.ProjectionType.ORTHOGRAPHIC;
+                  }
+                  setType(e.target.value);
+                }}
+              >
+                {cameraTypes.map((cameraType) => {
+                  return (
+                    <option
+                      value={cameraType}
+                      key={cameraType}
+                      style={{ color: "white", backgroundColor: "#2e2e2e" }}
+                    >
+                      {cameraType}
+                    </option>
+                  );
+                })}
+              </NativeSelect>
+            </FormControl>
           </Grid>
           <Grid item xs={12}>
             <TextField
@@ -128,52 +167,57 @@ const CameraView = ({ targetNode }) => {
               inputProps={{ style: { color: "white" } }}
             />
           </Grid>
-          <Grid item xs={6}>
-            <TextField
-              type="number"
-              variant="standard"
-              id="xMag-input"
-              label="xMag"
-              value={xMag}
-              onChange={(e) => {
-                if (Util.isValidNum(e.target.value)) {
-                  const floatValue = parseFloat(e.target.value);
-                  camera.xMag = floatValue;
-                  setXMag(floatValue);
-                } else {
-                  setXMag(e.target.value);
-                }
-              }}
-              InputLabelProps={{
-                shrink: true,
-                style: { color: "#868686" },
-              }}
-              inputProps={{ style: { color: "white" } }}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              type="number"
-              variant="standard"
-              id="yMag-input"
-              label="yMag"
-              value={yMag}
-              onChange={(e) => {
-                if (Util.isValidNum(e.target.value)) {
-                  const floatValue = parseFloat(e.target.value);
-                  camera.yMag = floatValue;
-                  setYMag(floatValue);
-                } else {
-                  setYMag(e.target.value);
-                }
-              }}
-              InputLabelProps={{
-                shrink: true,
-                style: { color: "#868686" },
-              }}
-              inputProps={{ style: { color: "white" } }}
-            />
-          </Grid>
+          {type === cameraTypes[1] ?
+            <>
+              <Grid item xs={6}>
+                <TextField
+                  type="number"
+                  variant="standard"
+                  id="xMag-input"
+                  label="xMag"
+                  value={xMag}
+                  onChange={(e) => {
+                    if (Util.isValidNum(e.target.value)) {
+                      const floatValue = parseFloat(e.target.value);
+                      camera.xMag = floatValue;
+                      setXMag(floatValue);
+                    } else {
+                      setXMag(e.target.value);
+                    }
+                  }}
+                  InputLabelProps={{
+                    shrink: true,
+                    style: { color: "#868686" },
+                  }}
+                  inputProps={{ style: { color: "white" } }}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <TextField
+                  type="number"
+                  variant="standard"
+                  id="yMag-input"
+                  label="yMag"
+                  value={yMag}
+                  onChange={(e) => {
+                    if (Util.isValidNum(e.target.value)) {
+                      const floatValue = parseFloat(e.target.value);
+                      camera.yMag = floatValue;
+                      setYMag(floatValue);
+                    } else {
+                      setYMag(e.target.value);
+                    }
+                  }}
+                  InputLabelProps={{
+                    shrink: true,
+                    style: { color: "#868686" },
+                  }}
+                  inputProps={{ style: { color: "white" } }}
+                />
+              </Grid>
+            </>
+            : <></>}
+
         </Grid>
       );
     }

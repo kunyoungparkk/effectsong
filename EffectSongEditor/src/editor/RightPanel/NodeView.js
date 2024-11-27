@@ -444,7 +444,7 @@ const NodeView = ({ module, targetNode, updateHierarchy }) => {
         </Grid>
 
         <Grid item xs={12}>
-          <CameraView targetNode={targetNode} />
+          <CameraView module={module} targetNode={targetNode} />
         </Grid>
         <Grid item xs={12}>
           <LightView targetNode={targetNode} />
