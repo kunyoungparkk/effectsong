@@ -3,10 +3,12 @@ import { Button, Modal, Box } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import FileUpload from "./FileUpload";
 
-const MusicImport = ({ module, audioPlayerRef }) => {
+const MusicImport = ({ module, audioPlayerRef, notify, setLoading }) => {
   const [modalOpen, setModalOpen] = useState(false);
 
   const procMusicInput = (file) => {
+    setLoading(true);
+    setModalOpen(false);
     let reader = new FileReader();
     const MUSIC_ROOT_PATH = module.getRootPath() + "res/music/";
     if (!module.FS.analyzePath(MUSIC_ROOT_PATH).exists) {
@@ -25,10 +27,13 @@ const MusicImport = ({ module, audioPlayerRef }) => {
       const prevURL = audioPlayerRef.current.audio.current.src;
       audioPlayerRef.current.audio.current.src = url;
       URL.revokeObjectURL(prevURL);
-      setModalOpen(false);
+
+      setLoading(false);
+      notify(file.name + " loaded successfully ", true);
     };
     reader.readAsArrayBuffer(file);
   };
+
   return (
     <div>
       <Button
@@ -74,16 +79,14 @@ const MusicImport = ({ module, audioPlayerRef }) => {
             onDrop={(e) => {
               let files = e.dataTransfer?.files;
               if (files.length > 1) {
-                //TODO: POPUP
-                //setLabelText("please upload single file");
+                notify("please upload single audio file");
                 return;
               } else if (
                 files[0].type !== "audio/flac" &&
                 files[0].type !== "audio/wav" &&
                 files[0].type !== "audio/mpeg"
               ) {
-                //TODO: POPUP
-                // setLabelText("type mismatch");
+                notify("Audio file type mismatch. Only MP3, WAV, and FLAC are supported.");
                 return;
               }
               procMusicInput(files[0]);

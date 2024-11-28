@@ -3,38 +3,46 @@ import { Button, Modal, Box } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import FileUpload from "./FileUpload";
 
-const GLTFImport = ({ module, updateHierarchy }) => {
+const GLTFImport = ({ module, updateHierarchy, notify, setLoading }) => {
   const [modalOpen, setModalOpen] = useState(false);
 
   const procGLTFInput = (files) => {
-    //glb인지, gltf인지, 혹은 둘다, 혹은 없는지 확인.
+    //glb인지, gltf인지, 혹은 둘다, 혹은 없는지, 혹은 여러개인지 확인.
     let isGLTF = false;
     let isGLB = false;
+    let modelCount = 0;
     let fileName = "";
-    for(let i=0; i<files.length; i++){
+    for (let i = 0; i < files.length; i++) {
       let splittedName = files[i].name.split(".");
       const ext = splittedName[1];
-      if(ext && ext == 'gltf'){
+      if (ext && ext == 'gltf') {
         isGLTF = true;
         fileName = splittedName[0];
+        modelCount++;
       }
-      else if(ext && ext == 'glb'){
+      else if (ext && ext == 'glb') {
         isGLB = true;
         fileName = splittedName[0];
+        modelCount++;
       }
     }
-    if(isGLTF && isGLB){
-      //TODO: popup required
+
+    if (!isGLTF && !isGLB) {
+      notify('failed to load model.');
       return;
-    }else if(!isGLTF && !isGLB){
-      //TODO: popup required
+    } else if (modelCount > 1) {
+      notify('can\'t import multiple models.');
       return;
     }
-    const targetEXT = isGLTF? "gltf" : "glb";
+
+    setLoading(true);
+    setModalOpen(false);
+
+    const targetEXT = isGLTF ? "gltf" : "glb";
     const TARGET_GLTF_ROOT_PATH = module.getRootPath() + "res/" + fileName + "/";
-    
+
     if (!module.FS.analyzePath(TARGET_GLTF_ROOT_PATH).exists) {
-        module.FS.mkdir(TARGET_GLTF_ROOT_PATH);
+      module.FS.mkdir(TARGET_GLTF_ROOT_PATH);
     }
 
     let readFileCount = 0;
@@ -64,7 +72,8 @@ const GLTFImport = ({ module, updateHierarchy }) => {
           module.FS.rmdir(TARGET_GLTF_ROOT_PATH);
 
           updateHierarchy();
-          setModalOpen(false);
+          setLoading(false);
+          notify(fileName + " loaded successfully ", true);
         }
       };
       reader.readAsArrayBuffer(file);

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import useUtil from "./Util.js";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 import ShaderSettings from "./ScriptEditor/ShaderSettings.js";
@@ -9,9 +8,7 @@ import Typography from "@mui/material/Typography";
 import { floor } from "mathjs";
 import MusicImport from "./Import/MusicImport.js";
 import GLTFImport from "./Import/GLTFImport.js";
-import { Grid } from "@mui/material";
-//import JSZip from 'jszip';
-//import { rotationMatrix, multiply } from 'mathjs';
+import { Grid, Snackbar, Alert, CircularProgress, Backdrop } from "@mui/material";
 
 export default function Editor() {
   const currentWidth = useRef(1400);
@@ -20,6 +17,11 @@ export default function Editor() {
   const audioRef = useRef(null);
   const canvasRef = useRef(null);
   const canvasDivRef = useRef(null);
+
+  const [notifyOpen, setNotifyOpen] = useState(false);
+  const [notifySuccess, setNotifySuccess] = useState(false);
+  const [notifyMessage, setNotifyMessage] = useState("");
+  const [loading, setLoading] = useState(true);
 
   //Hierarchy Data State
   const [hierarchyData, setHierarchyData] = useState([]);
@@ -53,11 +55,11 @@ export default function Editor() {
       onResizeEngine(currentWidth.current, currentHeight.current);
     };
 
-    const handleScroll = (e) => {};
+    const handleScroll = (e) => { };
 
-    const handleMouseOver = (e) => {};
+    const handleMouseOver = (e) => { };
 
-    const handleMouseOut = (e) => {};
+    const handleMouseOut = (e) => { };
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
@@ -85,6 +87,11 @@ export default function Editor() {
     startEngine();
   }, [module]);
 
+  const notify = (message, isSuccess = false) => {
+    setNotifySuccess(isSuccess);
+    setNotifyMessage(message);
+    setNotifyOpen(true);
+  }
   const getNodeById = (id) => {
     const idxList = id.split("-");
     let curNode = module.Renderer.getInstance().getSceneAt(
@@ -203,10 +210,35 @@ export default function Editor() {
 
     module.Renderer.getInstance().setActiveCamera(cam);
     updateHierarchy();
+
+    setLoading(false);
   };
 
   return (
     <div className="editor">
+      {/*loading popup*/}
+      <Backdrop
+        open={loading}
+      >
+        <CircularProgress color="primary" />
+      </Backdrop>
+
+      {/*notify popup*/}
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        open={notifyOpen}
+        onClose={() => { setNotifyOpen(false) }}
+        key='notify'
+      >
+        <Alert
+          severity={notifySuccess ? "success" : "error"}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {notifyMessage}
+        </Alert>
+      </Snackbar>
+      {/*editor*/}
       <div className="hierarchy">
         <Typography
           variant="h5"
@@ -246,7 +278,7 @@ export default function Editor() {
           volume={0.8}
           showSkipControls
           progressUpdateInterval={100}
-          autoPlay= {true}
+          autoPlay={true}
         />
         {/* <div style={{ width: "90px", height: "80px" }}></div> */}
       </div>
@@ -265,10 +297,10 @@ export default function Editor() {
             }}
           >
             <Grid item xs={6}>
-              <GLTFImport module={module} updateHierarchy={updateHierarchy}/>
+              <GLTFImport module={module} updateHierarchy={updateHierarchy} notify={notify} setLoading={setLoading}/>
             </Grid>
             <Grid item xs={6}>
-              <MusicImport module={module} audioPlayerRef={audioRef}/>
+              <MusicImport module={module} audioPlayerRef={audioRef} notify={notify} setLoading={setLoading}/>
             </Grid>
           </Grid>
         </div>

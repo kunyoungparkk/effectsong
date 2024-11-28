@@ -12,7 +12,7 @@ const LightView = ({ module, targetNode }) => {
   const Util = useUtil();
   const light = targetNode?.getLight();
 
-  const [name, setName] = useState("");
+  // const [name, setName] = useState("");
   const [color, setColor] = useState([0.0, 0.0, 0.0]);
   const [intensity, setIntensity] = useState(0.0);
   const [range, setRange] = useState(0.0);
@@ -25,7 +25,7 @@ const LightView = ({ module, targetNode }) => {
     if (!light) {
       return;
     }
-    setName(light.name);
+    // setName(light.name);
     setColor([
       Util.roundToNearestStep(light.color.x),
       Util.roundToNearestStep(light.color.y),

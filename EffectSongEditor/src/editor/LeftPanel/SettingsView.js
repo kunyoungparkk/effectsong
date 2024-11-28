@@ -15,7 +15,7 @@ const SettingsView = ({ module }) => {
       const scene = renderer.getSceneAt(i);
       for (let j = 0; j < scene.getCameraCount(); j++) {
         const camera = scene.getCameraAt(j);
-        if (camera.$$.ptr == activeCamera.$$.ptr) {
+        if (camera.$$.ptr === activeCamera.$$.ptr) {
           setActiveCameraIndex(tempCameraList.length);
         }
         tempCameraList.push(camera.getNode());

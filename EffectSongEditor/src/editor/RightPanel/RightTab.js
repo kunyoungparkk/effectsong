@@ -1,5 +1,4 @@
 import * as React from 'react';
-import {useState} from 'react';
 import { styled } from '@mui/material/styles';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -58,6 +57,7 @@ export default function RightTab({ updateHierarchy, module, targetNode }) {
                 }else if(targetNode?.$$.ptrType.name === "Scene*"){
                     return <SceneView module={module} targetScene={targetNode} updateHierarchy={updateHierarchy}/>
                 }
+                break;
             case 1:
                 return <VisualScriptView/>
             case 2:

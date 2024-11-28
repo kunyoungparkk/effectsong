@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Box, TextField, Grid, IconButton } from "@mui/material";
+import { Box, TextField, Grid, IconButton, Divider } from "@mui/material";
 import useUtil from "../Util";
 import CameraView from "./CameraView";
 import LightView from "./LightView";
@@ -86,6 +86,14 @@ const NodeView = ({ module, targetNode, updateHierarchy }) => {
             inputProps={{ style: { color: "white" } }}
             sx={{ width: "100%" }}
           />
+        </Grid>
+        <Grid item xs={12}>
+          <Divider sx={{
+            color: "#868686",
+            "&::before, &::after": {
+              borderColor: "#868686",
+            },
+          }}>Transform</Divider>
         </Grid>
         <Grid item xs={12}>
           <Grid
@@ -444,7 +452,23 @@ const NodeView = ({ module, targetNode, updateHierarchy }) => {
         </Grid>
 
         <Grid item xs={12}>
+          <Divider sx={{
+            color: "#868686",
+            "&::before, &::after": {
+              borderColor: "#868686",
+            },
+          }}>Camera</Divider>
+        </Grid>
+        <Grid item xs={12}>
           <CameraView module={module} targetNode={targetNode} />
+        </Grid>
+        <Grid item xs={12}>
+          <Divider sx={{
+            color: "#868686",
+            "&::before, &::after": {
+              borderColor: "#868686",
+            },
+          }}>Light</Divider>
         </Grid>
         <Grid item xs={12}>
           <LightView module={module} targetNode={targetNode} />
