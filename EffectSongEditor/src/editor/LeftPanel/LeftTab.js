@@ -40,7 +40,7 @@ const StyledTab = styled((props) => <Tab disableRipple {...props} />)(
   }),
 );
 
-export default function LeftTab({ module, hierarchyData, selectCallback, expandIdList, setExpandIdList }) {
+export default function LeftTab({ module, hierarchyData, selectCallback, expandIdList, setExpandIdList, targetNode }) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event, newValue) => {
@@ -57,7 +57,7 @@ export default function LeftTab({ module, hierarchyData, selectCallback, expandI
           setExpandIdList={setExpandIdList}
         />
       case 1:
-        return <SettingsView module={module}/>
+        return <SettingsView module={module} targetNode={targetNode}/>
     }
   }
 

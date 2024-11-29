@@ -5,9 +5,15 @@
 class Material {
  public:
   Material(cgltf_material* material, std::string& gltfPath);
+  Material();
   void bind(GLuint shaderProgram);
  private:
-  cgltf_material* m_material;
+  glm::vec4 m_baseColorFactor = glm::vec4(1.0f);
+  glm::vec3 m_specularColorFactor = glm::vec3(0.0f);
+  glm::vec3 m_emissiveFactor = glm::vec3(0.0f);
+  float m_metallicFactor = 0.0f;
+  float m_roughnessFactor = 1.0f;
+
   Texture* m_baseColorTexture = nullptr;
   Texture* m_emissiveTexture = nullptr;
   Texture* m_metallicRoughnessTexture = nullptr;

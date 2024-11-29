@@ -115,7 +115,7 @@ void main() {
 }
 
 )");
-	Renderer::getInstance()->setAudioFile(EFFECTSONG_ROOT + std::string("res/music/effectsong.mp3"));
+	Renderer::getInstance()->setAudioFile(EFFECTSONG_ROOT + std::string("res/music/unity.mp3"));
 	SDL_Event event;
 	bool running = true;
 	// camera control
@@ -136,7 +136,7 @@ void main() {
 	camNode->setPosition(glm::vec3(0, 0, -5));
 	camNode->setRotation(
 		glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
-	Renderer::getInstance()->getSceneAt(0)->addNode(camNode);
+	Renderer::getInstance()->getSceneAt(0)->addChild(camNode);
 	Renderer::getInstance()->setDiffuseIBLIntensity(10.0f);
 
 	while (running) {
@@ -254,20 +254,6 @@ EMSCRIPTEN_BINDINGS(CORE) {
 	emscripten::function("getRootPath", &getRootPath, allow_raw_pointers());
 }
 EMSCRIPTEN_BINDINGS(GLTF) {
-	class_<Scene>("Scene")
-		.constructor<>()
-		.function("getName", &Scene::getName, allow_raw_pointers())
-		.function("setName", &Scene::setName, allow_raw_pointers())
-		.function("addLight", &Scene::addLight, allow_raw_pointers())
-		.function("removeLight", &Scene::removeLight, allow_raw_pointers())
-		.function("addCamera", &Scene::addCamera, allow_raw_pointers())
-		.function("removeCamera", &Scene::removeCamera, allow_raw_pointers())
-		.function("getCameraAt", &Scene::getCameraAt, allow_raw_pointers())
-		.function("getCameraCount", &Scene::getCameraCount)
-		.function("addNode", &Scene::addNode, allow_raw_pointers())
-		.function("getChildAt", &Scene::getChildAt, allow_raw_pointers())
-		.function("getChildByName", &Scene::getChildByName, allow_raw_pointers())
-		.function("getChildrenCount", &Scene::getChildrenCount);
 	class_<Node>("Node")
 		.constructor<Scene*, Node*>()
 		.property("m_bAudioReactiveScale", &Node::m_bAudioReactiveScale)
@@ -294,9 +280,21 @@ EMSCRIPTEN_BINDINGS(GLTF) {
 		.function("setCamera", &Node::setCamera, allow_raw_pointers())
 		.function("getName", &Node::getName, allow_raw_pointers())
 		.function("setName", &Node::setName, allow_raw_pointers())
+		.function("addChild", &Node::addChild, allow_raw_pointers())
+		.function("removeChild", &Node::removeChild, allow_raw_pointers())
+		.function("getParent", &Node::getParent, allow_raw_pointers())
+		.function("setParent", &Node::setParent, allow_raw_pointers())
 		.function("getChildAt", &Node::getChildAt, allow_raw_pointers())
 		.function("getChildByName", &Node::getChildByName, allow_raw_pointers())
 		.function("getChildrenCount", &Node::getChildrenCount);
+	class_<Scene, base<Node>>("Scene")
+		.constructor<>()
+		.function("addLight", &Scene::addLight, allow_raw_pointers())
+		.function("removeLight", &Scene::removeLight, allow_raw_pointers())
+		.function("addCamera", &Scene::addCamera, allow_raw_pointers())
+		.function("removeCamera", &Scene::removeCamera, allow_raw_pointers())
+		.function("getCameraAt", &Scene::getCameraAt, allow_raw_pointers())
+		.function("getCameraCount", &Scene::getCameraCount);
 	enum_<ProjectionType>("ProjectionType")
 		.value("PERSPECTIVE", ProjectionType::PERSPECTIVE)
 		.value("ORTHOGRAPHIC", ProjectionType::ORTHOGRAPHIC);

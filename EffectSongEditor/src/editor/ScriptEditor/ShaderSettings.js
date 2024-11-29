@@ -93,8 +93,8 @@ void main() {
 
     gl_Position = vec4(xy * aspect, 0, 1);
     gl_Position.x = num < 0.9 
-        ? gl_Position.x * 0.5 - 0.5 
-        : gl_Position.x * 0.5 + 0.5; 
+        ? gl_Position.x * 0.5 - 0.4
+        : gl_Position.x * 0.5 + 0.4; 
     
     gl_PointSize = 2.0 + length(xy) * 20. * resolution.x / 1600.0;
 
@@ -105,30 +105,63 @@ void main() {
     v_color = mix(color, background, radius - cPulse);
 }
 `);
-const soundTextureVS = `
+
+  const [customVS, setCustomVS] = useState(`#define PI radians(180.0)
+vec3 hsv2rgb(vec3 c) {
+  c = vec3(c.x, clamp(c.yz, 0.0, 1.0));
+  vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+  return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
 void main() {
-  float across = floor(sqrt(vertexCount));
-  float down = floor(vertexCount / across);
-  
+  float down = sqrt(vertexCount);
+  float across = floor(vertexCount / down);
   float x = mod(vertexId, across);
   float y = floor(vertexId / across);
   
-  float u = x / across;
-  float v = y / across;
+  float u = x / (across - 1.);
+  float v = y / (across - 1.);
   
-  vec2 xy = vec2(u * 2.0 - 1.0, v * 2.0 - 1.0);
-  gl_Position = vec4(xy, 0, 1);
-  gl_PointSize = max(0.1, ceil(resolution.x / across));
+  float su = abs(u - 0.5) * 2.;
+  float sv = abs(v - 0.5) * 2.;
   
-  float s;
+  float au = abs(atan(su, sv)) / PI;
+  float av = length(vec2(su, sv));
+  
+  float snd = 2.0;
+  
   if(!isStereo || u<0.5){
-    s = texture(sound, vec2(u * 2.0, v)).r;
-  }else{
-    s = texture(sound2, vec2((u - 0.5) * 2.0, v)).r;
-  }  
-  v_color = vec4(s, s, s, 1.0);
+  snd *= texture(sound, vec2(au, av * .25)).r;
 }
-`
+else{
+  snd *= texture(sound2, vec2(au, av * .25)).r;
+}
+
+  float xoff = 0.;//sin(time + y * 0.2) * 0.1;
+  float yoff = 0.;//sin(time + x * 0.3) * 0.2;
+  
+  float ux = u * 2. - 1. + xoff;
+  float vy = v * 2. - 1. + yoff;
+  
+  vec2 xy = vec2(ux, vy) * 1.3;
+  
+  gl_Position = vec4(xy, 0, 1);
+  
+  float soff = 1.;//sin(time + x * y * .02) * 5.;  
+  gl_PointSize = pow(snd + 0.2, 5.0) * 30.0 + soff;
+  gl_PointSize *= 20.0 / across;
+  
+  float pump = step(0.8, snd);
+  
+  float hue = u * .1 + snd * 0.2 + time * .1;
+  float sat = mix(0., 1., pump);
+  float val = mix(.1, pow(snd + 2.2, 5.0), pump);
+  v_color = vec4(hsv2rgb(vec3(hue, sat, val)), 1);
+}
+  `);
+  const [presetIndex, setPresetIndex] = useState(1);
+
   useEffect(() => {
     if (!module) {
       return;
@@ -144,13 +177,14 @@ void main() {
     let artShader = module.ArtShader.getInstance();
     setPrimitiveMode(artShader.getPrimitiveMode());
     setVertexCount(artShader.getVertexCount());
-    artShader.setVertexShader(vertexShader);//soundTextureVS
+    artShader.setVertexShader(vertexShader); //soundTextureVS
 
     const renderer = module.Renderer.getInstance();
     setDiffuseIBLIntensity(renderer.getDiffuseIBLIntensity());
     setWidth(renderer.getWidth());
     setHeight(renderer.getHeight());
   }, [module]);
+
   return (
     <div>
       <Grid
@@ -379,18 +413,41 @@ void main() {
               <Typography sx={{ mt: 2 }}>
                 float vertexId : current vertexId (0 ~ vertexCount - 1)
               </Typography>
-              <Typography sx={{ mt: 2 }}>float volume : current volume</Typography>
-              <Typography sx={{ mt: 2 }}>vec2 resolution : shader art texture resolution (maybe 2048, 2048)</Typography>
-              <Typography sx={{ mt: 2 }}>vec4 background : background color</Typography>
-              <Typography sx={{ mt: 2 }}>float time : current music time</Typography>
-              <Typography sx={{ mt: 2 }}>float vertexCount : total vertex counts</Typography>
-              <Typography sx={{ mt: 2 }}>sampler2D sound : left sound texture (2048, 2048), use r channel</Typography>
-              <Typography sx={{ mt: 2 }}>sampler2D sound2 : right sound texture (2048, 2048), use r channel</Typography>
-              <Typography sx={{ mt: 2 }}>bool isStereo : if stereo, it is true. if mono, it is false</Typography>
-              <hr/>
-              <Typography sx={{ mt: 2 }}>vec4 v_color : output color</Typography>
-              <Typography sx={{ mt: 2 }}>vec4 gl_Position : output position (NDC)</Typography>
-              <Typography sx={{ mt: 2 }}>float gl_PointSize : output point size</Typography>
+              <Typography sx={{ mt: 2 }}>
+                float volume : current volume
+              </Typography>
+              <Typography sx={{ mt: 2 }}>
+                vec2 resolution : shader art texture resolution (maybe 2048,
+                2048)
+              </Typography>
+              <Typography sx={{ mt: 2 }}>
+                vec4 background : background color
+              </Typography>
+              <Typography sx={{ mt: 2 }}>
+                float time : current music time
+              </Typography>
+              <Typography sx={{ mt: 2 }}>
+                float vertexCount : total vertex counts
+              </Typography>
+              <Typography sx={{ mt: 2 }}>
+                sampler2D sound : left sound texture, use r channel
+              </Typography>
+              <Typography sx={{ mt: 2 }}>
+                sampler2D sound2 : right sound texture, use r channel
+              </Typography>
+              <Typography sx={{ mt: 2 }}>
+                bool isStereo : if stereo, it is true. if mono, it is false
+              </Typography>
+              <hr />
+              <Typography sx={{ mt: 2 }}>
+                vec4 v_color : output color
+              </Typography>
+              <Typography sx={{ mt: 2 }}>
+                vec4 gl_Position : output position (NDC)
+              </Typography>
+              <Typography sx={{ mt: 2 }}>
+                float gl_PointSize : output point size
+              </Typography>
             </Box>
           </Modal>
         </Grid>
@@ -398,9 +455,16 @@ void main() {
 
       {scriptVisible ? (
         <ScriptEditor
+          module={module}
           vertexShader={vertexShader}
           setVertexShader={setVertexShader}
           opacity={scriptOpacity}
+          setPrimitiveMode={setPrimitiveMode}
+          setVertexCount={setVertexCount}
+          customVS={customVS}
+          setCustomVS={setCustomVS}
+          presetIndex={presetIndex}
+          setPresetIndex={setPresetIndex}
         ></ScriptEditor>
       ) : (
         <></>

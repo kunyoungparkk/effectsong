@@ -15,12 +15,12 @@ const GLTFImport = ({ module, updateHierarchy, notify, setLoading }) => {
     for (let i = 0; i < files.length; i++) {
       let splittedName = files[i].name.split(".");
       const ext = splittedName[1];
-      if (ext && ext == 'gltf') {
+      if (ext && ext === 'gltf') {
         isGLTF = true;
         fileName = splittedName[0];
         modelCount++;
       }
-      else if (ext && ext == 'glb') {
+      else if (ext && ext === 'glb') {
         isGLB = true;
         fileName = splittedName[0];
         modelCount++;
@@ -40,7 +40,7 @@ const GLTFImport = ({ module, updateHierarchy, notify, setLoading }) => {
 
     const targetEXT = isGLTF ? "gltf" : "glb";
     const TARGET_GLTF_ROOT_PATH = module.getRootPath() + "res/" + fileName + "/";
-
+    console.log(TARGET_GLTF_ROOT_PATH);
     if (!module.FS.analyzePath(TARGET_GLTF_ROOT_PATH).exists) {
       module.FS.mkdir(TARGET_GLTF_ROOT_PATH);
     }

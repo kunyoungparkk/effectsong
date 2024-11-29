@@ -78,6 +78,11 @@ std::string generateMaterialKey(const cgltf_material* material) {
 	if (material->occlusion_texture.texture) {
 		hash ^= pointerHasher(material->occlusion_texture.texture) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
 	}
+	hash ^= std::hash<int>()(material->alpha_mode) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+	hash ^= std::hash<bool>()(material->double_sided) + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+
+	hash ^= floatHasher(material->emissive_factor[0]) + floatHasher(material->emissive_factor[1]) + floatHasher(material->emissive_factor[2]);
+	hash ^= floatHasher(material->alpha_cutoff);
 
 	return std::to_string(hash);
 }
@@ -401,7 +406,7 @@ void main() {
 
 	glGenFramebuffers(1, &m_diffuseIBLFrameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_diffuseIBLFrameBuffer);
-	m_diffuseIBLTexture = new DiffuseIBLTexture(64, 64, 4, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, GL_LINEAR, GL_LINEAR);
+	m_diffuseIBLTexture = new DiffuseIBLTexture();
 	m_diffuseIBLTexture->bind(2);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_diffuseIBLTexture->getId(), 0);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_diffuseIBLTexture->getDepthTextureId());
@@ -658,7 +663,10 @@ void Renderer::render() {
 
 void Renderer::addScene(Scene* scene) { m_scenes.push_back(scene); }
 
-void Renderer::removeScene(Scene* scene) { m_scenes.remove(scene); }
+void Renderer::removeScene(Scene* scene) { 
+	m_scenes.remove(scene);
+	delete scene;
+}
 
 Scene* Renderer::getSceneAt(int index)
 {

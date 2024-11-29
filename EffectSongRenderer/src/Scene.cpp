@@ -2,30 +2,27 @@
 #include "Renderer.h"
 #include <string>
 
-Scene::Scene(cgltf_scene& cgltfScene){
+Scene::Scene(cgltf_scene& cgltfScene):Node(this, nullptr){
 	if (cgltfScene.name) {
 		m_name = cgltfScene.name;
 	}
 	for (int i = 0; i < cgltfScene.nodes_count; i++) {
-		Node* node = new Node(cgltfScene.nodes[i], nullptr, this);
-		m_nodes.push_back(node);
+		Node* node = new Node(cgltfScene.nodes[i], this, this);
+		m_children.push_back(node);
 	}
 }
 
-Scene::Scene(){}
+Scene::Scene() :Node(this, nullptr) {}
 
 Scene::~Scene()
 {
-	for (auto iter = m_nodes.begin(); iter != m_nodes.end(); iter++) {
-		delete *iter;
-	}
 }
 
-void Scene::update() {
-	for (auto iter = m_nodes.begin(); iter != m_nodes.end(); iter++) {
-		(*iter)->update();
-	}
-}
+//void Scene::update() {
+//	for (auto iter = m_children.begin(); iter != m_children.end(); iter++) {
+//		(*iter)->update();
+//	}
+//}
 
 void Scene::render(GLuint shaderProgram) {
 	//light
@@ -33,6 +30,49 @@ void Scene::render(GLuint shaderProgram) {
 	int pointLightCnt = 0;
 	int spotLightCnt = 0;
 	std::string uniformName;
+
+	if (shaderProgram != m_shaderProgram) {
+		m_shaderProgram = shaderProgram;
+
+		m_numDirectionalLightsLoc = glGetUniformLocation(m_shaderProgram, "numDirectionalLights");
+		m_numPointLightsLoc = glGetUniformLocation(m_shaderProgram, "numPointLights");
+		m_numSpotLightsLoc = glGetUniformLocation(m_shaderProgram, "numSpotLights");
+		for (int i = 0; i < 10; i++) {
+			uniformName = "directionalLights[" + std::to_string(i) + "].position";
+			m_directionalLightsLoc[i].position = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
+			uniformName = "directionalLights[" + std::to_string(i) + "].intensity";
+			m_directionalLightsLoc[i].intensity = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
+			uniformName = "directionalLights[" + std::to_string(i) + "].color";
+			m_directionalLightsLoc[i].color = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
+			uniformName = "directionalLights[" + std::to_string(i) + "].direction";
+			m_directionalLightsLoc[i].direction = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
+
+			uniformName = "pointLights[" + std::to_string(i) + "].position";
+			m_pointLightsLoc[i].position = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
+			uniformName = "pointLights[" + std::to_string(i) + "].intensity";
+			m_pointLightsLoc[i].intensity = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
+			uniformName = "pointLights[" + std::to_string(i) + "].color";
+			m_pointLightsLoc[i].color = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
+			uniformName = "pointLights[" + std::to_string(i) + "].range";
+			m_pointLightsLoc[i].range = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
+
+			uniformName = "spotLights[" + std::to_string(i) + "].position";
+			m_spotLightsLoc[i].position = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
+			uniformName = "spotLights[" + std::to_string(i) + "].intensity";
+			m_spotLightsLoc[i].intensity = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
+			uniformName = "spotLights[" + std::to_string(i) + "].color";
+			m_spotLightsLoc[i].color = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
+			uniformName = "spotLights[" + std::to_string(i) + "].range";
+			m_spotLightsLoc[i].range = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
+			uniformName = "spotLights[" + std::to_string(i) + "].direction";
+			m_spotLightsLoc[i].direction = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
+			uniformName = "spotLights[" + std::to_string(i) + "].innerConeAngle";
+			m_spotLightsLoc[i].innerConeAngle = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
+			uniformName = "spotLights[" + std::to_string(i) + "].outerConeAngle";
+			m_spotLightsLoc[i].outerConeAngle = glGetUniformLocation(m_shaderProgram, uniformName.c_str());
+		}
+	}
+
 	for (auto iter = m_lights.begin(); iter != m_lights.end(); iter++) {
 		Light* light = (*iter);
 		switch (light->lightType) {
@@ -41,21 +81,10 @@ void Scene::render(GLuint shaderProgram) {
 			if (dirLightCnt >= 10) {
 				break;
 			}
-			uniformName = "directionalLights[" + std::to_string(dirLightCnt) + "].position";
-			GLint lightPosLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glUniform3fv(lightPosLoc, 1, glm::value_ptr(light->getNode()->getGlobalPosition()));
-
-			uniformName = "directionalLights[" + std::to_string(dirLightCnt) + "].intensity";
-			GLint lightIntensityLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glUniform1f(lightIntensityLoc, light->intensity);
-
-			uniformName = "directionalLights[" + std::to_string(dirLightCnt) + "].color";
-			GLint lightColorLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glUniform3fv(lightColorLoc, 1, glm::value_ptr(light->color));
-
-			uniformName = "directionalLights[" + std::to_string(dirLightCnt) + "].direction";
-			GLint lightDirLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glUniform3fv(lightDirLoc, 1, glm::value_ptr(glm::normalize(-1.0f * light->getNode()->getGlobalFront())));
+			glUniform3fv(m_directionalLightsLoc[dirLightCnt].position, 1, glm::value_ptr(light->getNode()->getGlobalPosition()));
+			glUniform1f(m_directionalLightsLoc[dirLightCnt].intensity, light->intensity);
+			glUniform3fv(m_directionalLightsLoc[dirLightCnt].color, 1, glm::value_ptr(light->color));
+			glUniform3fv(m_directionalLightsLoc[dirLightCnt].direction, 1, glm::value_ptr(glm::normalize(-1.0f * light->getNode()->getGlobalFront())));
 
 			dirLightCnt++;
 			break;
@@ -65,21 +94,10 @@ void Scene::render(GLuint shaderProgram) {
 			if (pointLightCnt >= 10) {
 				break;
 			}
-			uniformName = "pointLights[" + std::to_string(pointLightCnt) + "].position";
-			GLint lightPosLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glUniform3fv(lightPosLoc, 1, glm::value_ptr(light->getNode()->getGlobalPosition()));
-
-			uniformName = "pointLights[" + std::to_string(pointLightCnt) + "].intensity";
-			GLint lightIntensityLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glUniform1f(lightIntensityLoc, light->intensity);
-
-			uniformName = "pointLights[" + std::to_string(pointLightCnt) + "].color";
-			GLint lightColorLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glUniform3fv(lightColorLoc, 1, glm::value_ptr(light->color));
-
-			uniformName = "pointLights[" + std::to_string(pointLightCnt) + "].range";
-			GLint lightRangeLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glUniform1f(lightRangeLoc, light->range);
+			glUniform3fv(m_pointLightsLoc[pointLightCnt].position, 1, glm::value_ptr(light->getNode()->getGlobalPosition()));
+			glUniform1f(m_pointLightsLoc[pointLightCnt].intensity, light->intensity);
+			glUniform3fv(m_pointLightsLoc[pointLightCnt].color, 1, glm::value_ptr(light->color));
+			glUniform1f(m_pointLightsLoc[pointLightCnt].range, light->range);
 
 			pointLightCnt++;
 			break;
@@ -89,48 +107,25 @@ void Scene::render(GLuint shaderProgram) {
 			if (spotLightCnt >= 10) {
 				break;
 			}
-			uniformName = "spotLights[" + std::to_string(spotLightCnt) + "].position";
-			GLint lightPosLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glUniform3fv(lightPosLoc, 1, glm::value_ptr(light->getNode()->getGlobalPosition()));
-
-			uniformName = "spotLights[" + std::to_string(spotLightCnt) + "].intensity";
-			GLint lightIntensityLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glUniform1f(lightIntensityLoc, light->intensity);
-
-			uniformName = "spotLights[" + std::to_string(spotLightCnt) + "].color";
-			GLint lightColorLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glUniform3fv(lightColorLoc, 1, glm::value_ptr(light->color));
-
-			uniformName = "spotLights[" + std::to_string(spotLightCnt) + "].range";
-			GLint lightRangeLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glUniform1f(lightRangeLoc, light->range);
-
-			uniformName = "spotLights[" + std::to_string(spotLightCnt) + "].direction";
-			GLint lightDirLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glUniform3fv(lightDirLoc, 1, glm::value_ptr(glm::normalize(-1.0f * light->getNode()->getGlobalFront())));
-
-			uniformName = "spotLights[" + std::to_string(spotLightCnt) + "].innerConeAngle";
-			GLint lightInnerConeAngleLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glUniform1f(lightInnerConeAngleLoc, light->innerConeAngle);
-
-			uniformName = "spotLights[" + std::to_string(spotLightCnt) + "].outerConeAngle";
-			GLint lightOuterConeAngleLoc = glGetUniformLocation(shaderProgram, uniformName.c_str());
-			glUniform1f(lightOuterConeAngleLoc, light->outerConeAngle);
+			glUniform3fv(m_spotLightsLoc[spotLightCnt].position, 1, glm::value_ptr(light->getNode()->getGlobalPosition()));
+			glUniform1f(m_spotLightsLoc[spotLightCnt].intensity, light->intensity);
+			glUniform3fv(m_spotLightsLoc[spotLightCnt].color, 1, glm::value_ptr(light->color));
+			glUniform1f(m_spotLightsLoc[spotLightCnt].range, light->range);
+			glUniform3fv(m_spotLightsLoc[spotLightCnt].direction, 1, glm::value_ptr(glm::normalize(-1.0f * light->getNode()->getGlobalFront())));
+			glUniform1f(m_spotLightsLoc[spotLightCnt].innerConeAngle, light->innerConeAngle);
+			glUniform1f(m_spotLightsLoc[spotLightCnt].outerConeAngle, light->outerConeAngle);
 
 			spotLightCnt++;
 			break;
 		}
 		}
 	}
-	GLint numDirectionalLightsLoc = glGetUniformLocation(shaderProgram, "numDirectionalLights");
-	glUniform1i(numDirectionalLightsLoc, dirLightCnt);
-	GLint numPointLightsLoc = glGetUniformLocation(shaderProgram, "numPointLights");
-	glUniform1i(numPointLightsLoc, pointLightCnt);
-	GLint numSpotLightsLoc = glGetUniformLocation(shaderProgram, "numSpotLights");
-	glUniform1i(numSpotLightsLoc, spotLightCnt);
+	glUniform1i(m_numDirectionalLightsLoc, dirLightCnt);
+	glUniform1i(m_numPointLightsLoc, pointLightCnt);
+	glUniform1i(m_numSpotLightsLoc, spotLightCnt);
 
 	//nodes
-	for (auto iter = m_nodes.begin(); iter != m_nodes.end(); iter++) {
+	for (auto iter = m_children.begin(); iter != m_children.end(); iter++) {
 		(*iter)->render(shaderProgram);
 	}
 }
@@ -163,29 +158,4 @@ Camera* Scene::getCameraAt(int index)
 	auto iter = m_cameras.begin();
 	std::advance(iter, index);
 	return *iter;
-}
-
-Node* Scene::getChildAt(int index)
-{
-	if (index >= m_nodes.size()) {
-		return nullptr;
-	}
-	auto iter = m_nodes.begin();
-	std::advance(iter, index);
-	return *iter;
-}
-
-Node* Scene::getChildByName(std::string name)
-{
-	for (auto iter = m_nodes.begin(); iter != m_nodes.end(); iter++) {
-		if (name == (*iter)->getName()) {
-			return *iter;
-		}
-	}
-	return nullptr;
-}
-
-void Scene::addNode(Node* node)
-{
-	m_nodes.push_back(node);
 }

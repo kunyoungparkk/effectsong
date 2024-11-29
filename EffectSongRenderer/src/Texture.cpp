@@ -221,7 +221,7 @@ void SpecularIBLTexture::bind(int texIdx) {
 	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 }
 
-DiffuseIBLTexture::DiffuseIBLTexture(int width, int height, int nrChannels, GLint wrapS, GLint wrapT, GLint minFilter, GLint maxFilter)
+DiffuseIBLTexture::DiffuseIBLTexture()
 {
 	glGenTextures(1, &m_textureID);
 	glActiveTexture(GL_TEXTURE0);
@@ -229,27 +229,22 @@ DiffuseIBLTexture::DiffuseIBLTexture(int width, int height, int nrChannels, GLin
 
 	glGenRenderbuffers(1, &m_depthTextureID);
 	glBindRenderbuffer(GL_RENDERBUFFER, m_depthTextureID);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, 64, 64);
 
 	// �ؽ�ó ����
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
-		wrapS);
+		GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
-		wrapT);
+		GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-		minFilter);
+		GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-		maxFilter);
+		GL_LINEAR);
 
-	// �ؽ�ó ������ ����
-	if (nrChannels == 3) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-			GL_UNSIGNED_BYTE, nullptr);
-	}
-	else if (nrChannels == 4) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-			GL_UNSIGNED_BYTE, nullptr);
-	}
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA,
+		GL_UNSIGNED_BYTE, nullptr);
+
+	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Box, Typography } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import FileUploadDefaultImage from "./FileUploadDefaultImage.png";
 
 const FileUpload = ({
   hoverLabel = "Click or drag to upload files",

@@ -9,10 +9,10 @@ class Node {
 public:
 	Node(cgltf_node* cgltfNode, Node* parent, Scene* scene);
 	Node(Scene* scene, Node* parent);
-	~Node();
+	virtual ~Node();
 
-	void update();
-	void render(GLuint shaderProgram);
+	virtual void update();
+	virtual void render(GLuint shaderProgram);
 
 	/*TRS*/
 	glm::vec3 getPosition() const;
@@ -42,6 +42,11 @@ public:
 	std::string getName() { return m_name; }
 	void setName(std::string name) { m_name = name; }
 
+	void addChild(Node* node);
+	void removeChild(Node* node);
+	void setParent(Node* node) { m_parent = node; }
+	Node* getParent() { return m_parent; }
+
 	Node* getChildAt(int index);
 	Node* getChildByName(std::string name);
 	int getChildrenCount() { return m_children.size(); }
@@ -50,6 +55,11 @@ public:
 	bool m_bAudioReactiveScale = false;
 	float m_reactiveOriginScale = 1.0f;
 	float m_reactiveChangingScale = 0.0f;
+
+protected:
+	std::list<Node*> m_children;
+	std::string m_name = "";
+	GLuint m_shaderProgram = -1;
 private:
 	Node* m_parent;
 	Scene* m_scene;
@@ -58,14 +68,11 @@ private:
 	Camera* m_camera = nullptr;
 	//TODO: add Mesh(refactor), Skin
 
-	std::vector<Node*> m_children;
 	std::vector<Primitive*> m_primitives;
 
 	glm::vec3 m_position = glm::vec3(0, 0, 0);
 	glm::quat m_rotation = glm::quat(1, 0, 0, 0);
 	glm::vec3 m_scale = glm::vec3(1, 1, 1);
-	std::string m_name = "";
 
-	GLuint m_shaderProgram = -1;
 	GLuint m_worldMatLoc = -1;
 };

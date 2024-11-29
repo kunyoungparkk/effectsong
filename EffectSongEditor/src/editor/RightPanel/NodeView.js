@@ -1,11 +1,24 @@
 import { useEffect, useState } from "react";
-import { Box, TextField, Grid, IconButton, Divider } from "@mui/material";
+import {
+  Box,
+  TextField,
+  Grid,
+  IconButton,
+  Divider,
+  Button,
+} from "@mui/material";
 import useUtil from "../Util";
 import CameraView from "./CameraView";
 import LightView from "./LightView";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import MusicOffIcon from "@mui/icons-material/MusicOff";
-const NodeView = ({ module, targetNode, updateHierarchy }) => {
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+const NodeView = ({
+  module,
+  targetNode,
+  updateHierarchy,
+  removeSelectedNode,
+}) => {
   const Util = useUtil();
   const [name, setName] = useState("");
   const [position, setPosition] = useState([0.0, 0.0, 0.0]);
@@ -67,6 +80,20 @@ const NodeView = ({ module, targetNode, updateHierarchy }) => {
           paddingRight: 2,
         }}
       >
+        <Grid item xs={8}></Grid>
+        <Grid item xs={4}>
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<DeleteForeverIcon />}
+            sx={{ width: "100%", backgroundColor:"#7d0e0e" }}
+            onClick={() => {
+              removeSelectedNode();
+            }}
+          >
+            remove
+          </Button>
+        </Grid>
         <Grid item xs={12}>
           <TextField
             type="text"
@@ -88,12 +115,16 @@ const NodeView = ({ module, targetNode, updateHierarchy }) => {
           />
         </Grid>
         <Grid item xs={12}>
-          <Divider sx={{
-            color: "#868686",
-            "&::before, &::after": {
-              borderColor: "#868686",
-            },
-          }}>Transform</Divider>
+          <Divider
+            sx={{
+              color: "#868686",
+              "&::before, &::after": {
+                borderColor: "#868686",
+              },
+            }}
+          >
+            Transform
+          </Divider>
         </Grid>
         <Grid item xs={12}>
           <Grid
@@ -452,23 +483,31 @@ const NodeView = ({ module, targetNode, updateHierarchy }) => {
         </Grid>
 
         <Grid item xs={12}>
-          <Divider sx={{
-            color: "#868686",
-            "&::before, &::after": {
-              borderColor: "#868686",
-            },
-          }}>Camera</Divider>
+          <Divider
+            sx={{
+              color: "#868686",
+              "&::before, &::after": {
+                borderColor: "#868686",
+              },
+            }}
+          >
+            Camera
+          </Divider>
         </Grid>
         <Grid item xs={12}>
           <CameraView module={module} targetNode={targetNode} />
         </Grid>
         <Grid item xs={12}>
-          <Divider sx={{
-            color: "#868686",
-            "&::before, &::after": {
-              borderColor: "#868686",
-            },
-          }}>Light</Divider>
+          <Divider
+            sx={{
+              color: "#868686",
+              "&::before, &::after": {
+                borderColor: "#868686",
+              },
+            }}
+          >
+            Light
+          </Divider>
         </Grid>
         <Grid item xs={12}>
           <LightView module={module} targetNode={targetNode} />

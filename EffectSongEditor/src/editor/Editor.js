@@ -8,7 +8,13 @@ import Typography from "@mui/material/Typography";
 import { floor } from "mathjs";
 import MusicImport from "./Import/MusicImport.js";
 import GLTFImport from "./Import/GLTFImport.js";
-import { Grid, Snackbar, Alert, CircularProgress, Backdrop } from "@mui/material";
+import {
+  Grid,
+  Snackbar,
+  Alert,
+  CircularProgress,
+  Backdrop,
+} from "@mui/material";
 
 export default function Editor() {
   const currentWidth = useRef(1400);
@@ -55,11 +61,11 @@ export default function Editor() {
       onResizeEngine(currentWidth.current, currentHeight.current);
     };
 
-    const handleScroll = (e) => { };
+    const handleScroll = (e) => {};
 
-    const handleMouseOver = (e) => { };
+    const handleMouseOver = (e) => {};
 
-    const handleMouseOut = (e) => { };
+    const handleMouseOut = (e) => {};
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
@@ -91,7 +97,7 @@ export default function Editor() {
     setNotifySuccess(isSuccess);
     setNotifyMessage(message);
     setNotifyOpen(true);
-  }
+  };
   const getNodeById = (id) => {
     const idxList = id.split("-");
     let curNode = module.Renderer.getInstance().getSceneAt(
@@ -101,6 +107,15 @@ export default function Editor() {
       curNode = curNode.getChildAt(parseInt(idxList[i]));
     }
     return curNode;
+  };
+  const removeSelectedNode = () => {
+    const parentNode = selectedNode.getParent();
+    if (parentNode) {
+      parentNode.removeChild(selectedNode);
+    } else {
+      module.Renderer.getInstance().removeScene(selectedNode);
+    }
+    setSelectedNode(null);
   };
   const updateHierarchy = () => {
     let data = [];
@@ -184,11 +199,11 @@ export default function Editor() {
 
   const startEngine = () => {
     //module.canvas.addEventListener("webglcontextlost", (e) => { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
-    const startMusicPath = module.getRootPath() + "res/music/effectsong.mp3";
+    const startMusicPath = module.getRootPath() + "res/music/unity.mp3";
     module.Renderer.getInstance().setAudioFile(startMusicPath);
 
     let arrayBuffer = module.FS.readFile(startMusicPath);
-    const blob = new Blob([arrayBuffer], { type: 'audio/mpeg' });
+    const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
     const url = URL.createObjectURL(blob);
     audioRef.current.audio.current.src = url;
 
@@ -197,9 +212,9 @@ export default function Editor() {
     //DefaultScene
     let scene = new module.Scene();
     scene.setName("DefaultScene");
-    let camNode = new module.Node(scene, null);
-    camNode.setName("DefaultCamera")
-    scene.addNode(camNode);
+    let camNode = new module.Node(scene, scene);
+    camNode.setName("DefaultCamera");
+    scene.addChild(camNode);
 
     let cam = new module.Camera(camNode);
     camNode.setPosition(new module.vec3(0, 0, -5));
@@ -217,23 +232,23 @@ export default function Editor() {
   return (
     <div className="editor">
       {/*loading popup*/}
-      <Backdrop
-        open={loading}
-      >
+      <Backdrop open={loading}>
         <CircularProgress color="primary" />
       </Backdrop>
 
       {/*notify popup*/}
       <Snackbar
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
         open={notifyOpen}
-        onClose={() => { setNotifyOpen(false) }}
-        key='notify'
+        onClose={() => {
+          setNotifyOpen(false);
+        }}
+        key="notify"
       >
         <Alert
           severity={notifySuccess ? "success" : "error"}
           variant="filled"
-          sx={{ width: '100%' }}
+          sx={{ width: "100%" }}
         >
           {notifyMessage}
         </Alert>
@@ -259,6 +274,7 @@ export default function Editor() {
           selectCallback={onSelectHierarchyObj}
           expandIdList={expandIdList}
           setExpandIdList={setExpandIdList}
+          targetNode={selectedNode}
         />
       </div>
       <ShaderSettings module={module} onResizeEngine={onResizeEngine} />
@@ -293,14 +309,24 @@ export default function Editor() {
               paddingRight: 2,
               paddingBottom: 0.5,
               width: "100%",
-              height: "100%"
+              height: "100%",
             }}
           >
             <Grid item xs={6}>
-              <GLTFImport module={module} updateHierarchy={updateHierarchy} notify={notify} setLoading={setLoading}/>
+              <GLTFImport
+                module={module}
+                updateHierarchy={updateHierarchy}
+                notify={notify}
+                setLoading={setLoading}
+              />
             </Grid>
             <Grid item xs={6}>
-              <MusicImport module={module} audioPlayerRef={audioRef} notify={notify} setLoading={setLoading}/>
+              <MusicImport
+                module={module}
+                audioPlayerRef={audioRef}
+                notify={notify}
+                setLoading={setLoading}
+              />
             </Grid>
           </Grid>
         </div>
@@ -308,6 +334,7 @@ export default function Editor() {
           updateHierarchy={updateHierarchy}
           module={module}
           targetNode={selectedNode}
+          removeSelectedNode={removeSelectedNode}
         />
       </div>
     </div>

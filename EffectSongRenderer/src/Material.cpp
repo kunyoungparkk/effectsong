@@ -2,27 +2,36 @@
 #include "Renderer.h"
 #include "Texture.h"
 
-Material::Material(cgltf_material* material, std::string& gltfPath) : m_material(material) {
-  if (m_material->pbr_metallic_roughness.base_color_texture.texture) {
+Material::Material(cgltf_material* material, std::string& gltfPath){
+  if (material->pbr_metallic_roughness.base_color_texture.texture) {
       m_baseColorTexture = Renderer::getInstance()->getTexture(
-          m_material->pbr_metallic_roughness.base_color_texture.texture, gltfPath, true);
+          material->pbr_metallic_roughness.base_color_texture.texture, gltfPath, true);
   }
-  if (m_material->pbr_metallic_roughness.metallic_roughness_texture.texture){
+  if (material->pbr_metallic_roughness.metallic_roughness_texture.texture){
       m_metallicRoughnessTexture = Renderer::getInstance()->getTexture(
-          m_material->pbr_metallic_roughness.metallic_roughness_texture.texture, gltfPath);
+          material->pbr_metallic_roughness.metallic_roughness_texture.texture, gltfPath);
   }
-  if (m_material->emissive_texture.texture) {
+  if (material->emissive_texture.texture) {
       m_emissiveTexture = Renderer::getInstance()->getTexture(
-          m_material->emissive_texture.texture, gltfPath, true);
+          material->emissive_texture.texture, gltfPath, true);
   }
-  if (m_material->normal_texture.texture) {
+  if (material->normal_texture.texture) {
       m_normalTexture = Renderer::getInstance()->getTexture(
-          m_material->normal_texture.texture, gltfPath);
+          material->normal_texture.texture, gltfPath);
   }
-  if (m_material->occlusion_texture.texture) {
+  if (material->occlusion_texture.texture) {
       m_occlusionTexture = Renderer::getInstance()->getTexture(
-          m_material->occlusion_texture.texture, gltfPath);
+          material->occlusion_texture.texture, gltfPath);
   }
+  m_baseColorFactor = *(glm::vec4*)material->pbr_metallic_roughness.base_color_factor;
+  m_specularColorFactor = *(glm::vec3*)material->specular.specular_color_factor;
+  m_emissiveFactor = *(glm::vec3*)material->emissive_factor;
+  m_metallicFactor = material->pbr_metallic_roughness.metallic_factor;
+  m_roughnessFactor = material->pbr_metallic_roughness.roughness_factor;
+}
+
+Material::Material()
+{
 }
 
 void Material::bind(GLuint shaderProgram) {
@@ -93,9 +102,9 @@ void Material::bind(GLuint shaderProgram) {
       glUniform1i(m_useOcclusionTexLoc, GL_FALSE);
   }
 
-  glUniform4fv(m_baseColorLoc, 1, m_material->pbr_metallic_roughness.base_color_factor);
-  glUniform3fv(m_specularColorLoc, 1, m_material->specular.specular_color_factor);
-  glUniform3fv(m_emissionColorLoc, 1, m_material->emissive_factor);
-  glUniform1f(m_metallicLoc, m_material->pbr_metallic_roughness.metallic_factor);
-  glUniform1f(m_roughnessLoc, m_material->pbr_metallic_roughness.roughness_factor);
+  glUniform4fv(m_baseColorLoc, 1, glm::value_ptr(m_baseColorFactor));
+  glUniform3fv(m_specularColorLoc, 1, glm::value_ptr(m_specularColorFactor));
+  glUniform3fv(m_emissionColorLoc, 1, glm::value_ptr(m_emissiveFactor));
+  glUniform1f(m_metallicLoc, m_metallicFactor);
+  glUniform1f(m_roughnessLoc, m_roughnessFactor);
 }

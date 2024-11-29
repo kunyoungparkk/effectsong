@@ -88,14 +88,20 @@ Node::Node(Scene* scene, Node* parent)
 
 Node::~Node()
 {
-	for (int i = 0; i < m_children.size(); i++) {
-		delete m_children[i];
+	for (auto iter = m_children.begin(); iter != m_children.end(); iter++) {
+		delete *iter;
 	}
 	for (int i = 0; i < m_primitives.size(); i++)
 	{
 		delete m_primitives[i];
 	}
 	if (m_camera) {
+		if (Renderer::getInstance()->getActiveCamera() == m_camera) {
+			Renderer::getInstance()->setActiveCamera(nullptr);
+		}
+		if (m_scene) {
+			m_scene->removeCamera(m_camera);
+		}
 		delete m_camera;
 	}
 	if (m_light) {
@@ -107,8 +113,8 @@ Node::~Node()
 }
 
 void Node::update() {
-	for (int i = 0; i < m_children.size(); i++) {
-		m_children[i]->update();
+	for (auto iter = m_children.begin(); iter != m_children.end(); iter++) {
+		(*iter)->update();
 	}
 	//TODO: temporary reactive scale
 	if (m_bAudioReactiveScale) {
@@ -118,8 +124,8 @@ void Node::update() {
 }
 
 void Node::render(GLuint shaderProgram) {
-	for (int i = 0; i < m_children.size(); i++) {
-		m_children[i]->render(shaderProgram);
+	for (auto iter = m_children.begin(); iter != m_children.end(); iter++) {
+		(*iter)->render(shaderProgram);
 	}
 
 	//vertex shader
@@ -238,18 +244,31 @@ void Node::setCamera(Camera* camera)
 	m_camera = camera;
 }
 
+void Node::addChild(Node* node)
+{
+	m_children.push_back(node);
+}
+
+void Node::removeChild(Node* node)
+{
+	m_children.remove(node);
+	delete node;
+}
+
 Node* Node::getChildAt(int index)
 {
 	if (m_children.size() <= index)
 		return nullptr;
-	return m_children[index];
+	auto iter = m_children.begin();
+	std::advance(iter, index);
+	return *iter;
 }
 
 Node* Node::getChildByName(std::string name)
 {
-	for (int i = 0; i < m_children.size(); i++) {
-		if (m_children[i]->getName() == name) {
-			return m_children[i];
+	for (auto iter = m_children.begin(); iter != m_children.end(); iter++) {
+		if ((*iter)->getName() == name) {
+			return (*iter);
 		}
 	}
 	return nullptr;

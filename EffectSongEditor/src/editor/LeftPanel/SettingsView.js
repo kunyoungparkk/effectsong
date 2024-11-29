@@ -1,28 +1,30 @@
 import { useState, useEffect } from "react";
 import { Grid, FormControl, InputLabel, NativeSelect } from "@mui/material";
 
-const SettingsView = ({ module }) => {
+const SettingsView = ({ module, targetNode }) => {
   const [cameraList, setCameraList] = useState([]);
-  const [activeCameraIndex, setActiveCameraIndex] = useState(0);
-
+  const [activeCameraIndex, setActiveCameraIndex] = useState(-1);
 
   useEffect(() => {
     let tempCameraList = [];
     const renderer = module.Renderer.getInstance();
     const activeCamera = renderer.getActiveCamera();
-
+    //when camera deleted on attribute panel
+    if(!activeCamera){
+      setActiveCameraIndex(-1);
+    }
     for (let i = 0; i < renderer.getSceneCount(); i++) {
       const scene = renderer.getSceneAt(i);
       for (let j = 0; j < scene.getCameraCount(); j++) {
         const camera = scene.getCameraAt(j);
-        if (camera.$$.ptr === activeCamera.$$.ptr) {
+        if (activeCamera && camera.$$.ptr === activeCamera.$$.ptr) {
           setActiveCameraIndex(tempCameraList.length);
         }
         tempCameraList.push(camera.getNode());
       }
     }
     setCameraList(tempCameraList);
-  }, [module]);
+  }, [targetNode]);
 
   return (
     <Grid

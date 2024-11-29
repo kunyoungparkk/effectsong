@@ -4,7 +4,6 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import NodeView from './NodeView.js';
-import SceneView from './SceneView.js';
 import VisualScriptView from './VisualScriptView.js';
 const StyledTabs = styled((props) => (
     <Tabs
@@ -40,7 +39,7 @@ const StyledTab = styled((props) => <Tab disableRipple {...props} />)(
     }),
 );
 
-export default function RightTab({ updateHierarchy, module, targetNode }) {
+export default function RightTab({ updateHierarchy, module, targetNode, removeSelectedNode }) {
     const [value, setValue] = React.useState(0);
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -52,12 +51,7 @@ export default function RightTab({ updateHierarchy, module, targetNode }) {
         }
         switch(index){
             case 0:
-                if(targetNode?.$$.ptrType.name === "Node*"){
-                    return <NodeView module={module} targetNode={targetNode} updateHierarchy={updateHierarchy}/>
-                }else if(targetNode?.$$.ptrType.name === "Scene*"){
-                    return <SceneView module={module} targetScene={targetNode} updateHierarchy={updateHierarchy}/>
-                }
-                break;
+                return <NodeView module={module} targetNode={targetNode} updateHierarchy={updateHierarchy} removeSelectedNode={removeSelectedNode}/>
             case 1:
                 return <VisualScriptView/>
             case 2:
