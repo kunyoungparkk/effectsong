@@ -3,8 +3,8 @@ import { styled } from '@mui/material/styles';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import NodeView from './NodeView.js';
-import VisualScriptView from './VisualScriptView.js';
+import NodeView from './NodeView';
+import VisualScriptView from './VisualScriptView';
 const StyledTabs = styled((props) => (
     <Tabs
         {...props}

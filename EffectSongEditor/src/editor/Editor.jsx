@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
-import ShaderSettings from "./ScriptEditor/ShaderSettings.js";
-import LeftTab from "./LeftPanel/LeftTab.js";
-import RightTab from "./RightPanel/RightTab.js";
+import ShaderSettings from "./ScriptEditor/ShaderSettings";
+import LeftTab from "./LeftPanel/LeftTab";
+import RightTab from "./RightPanel/RightTab";
 import Typography from "@mui/material/Typography";
 import { floor } from "mathjs";
-import MusicImport from "./Import/MusicImport.js";
-import GLTFImport from "./Import/GLTFImport.js";
+import MusicImport from "./Import/MusicImport";
+import GLTFImport from "./Import/GLTFImport";
 import {
   Grid,
   Snackbar,
@@ -61,11 +61,11 @@ export default function Editor() {
       onResizeEngine(currentWidth.current, currentHeight.current);
     };
 
-    const handleScroll = (e) => {};
+    const handleScroll = (e) => { };
 
-    const handleMouseOver = (e) => {};
+    const handleMouseOver = (e) => { };
 
-    const handleMouseOut = (e) => {};
+    const handleMouseOut = (e) => { };
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
@@ -93,12 +93,13 @@ export default function Editor() {
     startEngine();
   }, [module]);
 
-  const notify = (message, isSuccess = false) => {
+  const notify = useCallback((message, isSuccess = false) => {
     setNotifySuccess(isSuccess);
     setNotifyMessage(message);
     setNotifyOpen(true);
-  };
-  const getNodeById = (id) => {
+  }, [setNotifySuccess, setNotifyMessage, setNotifyOpen]);
+
+  const getNodeById = useCallback((id) => {
     const idxList = id.split("-");
     let curNode = module.Renderer.getInstance().getSceneAt(
       parseInt(idxList[0])
@@ -107,8 +108,9 @@ export default function Editor() {
       curNode = curNode.getChildAt(parseInt(idxList[i]));
     }
     return curNode;
-  };
-  const removeSelectedNode = () => {
+  }, [module]);
+
+  const removeSelectedNode = useCallback(() => {
     const parentNode = selectedNode.getParent();
     if (parentNode) {
       parentNode.removeChild(selectedNode);
@@ -116,16 +118,9 @@ export default function Editor() {
       module.Renderer.getInstance().removeScene(selectedNode);
     }
     setSelectedNode(null);
-  };
-  const updateHierarchy = () => {
-    let data = [];
-    let renderer = module.Renderer.getInstance();
-    for (let i = 0; i < renderer.getSceneCount(); i++) {
-      data.push(recursiveWriteNodes(renderer.getSceneAt(i), i.toString()));
-    }
-    setHierarchyData(data);
-  };
-  const recursiveWriteNodes = (curNode, id) => {
+  }, [module, selectedNode, setSelectedNode]);
+
+  const recursiveWriteNodes = useCallback((curNode, id) => {
     //현재 노드 기록
     let currentData = {
       id: id,
@@ -147,32 +142,25 @@ export default function Editor() {
       );
     }
     return currentData;
-  };
-  const onSelectHierarchyObj = (event, id, isSelected) => {
+  }, [selectedNode]);
+
+  const updateHierarchy = useCallback(() => {
+    let data = [];
+    let renderer = module.Renderer.getInstance();
+    for (let i = 0; i < renderer.getSceneCount(); i++) {
+      data.push(recursiveWriteNodes(renderer.getSceneAt(i), i.toString()));
+    }
+    setHierarchyData(data);
+  }, [module, setHierarchyData, recursiveWriteNodes]);
+
+  const onSelectHierarchyObj = useCallback((event, id, isSelected) => {
     if (!isSelected) {
       return;
     }
-
     setSelectedNode(getNodeById(id));
-  };
-  //엔진 초기화 시점에 호출
-  function onEngineInitialized() {
-    window.EFFECTSONG_CORE.canvas = document.getElementById("canvas");
-    window.EFFECTSONG_CORE.initialize(
-      currentWidth.current,
-      currentHeight.current,
-      window.EFFECTSONG_CORE.addFunction(function () {
-        return audioRef.current.audio.current.currentTime;
-      }, "f"),
-      window.EFFECTSONG_CORE.addFunction(function () {
-        return audioRef.current.isPlaying();
-      }, "i")
-    );
-    onResizeEngine(currentWidth.current, currentHeight.current);
-    setModule(window.EFFECTSONG_CORE);
-  }
+  }, [setSelectedNode, getNodeById]);
 
-  const onResizeEngine = (width, height) => {
+  const onResizeEngine = useCallback((width, height) => {
     currentWidth.current = width;
     currentHeight.current = height;
 
@@ -195,7 +183,24 @@ export default function Editor() {
         `${floor(canvasDivRef.current.offsetHeight * engineAspectRatio)}px`
       );
     }
-  };
+  }, []);
+
+  //엔진 초기화 시점에 호출
+  const onEngineInitialized = useCallback(() => {
+    window.EFFECTSONG_CORE.canvas = document.getElementById("canvas");
+    window.EFFECTSONG_CORE.initialize(
+      currentWidth.current,
+      currentHeight.current,
+      window.EFFECTSONG_CORE.addFunction(function () {
+        return audioRef.current.audio.current.currentTime;
+      }, "f"),
+      window.EFFECTSONG_CORE.addFunction(function () {
+        return audioRef.current.isPlaying();
+      }, "i")
+    );
+    onResizeEngine(currentWidth.current, currentHeight.current);
+    setModule(window.EFFECTSONG_CORE);
+  }, [onResizeEngine, setModule]);
 
   const startEngine = () => {
     //module.canvas.addEventListener("webglcontextlost", (e) => { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);

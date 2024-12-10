@@ -1,6 +1,6 @@
 import './App.css';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import Editor from './editor/Editor.js'
+import Editor from './editor/Editor'
 
 const theme = createTheme({
   palette: {
