@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Editor, { loader } from "@monaco-editor/react";
 import { Box, Button, Grid, Typography } from "@mui/material";
 import CodeIcon from "@mui/icons-material/Code";

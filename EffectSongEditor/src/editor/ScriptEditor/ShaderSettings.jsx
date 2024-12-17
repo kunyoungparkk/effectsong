@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   NativeSelect,
   TextField,
@@ -17,32 +17,11 @@ import LightModeIcon from "@mui/icons-material/LightMode";
 import HeightIcon from "@mui/icons-material/Height";
 import HelpIcon from "@mui/icons-material/Help";
 import ScriptEditor from "./ScriptEditor";
-import useUtil from "../Util";
+import Util from "../Util";
 import Slider from "@mui/material/Slider";
 
 const ShaderSettings = ({ module, onResizeEngine }) => {
-  const [scriptOpacity, setScriptOpacity] = useState(0.2);
-  const primitiveTypes = [
-    "POINTS",
-    "LINES",
-    "LINE_LOOP",
-    "LINE_STRIP",
-    "TRIANGLES",
-    "TRI_STRIP",
-    "TRI_FAN",
-  ];
-  const [primitiveMode, setPrimitiveMode] = useState(0);
-  const [scriptVisible, setScriptVisible] = useState(true);
-  const [vertexCount, setVertexCount] = useState(0);
-  const [diffuseIBLIntensity, setDiffuseIBLIntensity] = useState(0.0);
-  const [width, setWidth] = useState(0);
-  const [height, setHeight] = useState(0);
-
-  const [helpModalOpen, setHelpModalOpen] = useState(false);
-
-  const Util = useUtil();
-
-  const [vertexShader, setVertexShader] = useState(`//shader art sample
+  const DEFAULT_SHADER = useMemo(()=>`//shader art sample
 #define PI 3.14159
 #define NUM_SEGMENTS 51.0
 #define NUM_POINTS (NUM_SEGMENTS * 2.0)
@@ -104,7 +83,27 @@ void main() {
     vec4 color = vec4(hsv2rgb(vec3(hue, invCPulse, 1.0)), 1.0);
     v_color = mix(color, background, radius - cPulse);
 }
-`);
+`,[]);
+  const [scriptOpacity, setScriptOpacity] = useState(0.2);
+  const primitiveTypes = [
+    "POINTS",
+    "LINES",
+    "LINE_LOOP",
+    "LINE_STRIP",
+    "TRIANGLES",
+    "TRI_STRIP",
+    "TRI_FAN",
+  ];
+  const [primitiveMode, setPrimitiveMode] = useState(0);
+  const [scriptVisible, setScriptVisible] = useState(true);
+  const [vertexCount, setVertexCount] = useState(0);
+  const [diffuseIBLIntensity, setDiffuseIBLIntensity] = useState(0.0);
+  const [width, setWidth] = useState(0);
+  const [height, setHeight] = useState(0);
+
+  const [helpModalOpen, setHelpModalOpen] = useState(false);
+
+  const [vertexShader, setVertexShader] = useState(DEFAULT_SHADER);
 
   const [customVS, setCustomVS] = useState(`#define PI radians(180.0)
 vec3 hsv2rgb(vec3 c) {
@@ -168,7 +167,7 @@ else{
     }
     let success = module.ArtShader.getInstance().setVertexShader(vertexShader);
     console.log("compile: " + success);
-  }, [vertexShader]);
+  }, [module, vertexShader]);
 
   useEffect(() => {
     if (!module) {
@@ -177,13 +176,13 @@ else{
     let artShader = module.ArtShader.getInstance();
     setPrimitiveMode(artShader.getPrimitiveMode());
     setVertexCount(artShader.getVertexCount());
-    artShader.setVertexShader(vertexShader); //soundTextureVS
+    artShader.setVertexShader(DEFAULT_SHADER);
 
     const renderer = module.Renderer.getInstance();
     setDiffuseIBLIntensity(renderer.getDiffuseIBLIntensity());
     setWidth(renderer.getWidth());
     setHeight(renderer.getHeight());
-  }, [module]);
+  }, [module, DEFAULT_SHADER]);
 
   return (
     <div>

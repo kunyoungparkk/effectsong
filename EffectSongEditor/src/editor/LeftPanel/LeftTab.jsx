@@ -58,6 +58,8 @@ export default function LeftTab({ module, hierarchyData, selectCallback, expandI
         />
       case 1:
         return <SettingsView module={module} targetNode={targetNode}/>
+      default:
+        return null;
     }
   }
 

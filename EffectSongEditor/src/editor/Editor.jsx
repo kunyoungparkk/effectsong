@@ -33,65 +33,6 @@ export default function Editor() {
   const [hierarchyData, setHierarchyData] = useState([]);
   const [expandIdList, setExpandIdList] = useState([]);
   const [selectedNode, setSelectedNode] = useState(null);
-  useEffect(() => {
-    if (module) {
-      updateHierarchy();
-    }
-  }, [selectedNode]);
-
-  useEffect(() => {
-    //setShowLoading(true);
-    if (!window.EFFECTSONG_CORE) {
-      //모듈 초기 로드시 - 초기화
-      window.initializeModule(onEngineInitialized);
-    } else {
-      //두번째 로드시부턴 초기화하지말고 개별적으로 startEngine 함수 호출
-      onEngineInitialized();
-    }
-    //키보드 이벤트 등록
-    const handleKeyDown = (e) => {
-      switch (e.key) {
-      }
-    };
-    const handleKeyUp = (e) => {
-      switch (e.key) {
-      }
-    };
-    const handleResize = (e) => {
-      onResizeEngine(currentWidth.current, currentHeight.current);
-    };
-
-    const handleScroll = (e) => { };
-
-    const handleMouseOver = (e) => { };
-
-    const handleMouseOut = (e) => { };
-
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-    window.addEventListener("resize", handleResize);
-    document.body.addEventListener("wheel", handleScroll);
-    document.body.addEventListener("mouseover", handleMouseOver);
-    document.body.addEventListener("mouseout", handleMouseOut);
-
-    return () => {
-      //키보드 이벤트 제거
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-      window.removeEventListener("resize", handleResize);
-      console.log("deinitialize");
-      //종료 시 addFunction 삭제 필요
-      window.EFFECTSONG_CORE.deInitialize();
-    };
-  }, []);
-
-  //모듈 초기화
-  useEffect(() => {
-    if (!module) {
-      return;
-    }
-    startEngine();
-  }, [module]);
 
   const notify = useCallback((message, isSuccess = false) => {
     setNotifySuccess(isSuccess);
@@ -120,7 +61,7 @@ export default function Editor() {
     setSelectedNode(null);
   }, [module, selectedNode, setSelectedNode]);
 
-  const recursiveWriteNodes = useCallback((curNode, id) => {
+  const recursiveWriteNodes = useCallback((selectedNodePtr, curNode, id) => {
     //현재 노드 기록
     let currentData = {
       id: id,
@@ -128,7 +69,7 @@ export default function Editor() {
       isSelected: false,
       children: [],
     };
-    if (curNode.$$.ptr === selectedNode?.$$.ptr) {
+    if (curNode.$$.ptr === selectedNodePtr) {
       currentData.isSelected = true;
     } else {
       currentData.isSelected = false;
@@ -138,17 +79,17 @@ export default function Editor() {
     for (let i = 0; i < curNode.getChildrenCount(); i++) {
       let currentChildNode = curNode.getChildAt(i);
       currentData.children.push(
-        recursiveWriteNodes(currentChildNode, id + "-" + i)
+        recursiveWriteNodes(selectedNodePtr, currentChildNode, id + "-" + i)
       );
     }
     return currentData;
-  }, [selectedNode]);
+  }, []);
 
-  const updateHierarchy = useCallback(() => {
+  const updateHierarchy = useCallback((selectedNodePtr) => {
     let data = [];
     let renderer = module.Renderer.getInstance();
     for (let i = 0; i < renderer.getSceneCount(); i++) {
-      data.push(recursiveWriteNodes(renderer.getSceneAt(i), i.toString()));
+      data.push(recursiveWriteNodes(selectedNodePtr, renderer.getSceneAt(i), i.toString()));
     }
     setHierarchyData(data);
   }, [module, setHierarchyData, recursiveWriteNodes]);
@@ -185,23 +126,6 @@ export default function Editor() {
     }
   }, []);
 
-  //엔진 초기화 시점에 호출
-  const onEngineInitialized = useCallback(() => {
-    window.EFFECTSONG_CORE.canvas = document.getElementById("canvas");
-    window.EFFECTSONG_CORE.initialize(
-      currentWidth.current,
-      currentHeight.current,
-      window.EFFECTSONG_CORE.addFunction(function () {
-        return audioRef.current.audio.current.currentTime;
-      }, "f"),
-      window.EFFECTSONG_CORE.addFunction(function () {
-        return audioRef.current.isPlaying();
-      }, "i")
-    );
-    onResizeEngine(currentWidth.current, currentHeight.current);
-    setModule(window.EFFECTSONG_CORE);
-  }, [onResizeEngine, setModule]);
-
   const startEngine = () => {
     //module.canvas.addEventListener("webglcontextlost", (e) => { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
     const startMusicPath = module.getRootPath() + "res/music/unity.mp3";
@@ -229,10 +153,79 @@ export default function Editor() {
     module.Renderer.getInstance().addScene(scene);
 
     module.Renderer.getInstance().setActiveCamera(cam);
-    updateHierarchy();
+    updateHierarchy(null);
 
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (module) {
+      updateHierarchy(selectedNode?.$$.ptr);
+    }
+  }, [module, selectedNode, updateHierarchy]);
+
+  useEffect(() => {
+    let tempInstance = null;
+    window.createModule().then((instance) => {
+      tempInstance = instance;
+      instance.canvas = document.getElementById("canvas");
+      instance.initialize(
+        currentWidth.current,
+        currentHeight.current,
+        instance.addFunction(function () {
+          return audioRef.current.audio.current.currentTime;
+        }, "f"),
+        instance.addFunction(function () {
+          return audioRef.current.isPlaying();
+        }, "i")
+      );
+      onResizeEngine(currentWidth.current, currentHeight.current);
+      setModule(instance);
+    });
+
+    //키보드 이벤트 등록
+    const handleKeyDown = (e) => {
+      switch (e.key) {
+      }
+    };
+    const handleKeyUp = (e) => {
+      switch (e.key) {
+      }
+    };
+    const handleResize = (e) => {
+      onResizeEngine(currentWidth.current, currentHeight.current);
+    };
+
+    const handleScroll = (e) => { };
+
+    const handleMouseOver = (e) => { };
+
+    const handleMouseOut = (e) => { };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("resize", handleResize);
+    document.body.addEventListener("wheel", handleScroll);
+    document.body.addEventListener("mouseover", handleMouseOver);
+    document.body.addEventListener("mouseout", handleMouseOut);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("resize", handleResize);
+      //TODO: removeFunction
+      tempInstance.deInitialize();
+      setModule(null);
+    };
+  }, []);
+
+  //모듈 초기화
+  useEffect(() => {
+    if (!module) {
+      return;
+    }
+    startEngine();
+  }, [module]);
 
   return (
     <div className="editor">

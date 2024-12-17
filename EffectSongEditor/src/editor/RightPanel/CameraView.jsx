@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { TextField, Grid, FormControl, InputLabel, NativeSelect } from "@mui/material";
-import useUtil from "../Util";
+import Util from "../Util";
 
 const CameraView = ({ module, targetNode }) => {
-  const Util = useUtil();
   const camera = targetNode?.getCamera();
 
-  const [name, setName] = useState("");
+  //const [name, setName] = useState("");
   const [fov, setFov] = useState(0.0);
   const [near, setNear] = useState(0.0);
   const [far, setFar] = useState(0.0);
@@ -14,19 +13,20 @@ const CameraView = ({ module, targetNode }) => {
   const [yMag, setYMag] = useState(0.0);
   const [type, setType] = useState('');
 
-  const cameraTypes = ['Perspective', 'Orthographic'];
+  const cameraTypes = useMemo(()=>['Perspective', 'Orthographic'], []);
+
   useEffect(() => {
     if (!camera) {
       return;
     }
-    setName(camera.name);
+    //setName(camera.name);
     setFov(Util.roundToNearestStep(camera.fov));
     setNear(Util.roundToNearestStep(camera.zNear));
     setFar(Util.roundToNearestStep(camera.zFar));
     setXMag(Util.roundToNearestStep(camera.xMag));
     setYMag(Util.roundToNearestStep(camera.yMag));
     setType(cameraTypes[camera.projectionType.value]);
-  }, [targetNode]);
+  }, [camera, cameraTypes]);
 
   const getView = () => {
     if (!camera) {

@@ -59,6 +59,7 @@ set(COPTS "${COPTS} -sUSE_SDL=2")
 # set(COPTS "${COPTS} -sMEMORY64=1")
 
 # emcc compile options
+set(LOPTS "${LOPTS} --closure 0")
 set(LOPTS "${LOPTS} -sUSE_SDL=2")
 set(LOPTS "${LOPTS} -lembind")
 set(LOPTS "${LOPTS} -sFULL_ES3")
@@ -70,7 +71,7 @@ set(LOPTS "${LOPTS} -s ENVIRONMENT='web'")
 set(LOPTS "${LOPTS} -s MAXIMUM_MEMORY=4GB")
 set(LOPTS "${LOPTS} -s ALLOW_MEMORY_GROWTH=1")
 set(LOPTS "${LOPTS} -s STACK_SIZE=1048576")
-set(LOPTS "${LOPTS} -s GL_MAX_TEMP_BUFFER_SIZE=8388608")
+#set(LOPTS "${LOPTS} -s GL_MAX_TEMP_BUFFER_SIZE=8388608")
 set(LOPTS "${LOPTS} -s EXPORTED_RUNTIME_METHODS=['addFunction','removeFunction','FS']")
 set(LOPTS "${LOPTS} -s ALLOW_TABLE_GROWTH=1")
 set(LOPTS "${LOPTS} -s MODULARIZE=1")
@@ -82,11 +83,9 @@ set(LOPTS "${LOPTS} --preload-file ../res/music")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LOPTS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COPTS}")
 
-# "Debug" 형상 한정 컴파일 옵션, 링크 옵션
+# debug / release 모드에 따라 처리
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
-
-# "Release" 형상 한정 컴파일 옵션, 링크 옵션
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 --llvm-lto 1" )
+set(CMAKE_CXX_FLAGS_RELEASE "-O3" )
 
 # 출력 디렉토리
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})

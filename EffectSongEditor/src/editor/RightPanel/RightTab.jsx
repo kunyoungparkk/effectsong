@@ -54,8 +54,8 @@ export default function RightTab({ updateHierarchy, module, targetNode, removeSe
                 return <NodeView module={module} targetNode={targetNode} updateHierarchy={updateHierarchy} removeSelectedNode={removeSelectedNode}/>
             case 1:
                 return <VisualScriptView/>
-            case 2:
-                return <></>
+            default:
+                return null;
         }
     }
     return (

@@ -6,6 +6,9 @@ const SettingsView = ({ module, targetNode }) => {
   const [activeCameraIndex, setActiveCameraIndex] = useState(-1);
 
   useEffect(() => {
+    if(!module){
+      return;
+    }
     let tempCameraList = [];
     const renderer = module.Renderer.getInstance();
     const activeCamera = renderer.getActiveCamera();
@@ -24,7 +27,7 @@ const SettingsView = ({ module, targetNode }) => {
       }
     }
     setCameraList(tempCameraList);
-  }, [targetNode]);
+  }, [module, targetNode]);
 
   return (
     <Grid

@@ -1,5 +1,4 @@
-export default function useUtil() {
-    return {
+const Util =  {
         cross: (A, B) => {
             return [A[1] * B[2] - A[2] * B[1], A[2] * B[0] - A[0] * B[2], A[0] * B[1] - A[1] * B[0]];
         },
@@ -28,5 +27,5 @@ export default function useUtil() {
             const nearest = Math.round(value / step) * step;
             return Math.abs(value - nearest) < epsilon ? nearest : value;
         }
-    }
 }
+export default Util;

@@ -7,7 +7,7 @@ import {
   Divider,
   Button,
 } from "@mui/material";
-import useUtil from "../Util";
+import Util from "../Util";
 import CameraView from "./CameraView";
 import LightView from "./LightView";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
@@ -19,7 +19,6 @@ const NodeView = ({
   updateHierarchy,
   removeSelectedNode,
 }) => {
-  const Util = useUtil();
   const [name, setName] = useState("");
   const [position, setPosition] = useState([0.0, 0.0, 0.0]);
   const [rotation, setRotation] = useState([0.0, 0.0, 0.0]);
@@ -61,7 +60,7 @@ const NodeView = ({
     setReactiveChangingScale(
       Util.roundToNearestStep(targetNode.m_reactiveChangingScale)
     );
-  }, [targetNode]);
+  }, [module, targetNode]);
   return (
     <Box
       sx={{

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   TextField,
   Grid,
@@ -6,10 +6,9 @@ import {
   InputLabel,
   NativeSelect,
 } from "@mui/material";
-import useUtil from "../Util";
+import Util from "../Util";
 
 const LightView = ({ module, targetNode }) => {
-  const Util = useUtil();
   const light = targetNode?.getLight();
 
   // const [name, setName] = useState("");
@@ -20,7 +19,8 @@ const LightView = ({ module, targetNode }) => {
   const [outerConeAngle, setOuterConeAngle] = useState(0.0);
   const [type, setType] = useState("");
 
-  const lightTypes = ["None", "Directional Light", "Point Light", "Spot Light"];
+  const lightTypes = useMemo(()=>["None", "Directional Light", "Point Light", "Spot Light"], []);
+
   useEffect(() => {
     if (!light) {
       return;
@@ -36,7 +36,7 @@ const LightView = ({ module, targetNode }) => {
     setInnerConeAngle(Util.roundToNearestStep(light.innerConeAngle));
     setOuterConeAngle(Util.roundToNearestStep(light.outerConeAngle));
     setType(lightTypes[light.lightType.value]);
-  }, [targetNode]);
+  }, [light, lightTypes]);
 
   const getView = () => {
     if (!light) {

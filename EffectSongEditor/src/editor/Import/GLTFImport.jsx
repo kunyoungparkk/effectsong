@@ -48,6 +48,10 @@ const GLTFImport = ({ module, updateHierarchy, notify, setLoading }) => {
     let readFileCount = 0;
     let gltfFilePath = "";
     let reader = new FileReader();
+    //promise로 전부 읽게하기
+
+    //이후 처리
+    
     for (let i = 0; i < files.length; i++) {
       let file = files[i];
       reader = new FileReader();
