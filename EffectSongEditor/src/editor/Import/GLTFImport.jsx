@@ -45,43 +45,57 @@ const GLTFImport = ({ module, updateHierarchy, notify, setLoading }) => {
       module.FS.mkdir(TARGET_GLTF_ROOT_PATH);
     }
 
-    let readFileCount = 0;
     let gltfFilePath = "";
-    let reader = new FileReader();
-    //promise로 전부 읽게하기
-
-    //이후 처리
-    
+    let readPromises = [];
     for (let i = 0; i < files.length; i++) {
-      let file = files[i];
-      reader = new FileReader();
-      reader.onload = function (e) {
-        let arrayBuffer = e.target.result;
-        let filePath = TARGET_GLTF_ROOT_PATH + file.name;
+      readPromises.push(new Promise((resolve, reject) => {
+        let file = files[i];
+        let reader = new FileReader();
+        reader.onload = function (e) {
+          let arrayBuffer = e.target.result;
+          let filePath = TARGET_GLTF_ROOT_PATH + file.name;
 
-        if (file.name.split(".")[1] === targetEXT) {
-          gltfFilePath = filePath;
-        }
-
-        module.FS.writeFile(filePath, new Uint8Array(arrayBuffer));
-        readFileCount++;
-        if (readFileCount === files.length) {
-          module.loadGLTFData(gltfFilePath);
-
-          //delete after read to mem
-          const dir_info = module.FS.readdir(TARGET_GLTF_ROOT_PATH);
-          for (let i = 2; i < dir_info.length; i++) {
-            module.FS.unlink(TARGET_GLTF_ROOT_PATH + dir_info[i]);
+          if (file.name.split(".")[1] === targetEXT) {
+            gltfFilePath = filePath;
           }
-          module.FS.rmdir(TARGET_GLTF_ROOT_PATH);
 
-          updateHierarchy();
-          setLoading(false);
-          notify(fileName + " loaded successfully ", true);
+          module.FS.writeFile(filePath, new Uint8Array(arrayBuffer));
+          resolve();
+        };
+        reader.onerror = function (e) {
+          reject(e);
         }
-      };
-      reader.readAsArrayBuffer(file);
+        reader.readAsArrayBuffer(file);
+      }))
     }
+
+    Promise.all(readPromises)
+      .then(() => {
+        module.loadGLTFData(gltfFilePath);
+
+        //delete files after load
+        const dir_info = module.FS.readdir(TARGET_GLTF_ROOT_PATH);
+        for (let i = 2; i < dir_info.length; i++) {
+          module.FS.unlink(TARGET_GLTF_ROOT_PATH + dir_info[i]);
+        }
+        module.FS.rmdir(TARGET_GLTF_ROOT_PATH);
+
+        updateHierarchy();
+        setLoading(false);
+        notify(fileName + " loaded successfully ", true);
+      })
+      .catch((error) => {
+        //delete loaded files
+        const dir_info = module.FS.readdir(TARGET_GLTF_ROOT_PATH);
+        for (let i = 2; i < dir_info.length; i++) {
+          module.FS.unlink(TARGET_GLTF_ROOT_PATH + dir_info[i]);
+        }
+        module.FS.rmdir(TARGET_GLTF_ROOT_PATH);
+        
+        setLoading(false);
+        notify(fileName + " loaded failed ", false);
+        console.log(error);
+      });
   };
 
   return (
