@@ -17,8 +17,8 @@ import {
 } from "@mui/material";
 
 export default function Editor() {
-  const currentWidth = useRef(1400);
-  const currentHeight = useRef(900);
+  const currentWidth = useRef(1000);
+  const currentHeight = useRef(1000);
   const [module, setModule] = useState(null);
   const audioRef = useRef(null);
   const canvasRef = useRef(null);
@@ -146,6 +146,7 @@ export default function Editor() {
     scene.addChild(camNode);
 
     let cam = new module.Camera(camNode);
+    cam.fov = 90.0;
     camNode.setPosition(new module.vec3(0, 0, -5));
     camNode.setRotation(new module.quat(0, 0, 1, 0));
 
