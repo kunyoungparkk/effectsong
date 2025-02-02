@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import Editor, { loader } from "@monaco-editor/react";
 import { Box, Button, Grid, Typography } from "@mui/material";
 import CodeIcon from "@mui/icons-material/Code";
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
 function ScriptEditor({
   module,
@@ -12,9 +13,63 @@ function ScriptEditor({
   setVertexCount,
   customVS,
   setCustomVS,
-  presetIndex,
-  setPresetIndex,
+  targetShaderIndex,
+  setTargetShaderIndex,
 }) {
+  const simpleVS = `#define PI radians(180.0)
+vec3 hsv2rgb(vec3 c) {
+  c = vec3(c.x, clamp(c.yz, 0.0, 1.0));
+  vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+  return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
+void main() {
+  float down = sqrt(vertexCount);
+  float across = floor(vertexCount / down);
+  float x = mod(vertexId, across);
+  float y = floor(vertexId / across);
+  
+  float u = x / (across - 1.);
+  float v = y / (across - 1.);
+  
+  float su = abs(u - 0.5) * 2.;
+  float sv = abs(v - 0.5) * 2.;
+  
+  float au = abs(atan(su, sv)) / PI;
+  float av = length(vec2(su, sv));
+  
+  float snd = 2.0;
+  
+  if(!isStereo || u<0.5){
+  snd *= texture(sound, vec2(au, av * .25)).r;
+}
+else{
+  snd *= texture(sound2, vec2(au, av * .25)).r;
+}
+
+  float xoff = 0.;//sin(time + y * 0.2) * 0.1;
+  float yoff = 0.;//sin(time + x * 0.3) * 0.2;
+  
+  float ux = u * 2. - 1. + xoff;
+  float vy = v * 2. - 1. + yoff;
+  
+  vec2 xy = vec2(ux, vy) * 1.3;
+  
+  gl_Position = vec4(xy, 0, 1);
+  
+  float soff = 1.;//sin(time + x * y * .02) * 5.;  
+  gl_PointSize = pow(snd + 0.2, 5.0) * 30.0 + soff;
+  gl_PointSize *= 20.0 / across;
+  
+  float pump = step(0.8, snd);
+  
+  float hue = u * .1 + snd * 0.2 + time * .1;
+  float sat = mix(0., 1., pump);
+  float val = mix(.1, pow(snd + 2.2, 5.0), pump);
+  v_color = vec4(hsv2rgb(vec3(hue, sat, val)), 1);
+}
+  `;
   const stereoVS = `//shader art sample
     #define PI 3.14159
     #define NUM_SEGMENTS 51.0
@@ -841,13 +896,13 @@ function ScriptEditor({
               variant="contained"
               startIcon={<CodeIcon />}
               sx={
-                presetIndex === 0
+                true //그냥 탭선택으로 해야
                   ? { width: "100%", color: "black" }
                   : { width: "100%" }
               }
               onClick={() => {
                 setVertexShader(customVS);
-                setPresetIndex(0);
+                setTargetShaderIndex(0);
               }}
             >
               <Typography
@@ -859,11 +914,39 @@ function ScriptEditor({
                   whiteSpace: "nowrap",
                 }}
               >
-                custom
+                default
               </Typography>
             </Button>
           </Grid>
+          
+          <Grid item xs={8}></Grid>
+
           <Grid item xs={2}>
+            <Button
+              size="small"
+              variant="contained"
+              startIcon={< PlayArrowIcon/>}
+              sx={
+                  { width: "100%", color: "green" }
+              }
+              onClick={() => {
+
+              }}
+            >
+              <Typography
+                variant="body2"
+                noWrap
+                style={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                compile
+              </Typography>
+            </Button>
+          </Grid>
+          {/* <Grid item xs={2}>
             <Button
               size="small"
               variant="contained"
@@ -1022,7 +1105,7 @@ function ScriptEditor({
                 grass
               </Typography>
             </Button>
-          </Grid>
+          </Grid> */}
         </Grid>
       </Box>
       <Editor
@@ -1030,12 +1113,12 @@ function ScriptEditor({
         defaultLanguage="glsles"
         value={vertexShader}
         theme="transparentTheme"
-        onChange={(value) => {
-          if (presetIndex === 0) {
-            setCustomVS(value);
-          }
-          setVertexShader(value);
-        }}
+        // onChange={(value) => {
+        //   if (presetIndex === 0) {
+        //     setCustomVS(value);
+        //   }
+        //   setVertexShader(value);
+        // }} // TODO: Run 시 적용되게 변경
         options={{
           fontSize: 14,
           minimap: { enabled: false },
