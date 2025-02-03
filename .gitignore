@@ -19,6 +19,7 @@ EffectSongRenderer/project/EffectSongRenderer/x64/
 EffectSongEditor/node_modules
 EffectSongEditor/.pnp
 EffectSongEditor/.pnp.js
+EffectSongServer/AI/node_modules
 
 # testing
 EffectSongEditor/coverage

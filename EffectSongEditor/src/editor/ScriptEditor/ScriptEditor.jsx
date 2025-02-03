@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import Editor, { loader } from "@monaco-editor/react";
-import { Box, Button, Grid, Typography } from "@mui/material";
+import { Box, Button, Grid, Typography, TextField } from "@mui/material";
 import CodeIcon from "@mui/icons-material/Code";
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
 function ScriptEditor({
   module,
@@ -11,65 +12,73 @@ function ScriptEditor({
   opacity,
   setPrimitiveMode,
   setVertexCount,
-  customVS,
-  setCustomVS,
   targetShaderIndex,
   setTargetShaderIndex,
+  compileShader
 }) {
-  const simpleVS = `#define PI radians(180.0)
-vec3 hsv2rgb(vec3 c) {
-  c = vec3(c.x, clamp(c.yz, 0.0, 1.0));
-  vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-  vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-  return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-}
-
-void main() {
-  float down = sqrt(vertexCount);
-  float across = floor(vertexCount / down);
-  float x = mod(vertexId, across);
-  float y = floor(vertexId / across);
-  
-  float u = x / (across - 1.);
-  float v = y / (across - 1.);
-  
-  float su = abs(u - 0.5) * 2.;
-  float sv = abs(v - 0.5) * 2.;
-  
-  float au = abs(atan(su, sv)) / PI;
-  float av = length(vec2(su, sv));
-  
-  float snd = 2.0;
-  
-  if(!isStereo || u<0.5){
-  snd *= texture(sound, vec2(au, av * .25)).r;
-}
-else{
-  snd *= texture(sound2, vec2(au, av * .25)).r;
-}
-
-  float xoff = 0.;//sin(time + y * 0.2) * 0.1;
-  float yoff = 0.;//sin(time + x * 0.3) * 0.2;
-  
-  float ux = u * 2. - 1. + xoff;
-  float vy = v * 2. - 1. + yoff;
-  
-  vec2 xy = vec2(ux, vy) * 1.3;
-  
-  gl_Position = vec4(xy, 0, 1);
-  
-  float soff = 1.;//sin(time + x * y * .02) * 5.;  
-  gl_PointSize = pow(snd + 0.2, 5.0) * 30.0 + soff;
-  gl_PointSize *= 20.0 / across;
-  
-  float pump = step(0.8, snd);
-  
-  float hue = u * .1 + snd * 0.2 + time * .1;
-  float sat = mix(0., 1., pump);
-  float val = mix(.1, pow(snd + 2.2, 5.0), pump);
-  v_color = vec4(hsv2rgb(vec3(hue, sat, val)), 1);
-}
-  `;
+  const simpleVS = `//shader art sample
+    #define PI 3.14159
+    #define NUM_SEGMENTS 51.0
+    #define NUM_POINTS (NUM_SEGMENTS * 2.0)
+    #define STEP 5.0
+    
+    vec3 hsv2rgb(vec3 c) {
+        c = vec3(c.x, clamp(c.yz, 0.0, 1.0));
+        vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+        vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+        return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+    }
+    
+    void main() {
+        float num = mod(vertexId, 2.0);
+        float point = mod(floor(vertexId / 2.0) + mod(vertexId, 2.0) * STEP, NUM_SEGMENTS);
+        float count = floor(vertexId / NUM_POINTS);
+        float offset = count * 0.02;
+        float angle = point * PI * 2.0 / NUM_SEGMENTS - offset;
+        float spread = 0.02;
+        float off = 0.01;
+        float speed = count * 0.004;
+        float snd = 1.0;
+    
+        if (isStereo && num > 0.9) {
+            snd *= (
+                texture(sound2, vec2(off + spread * 0., speed)).r +
+                texture(sound2, vec2(off + spread * 1., speed)).r +
+                texture(sound2, vec2(off + spread * 2., speed)).r) / 3.;
+        } else {
+            snd *= (
+                texture(sound, vec2(off + spread * 0., speed)).r +
+                texture(sound, vec2(off + spread * 1., speed)).r +
+                texture(sound, vec2(off + spread * 2., speed)).r) / 3.;
+        }
+        
+        float leftTarget =  texture(sound, vec2(off, 0.0)).r;
+        float rightTarget =  texture(sound2, vec2(off, 0.0)).r;
+        
+        float rPulse = pow(snd, 5.0);
+        float radius = count * 0.02 + rPulse * 0.4; 
+    
+        float rotationSpeed = num < 0.9 ? 1.0 : -1.0; 
+        float c = cos(angle + time * rotationSpeed) * radius;
+        float s = sin(angle + time * rotationSpeed) * radius;
+    
+        vec2 aspect = vec2(1, resolution.x / resolution.y);
+        vec2 xy = vec2(c, s);
+    
+        gl_Position = vec4(xy * aspect, 0, 1);
+        gl_Position.x = num < 0.9 
+            ? gl_Position.x * 0.5 - 0.4
+            : gl_Position.x * 0.5 + 0.4; 
+        
+        gl_PointSize = 2.0 + length(xy) * 20. * resolution.x / 1600.0;
+    
+        float hue = time * 0.03 + count * 1.001 + (num < 0.9 ? 0.0 : 0.5);
+        float cPulse = pow(rPulse, 2.0);
+        float invCPulse = 1.0 - cPulse;
+        vec4 color = vec4(hsv2rgb(vec3(hue, invCPulse, 1.0)), 1.0);
+        v_color = mix(color, background, radius - cPulse);
+    }
+    `;
   const stereoVS = `//shader art sample
     #define PI 3.14159
     #define NUM_SEGMENTS 51.0
@@ -697,6 +706,8 @@ else{
     }
       `;
 
+  const [aiRequest, setAIRequest] = useState("");
+
   useEffect(() => {
     loader.init().then((monaco) => {
       // 언어 등록
@@ -865,7 +876,6 @@ else{
         width: "calc(100% -  650px)",
         height: "calc(100vh - 130px)",
         backgroundColor: `rgba(0.0, 0.0, 0.0, ${opacity})`,
-        boxShadow: 3,
         pointerEvents: "auto",
       }}
     >
@@ -873,8 +883,7 @@ else{
         sx={{
           width: "100%",
           height: "50px",
-          backgroundColor: `rgba(0.0, 0.0, 0.0, ${opacity})`,
-          boxShadow: 3,
+          backgroundColor: `rgba(255.0, 255.0, 255.0, ${opacity})`,
           pointerEvents: "auto",
         }}
       >
@@ -890,47 +899,38 @@ else{
             height: "100%",
           }}
         >
-          <Grid item xs={2}>
+          <Grid item xs={8}>
+            <TextField id="standard-basic" variant="standard"
+              value={aiRequest}
+              onChange={(e) => { setAIRequest(e.target.value); }}
+              sx={{ width: '100%', height: '50%' }} />
+
+          </Grid>
+          <Grid item xs={1}>
             <Button
               size="small"
               variant="contained"
-              startIcon={<CodeIcon />}
+              startIcon={< AutoAwesomeIcon />}
               sx={
-                true //그냥 탭선택으로 해야
-                  ? { width: "100%", color: "black" }
-                  : { width: "100%" }
+                { width: "100%", color: "white" }
               }
               onClick={() => {
-                setVertexShader(customVS);
-                setTargetShaderIndex(0);
+                //send request
               }}
             >
-              <Typography
-                variant="body2"
-                noWrap
-                style={{
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                default
-              </Typography>
             </Button>
           </Grid>
-          
-          <Grid item xs={8}></Grid>
-
+          <Grid item xs={1}></Grid>
           <Grid item xs={2}>
             <Button
               size="small"
               variant="contained"
-              startIcon={< PlayArrowIcon/>}
+              startIcon={< PlayArrowIcon />}
               sx={
-                  { width: "100%", color: "green" }
+                { width: "100%", color: "white" }
               }
               onClick={() => {
-
+                compileShader(vertexShader);
               }}
             >
               <Typography
@@ -946,7 +946,68 @@ else{
               </Typography>
             </Button>
           </Grid>
-          {/* <Grid item xs={2}>
+
+        </Grid>
+      </Box>
+
+      <Box
+        sx={{
+          width: "100%",
+          height: "50px",
+          pointerEvents: "auto",
+        }}
+      >
+
+      </Box>
+      <Editor
+        height="calc(100% - 100px)"
+        defaultLanguage="glsles"
+        value={vertexShader}
+        theme="transparentTheme"
+        onChange={(value) => {
+          setVertexShader(value);
+        }}
+        options={{
+          fontSize: 14,
+          minimap: { enabled: false },
+          readOnly: false,
+        }}
+      />
+    </Box>
+  );
+}
+
+export default ScriptEditor;
+
+{/* <Grid item xs={2}>
+            <Button
+              size="small"
+              variant="contained"
+              startIcon={<CodeIcon />}
+              sx={
+                true //그냥 탭선택으로 해야
+                  ? { width: "100%", color: "black" }
+                  : { width: "100%" }
+              }
+              onClick={() => {
+                setTargetShaderIndex(0);
+              }}
+            >
+              <Typography
+                variant="body2"
+                noWrap
+                style={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                default
+              </Typography>
+            </Button>
+          </Grid> */}
+
+{/* <Grid item xs={2}>
             <Button
               size="small"
               variant="contained"
@@ -1106,27 +1167,3 @@ else{
               </Typography>
             </Button>
           </Grid> */}
-        </Grid>
-      </Box>
-      <Editor
-        height="calc(100% - 50px)"
-        defaultLanguage="glsles"
-        value={vertexShader}
-        theme="transparentTheme"
-        // onChange={(value) => {
-        //   if (presetIndex === 0) {
-        //     setCustomVS(value);
-        //   }
-        //   setVertexShader(value);
-        // }} // TODO: Run 시 적용되게 변경
-        options={{
-          fontSize: 14,
-          minimap: { enabled: false },
-          readOnly: false,
-        }}
-      />
-    </Box>
-  );
-}
-
-export default ScriptEditor;
