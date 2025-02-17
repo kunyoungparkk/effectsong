@@ -1,12 +1,19 @@
 import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic();
-
-const msg = await anthropic.messages.create({
-  model: "claude-3-5-sonnet-20241022",
-  max_tokens: 2000,
-  temperature: 0,
-  system: `당신은 OpenGL ES 3.0에 정통한 전문적인 Shader 아티스트이자 창의적인 기술 전문가입니다.
+//create
+const msg = await anthropic.messages
+  .stream({
+    model: "claude-3-5-sonnet-20241022",
+    max_tokens: 8192,
+    temperature: 0,
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: `당신은 OpenGL ES 3.0에 정통한 전문적인 Shader 아티스트이자 창의적인 기술 전문가입니다.
 
 ### 시각적 목표 "{사용자 query}"를 다음과 같은 특성을 가진 최고 수준의 시각적 효과로 구현해주세요:
 - 움직임: 매끄럽고 자연스러운 동적 표현과 화려한 애니메이션
@@ -142,19 +149,16 @@ const msg = await anthropic.messages.create({
 
 위에 언급한 헤더 정보는 이미 작성되어있다고 가정하고, 이를 답변에선 제외하고 그 밑부터 작성해주세요.
 답변에는 코드만 포함되어야 하며, 별도의 설명은 작성하지 마세요.
-`,
-  messages: [
-    {
-      role: "user",
-      content: [
-        {
-          type: "text",
-          text: `$(primitiveMode) = "TRIANGLES",
-$(request) = "음악에 반응하는 황홀한 태양계를 만들어줘. 여러 행성들과 태양, 운석 등을 실사에 가깝게 표현해줘. 카메라 연출도 넣어줘."
+
+$(primitiveMode) = "POINTS",
+$(request) = "별들과 항성과 함께하는 카메라무빙이 되는 역동적인 우주를 만들어줘."
         `,
-        },
-      ],
-    },
-  ],
-});
+          },
+        ],
+      },
+    ],
+  })
+  .on("text", (text) => {
+    console.log();
+  });
 console.log(msg);
