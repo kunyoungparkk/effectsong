@@ -8,6 +8,8 @@ import Typography from "@mui/material/Typography";
 import { floor } from "mathjs";
 import MusicImport from "./Import/MusicImport";
 import GLTFImport from "./Import/GLTFImport";
+import * as core from '../interfaces/effectsong-core';
+
 import {
   Grid,
   Snackbar,
@@ -19,9 +21,9 @@ import {
 export default function Editor() {
   const currentWidth = useRef(1000);
   const currentHeight = useRef(1000);
-  const [module, setModule] = useState(null);
+  const [module, setModule] = useState<core.MainModule>(null!);
   const audioRef = useRef(null);
-  const canvasRef = useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasDivRef = useRef(null);
 
   const [notifyOpen, setNotifyOpen] = useState(false);
@@ -30,46 +32,57 @@ export default function Editor() {
   const [loading, setLoading] = useState(true);
 
   //Hierarchy Data State
-  const [hierarchyData, setHierarchyData] = useState([]);
+  type currentDataType = {
+    id: string,
+    name: string,
+    isSelected: boolean,
+    children: Array<currentDataType>
+  }
+  const [hierarchyData, setHierarchyData] = useState<Array<currentDataType>>([]);
   const [expandIdList, setExpandIdList] = useState([]);
-  const [selectedNode, setSelectedNode] = useState(null);
+  const [selectedNode, setSelectedNode] = useState<core.Node | null>(null);
 
-  const notify = useCallback((message, isSuccess = false) => {
+  const notify = useCallback((message: string, isSuccess: boolean = false) => {
     setNotifySuccess(isSuccess);
     setNotifyMessage(message);
     setNotifyOpen(true);
   }, [setNotifySuccess, setNotifyMessage, setNotifyOpen]);
 
-  const getNodeById = useCallback((id) => {
+  const getNodeById = useCallback((id: string) => {
     const idxList = id.split("-");
-    let curNode = module.Renderer.getInstance().getSceneAt(
+
+    let curNode: core.Node = module.Renderer.getInstance()!.getSceneAt(
       parseInt(idxList[0])
-    );
+    )!;
     for (let i = 1; i < idxList.length; i++) {
-      curNode = curNode.getChildAt(parseInt(idxList[i]));
+      curNode = curNode.getChildAt(parseInt(idxList[i]))!;
     }
     return curNode;
   }, [module]);
 
   const removeSelectedNode = useCallback(() => {
+    if (selectedNode === null) {
+      return;
+    }
+
     const parentNode = selectedNode.getParent();
     if (parentNode) {
       parentNode.removeChild(selectedNode);
     } else {
-      module.Renderer.getInstance().removeScene(selectedNode);
+      module.Renderer.getInstance()!.removeScene(selectedNode as core.Scene);
     }
     setSelectedNode(null);
   }, [module, selectedNode, setSelectedNode]);
 
-  const recursiveWriteNodes = useCallback((selectedNodePtr, curNode, id) => {
+  const recursiveWriteNodes = useCallback((curNode: core.Node, id: string) => {
     //현재 노드 기록
-    let currentData = {
+    let currentData: currentDataType = {
       id: id,
       name: curNode.getName(),
       isSelected: false,
       children: [],
     };
-    if (curNode.$$.ptr === selectedNodePtr) {
+    if (curNode.isAliasOf(selectedNode as core.Node)) {
       currentData.isSelected = true;
     } else {
       currentData.isSelected = false;
@@ -79,33 +92,33 @@ export default function Editor() {
     for (let i = 0; i < curNode.getChildrenCount(); i++) {
       let currentChildNode = curNode.getChildAt(i);
       currentData.children.push(
-        recursiveWriteNodes(selectedNodePtr, currentChildNode, id + "-" + i)
+        recursiveWriteNodes(currentChildNode as core.Node, id + "-" + i)
       );
     }
     return currentData;
-  }, []);
+  }, [selectedNode]);
 
-  const updateHierarchy = useCallback((selectedNodePtr) => {
+  const updateHierarchy = useCallback(() => {
     let data = [];
-    let renderer = module.Renderer.getInstance();
+    let renderer = module.Renderer.getInstance() as core.Renderer;
     for (let i = 0; i < renderer.getSceneCount(); i++) {
-      data.push(recursiveWriteNodes(selectedNodePtr, renderer.getSceneAt(i), i.toString()));
+      data.push(recursiveWriteNodes(renderer.getSceneAt(i) as core.Node, i.toString()));
     }
     setHierarchyData(data);
   }, [module, setHierarchyData, recursiveWriteNodes]);
 
-  const onSelectHierarchyObj = useCallback((event, id, isSelected) => {
+  const onSelectHierarchyObj = useCallback((event: React.SyntheticEvent, id: string, isSelected: boolean) => {
     if (!isSelected) {
       return;
     }
     setSelectedNode(getNodeById(id));
   }, [setSelectedNode, getNodeById]);
 
-  const onResizeEngine = useCallback((width, height) => {
+  const onResizeEngine = useCallback((width: number, height: number) => {
     currentWidth.current = width;
     currentHeight.current = height;
 
-    const engineAspectRatio = parseFloat(width) / height;
+    const engineAspectRatio = parseFloat(width.toString()) / height;
     const divAspectRatio = parseFloat(
       canvasDivRef.current.offsetWidth / canvasDivRef.current.offsetHeight
     );
@@ -161,7 +174,7 @@ export default function Editor() {
 
   useEffect(() => {
     if (module) {
-      updateHierarchy(selectedNode?.$$.ptr);
+      updateHierarchy(selectedNode);
     }
   }, [module, selectedNode, updateHierarchy]);
 
@@ -185,30 +198,27 @@ export default function Editor() {
     });
 
     //키보드 이벤트 등록
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       switch (e.key) {
       }
     };
-    const handleKeyUp = (e) => {
+    const handleKeyUp = (e: KeyboardEvent) => {
       switch (e.key) {
       }
     };
-    const handleResize = (e) => {
+    const handleResize = (e: UIEvent) => {
       onResizeEngine(currentWidth.current, currentHeight.current);
     };
 
-    const handleScroll = (e) => { };
-
-    const handleMouseOver = (e) => { };
-
-    const handleMouseOut = (e) => { };
-
+    // const handleScroll = (e) => { };
+    // const handleMouseOver = (e) => { };
+    // const handleMouseOut = (e) => { };
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
     window.addEventListener("resize", handleResize);
-    document.body.addEventListener("wheel", handleScroll);
-    document.body.addEventListener("mouseover", handleMouseOver);
-    document.body.addEventListener("mouseout", handleMouseOut);
+    // document.body.addEventListener("wheel", handleScroll);
+    // document.body.addEventListener("mouseover", handleMouseOver);
+    // document.body.addEventListener("mouseout", handleMouseOut);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);

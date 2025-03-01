@@ -15,9 +15,8 @@
 using namespace emscripten;
 #endif
 
-
 SDL_GLContext g_context;
-SDL_Window* g_window;
+SDL_Window *g_window;
 
 void initialize(int width, int height);
 void deInitialize();
@@ -33,18 +32,18 @@ void windowTestProc()
 	const float targetDeltaTime = 1.0f / TARGET_FPS;
 
 	util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/LightsPunctualLamp/glTF/LightsPunctualLamp.gltf"));
-	//util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"));
-	//util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb"));
-	//util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/DamagedHelmet/glTF-Embedded/DamagedHelmet.gltf"));
+	// util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf"));
+	// util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/DamagedHelmet/glTF-Binary/DamagedHelmet.glb"));
+	// util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/DamagedHelmet/glTF-Embedded/DamagedHelmet.gltf"));
 	util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/Duck/glTF/Duck.gltf"));
 	// util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/Lantern/glTF/Lantern.gltf"));
 	// util::loadGLTFData(EFFECTSONG_ROOT + std::string("res/2.0/WaterBottle/glTF/WaterBottle.gltf"));
 	Renderer::getInstance()->getSceneAt(0)->getChildAt(0)->setPosition(glm::vec3(0.0f, 1.0f, 0.0f));
 
 	Renderer::getInstance()->getSceneAt(1)->getChildAt(0)->setPosition(glm::vec3(-1.0f, 0.0f, 0.0f));
-	//Renderer::getInstance()->getSceneAt(2)->getNodeAt(0)->setPosition(glm::vec3(2.0f, 1.0f, 0.0f));
-	//Renderer::getInstance()->getSceneAt(2)->getNodeAt(0)->setScale(glm::vec3(3.0f));
-	//Renderer::getInstance()->setBackgroundColor(glm::vec4(0.5f, 0.5f, 0.0f, 1.0f));
+	// Renderer::getInstance()->getSceneAt(2)->getNodeAt(0)->setPosition(glm::vec3(2.0f, 1.0f, 0.0f));
+	// Renderer::getInstance()->getSceneAt(2)->getNodeAt(0)->setScale(glm::vec3(3.0f));
+	// Renderer::getInstance()->setBackgroundColor(glm::vec4(0.5f, 0.5f, 0.0f, 1.0f));
 
 	ArtShader::getInstance()->setVertexCount(50000);
 	ArtShader::getInstance()->setPrimitiveMode(GL_POINTS);
@@ -121,7 +120,9 @@ void main() {
 	// camera control
 	float cam_speed = 2.0f;
 	bool b_mouse_pressed = false;
-	int32_t prev_mouse_coord[2] = { 0, };
+	int32_t prev_mouse_coord[2] = {
+		0,
+	};
 	float cam_xRot = 0.0f;
 	float cam_yRot = 180.0f;
 	uint32_t frameStart;
@@ -129,9 +130,9 @@ void main() {
 	float printTime = 0.0f;
 	uint32_t musicStartTime = SDL_GetTicks();
 
-	//Test Camera
-	Node* camNode = new Node(Renderer::getInstance()->getSceneAt(0), nullptr);
-	Camera* camera = new Camera(camNode);
+	// Test Camera
+	Node *camNode = new Node(Renderer::getInstance()->getSceneAt(0), nullptr);
+	Camera *camera = new Camera(camNode);
 	Renderer::getInstance()->setActiveCamera(camera);
 	camNode->setPosition(glm::vec3(0, 0, -5));
 	camNode->setRotation(
@@ -139,41 +140,51 @@ void main() {
 	Renderer::getInstance()->getSceneAt(0)->addChild(camNode);
 	Renderer::getInstance()->setDiffuseIBLIntensity(10.0f);
 
-	while (running) {
+	while (running)
+	{
 		frameStart = SDL_GetTicks();
-		const uint8_t* state = SDL_GetKeyboardState(nullptr);
-		if (state[SDL_SCANCODE_W]) {
+		const uint8_t *state = SDL_GetKeyboardState(nullptr);
+		if (state[SDL_SCANCODE_W])
+		{
 			camNode->setPosition(camNode->getPosition() +
-				-1.0f * cam_speed * targetDeltaTime *
-				camNode->getFront());
+								 -1.0f * cam_speed * targetDeltaTime *
+									 camNode->getFront());
 		}
-		if (state[SDL_SCANCODE_A]) {
+		if (state[SDL_SCANCODE_A])
+		{
 			camNode->setPosition(camNode->getPosition() +
-				-1.0f * cam_speed * targetDeltaTime *
-				camNode->getLeft());
+								 -1.0f * cam_speed * targetDeltaTime *
+									 camNode->getLeft());
 		}
-		if (state[SDL_SCANCODE_S]) {
+		if (state[SDL_SCANCODE_S])
+		{
 			camNode->setPosition(camNode->getPosition() +
-				cam_speed * targetDeltaTime * camNode->getFront());
+								 cam_speed * targetDeltaTime * camNode->getFront());
 		}
-		if (state[SDL_SCANCODE_D]) {
+		if (state[SDL_SCANCODE_D])
+		{
 			camNode->setPosition(camNode->getPosition() +
-				cam_speed * targetDeltaTime * camNode->getLeft());
+								 cam_speed * targetDeltaTime * camNode->getLeft());
 		}
-		if (state[SDL_SCANCODE_E]) {
+		if (state[SDL_SCANCODE_E])
+		{
 			camNode->setPosition(camNode->getPosition() +
-				cam_speed * targetDeltaTime * glm::vec3(0, 1, 0));
+								 cam_speed * targetDeltaTime * glm::vec3(0, 1, 0));
 		}
-		if (state[SDL_SCANCODE_Q]) {
+		if (state[SDL_SCANCODE_Q])
+		{
 			camNode->setPosition(camNode->getPosition() +
-				cam_speed * targetDeltaTime * glm::vec3(0, -1, 0));
+								 cam_speed * targetDeltaTime * glm::vec3(0, -1, 0));
 		}
-		while (SDL_PollEvent(&event)) {
-			switch (event.type) {
+		while (SDL_PollEvent(&event))
+		{
+			switch (event.type)
+			{
 			case SDL_KEYDOWN:
 				break;
 			case SDL_WINDOWEVENT:
-				if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+				if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+				{
 					Renderer::getInstance()->resize(event.window.data1, event.window.data2);
 				}
 				break;
@@ -183,15 +194,16 @@ void main() {
 				prev_mouse_coord[1] = event.button.y;
 				break;
 			case SDL_MOUSEMOTION:
-				if (b_mouse_pressed) {
+				if (b_mouse_pressed)
+				{
 					cam_xRot += event.button.y - prev_mouse_coord[1];
-					//TODO: 45���� �Ѿ�� �̻��ϰ� ��鸮�� ���� �ذ�
+					// TODO: 45���� �Ѿ�� �̻��ϰ� ��鸮�� ���� �ذ�
 					cam_xRot = glm::clamp(cam_xRot, -40.0f, 40.0f);
 					cam_yRot -= event.button.x - prev_mouse_coord[0];
 					camNode->setRotation(glm::angleAxis(glm::radians(cam_xRot),
-						-1.0f * camNode->getLeft()) *
-						glm::angleAxis(glm::radians(cam_yRot),
-							glm::vec3(0.0f, 1.0f, 0.0f)));
+														-1.0f * camNode->getLeft()) *
+										 glm::angleAxis(glm::radians(cam_yRot),
+														glm::vec3(0.0f, 1.0f, 0.0f)));
 					prev_mouse_coord[0] = event.button.x;
 					prev_mouse_coord[1] = event.button.y;
 				}
@@ -208,19 +220,21 @@ void main() {
 
 		uint32_t curTime = SDL_GetTicks();
 		frameTime = curTime - frameStart;
-		//fixed deltatime
+		// fixed deltatime
 		if (1000.0 / TARGET_FPS > frameTime)
 		{
 			SDL_Delay((uint32_t)(1000.0 / TARGET_FPS) - frameTime);
 		}
 		musicTime = (curTime - musicStartTime) / 1000.0f;
-		if (musicTime > printTime) {
+		if (musicTime > printTime)
+		{
 			printTime = ceil(musicTime);
 			std::cout << musicTime << std::endl;
 		}
 	}
 }
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
 	initialize(initialWidth, initialHeight);
 
 	windowTestProc();
@@ -232,30 +246,35 @@ int main(int argc, char* argv[]) {
 #elif defined(__EMSCRIPTEN__)
 float (*jsGetCurrentTime)(void) = nullptr;
 bool (*jsGetIsPlay)(void) = nullptr;
-void loopWeb() {
+void loopWeb()
+{
 	float musicTime = jsGetCurrentTime();
 	bool isPlay = jsGetIsPlay();
 	loop(musicTime, isPlay);
 }
-void initializeWeb(int width, int height, int getCurrentTimePtr, int getIsPlayPtr) {
-	jsGetCurrentTime = (float(*)(void))getCurrentTimePtr;
-	jsGetIsPlay = (bool(*)(void))getIsPlayPtr;
+void initializeWeb(int width, int height, int getCurrentTimePtr, int getIsPlayPtr)
+{
+	jsGetCurrentTime = (float (*)(void))getCurrentTimePtr;
+	jsGetIsPlay = (bool (*)(void))getIsPlayPtr;
 	initialize(width, height);
-	//TARGET_FPS
+	// TARGET_FPS
 	emscripten_set_main_loop(loopWeb, 0, false);
 }
-std::string getRootPath() {
+std::string getRootPath()
+{
 	return EFFECTSONG_ROOT;
 }
-EMSCRIPTEN_BINDINGS(CORE) {
+EMSCRIPTEN_BINDINGS(CORE)
+{
 	emscripten::function("initialize", &initializeWeb);
 	emscripten::function("deInitialize", &deInitialize);
 	emscripten::function("loadGLTFData", &util::loadGLTFData, allow_raw_pointers());
 	emscripten::function("getRootPath", &getRootPath, allow_raw_pointers());
 }
-EMSCRIPTEN_BINDINGS(GLTF) {
+EMSCRIPTEN_BINDINGS(GLTF)
+{
 	class_<Node>("Node")
-		.constructor<Scene*, Node*>()
+		.constructor<Scene *, Node *>()
 		.property("m_bAudioReactiveScale", &Node::m_bAudioReactiveScale)
 		.property("m_reactiveOriginScale", &Node::m_reactiveOriginScale)
 		.property("m_reactiveChangingScale", &Node::m_reactiveChangingScale)
@@ -299,7 +318,7 @@ EMSCRIPTEN_BINDINGS(GLTF) {
 		.value("PERSPECTIVE", ProjectionType::PERSPECTIVE)
 		.value("ORTHOGRAPHIC", ProjectionType::ORTHOGRAPHIC);
 	class_<Camera>("Camera")
-		.constructor<Node*>()
+		.constructor<Node *>()
 		.property("projectionType", &Camera::projectionType)
 		.property("aspectRatio", &Camera::aspectRatio)
 		.property("fov", &Camera::fov)
@@ -315,7 +334,7 @@ EMSCRIPTEN_BINDINGS(GLTF) {
 		.value("POINT_LIGHT", Light::LightType::POINT_LIGHT)
 		.value("SPOT_LIGHT", Light::LightType::SPOT_LIGHT);
 	class_<Light>("Light")
-		.constructor<Node*>()
+		.constructor<Node *>()
 		.property("color", &Light::color)
 		.property("intensity", &Light::intensity)
 		.property("range", &Light::range)
@@ -324,8 +343,11 @@ EMSCRIPTEN_BINDINGS(GLTF) {
 		.property("lightType", &Light::lightType)
 		.property("name", &Light::name)
 		.function("getNode", &Light::getNode, allow_raw_pointers());
+	// class_<Material>("Material")
+	// 	.function("bind", &Material::bind);
 }
-EMSCRIPTEN_BINDINGS(SINGLETON) {
+EMSCRIPTEN_BINDINGS(SINGLETON)
+{
 	class_<Renderer>("Renderer")
 		.class_function("getInstance", &Renderer::getInstance, allow_raw_pointers())
 		.function("addScene", &Renderer::addScene, allow_raw_pointers())
@@ -335,9 +357,9 @@ EMSCRIPTEN_BINDINGS(SINGLETON) {
 		.function("getSceneCount", &Renderer::getSceneCount)
 		.function("setActiveCamera", &Renderer::setActiveCamera, allow_raw_pointers())
 		.function("getActiveCamera", &Renderer::getActiveCamera, allow_raw_pointers())
-		.function("getMaterial", &Renderer::getMaterial, allow_raw_pointers())
-		.function("addMaterial", &Renderer::addMaterial, allow_raw_pointers())
-		.function("getTexture", &Renderer::getTexture, allow_raw_pointers())
+		// .function("getMaterial", &Renderer::getMaterial, allow_raw_pointers())
+		// .function("addMaterial", &Renderer::addMaterial, allow_raw_pointers())
+		// .function("getTexture", &Renderer::getTexture, allow_raw_pointers())
 		.function("getWidth", &Renderer::getWidth)
 		.function("getHeight", &Renderer::getHeight)
 		.function("resize", &Renderer::resize)
@@ -357,7 +379,8 @@ EMSCRIPTEN_BINDINGS(SINGLETON) {
 		.function("setVertexCount", &ArtShader::setVertexCount, allow_raw_pointers());
 }
 
-EMSCRIPTEN_BINDINGS(BIND_GLM) {
+EMSCRIPTEN_BINDINGS(BIND_GLM)
+{
 	class_<glm::vec2>("vec2")
 		.constructor<float, float>()
 		.property("x", &glm::vec2::x)
@@ -382,11 +405,13 @@ EMSCRIPTEN_BINDINGS(BIND_GLM) {
 }
 #endif
 
-void initialize(int width, int height) {
-	//#ifdef __EMSCRIPTEN__
+void initialize(int width, int height)
+{
+	// #ifdef __EMSCRIPTEN__
 	//	emscripten_html5_remove_all_event_listeners();
-	//#endif
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+	// #endif
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	{
 		printf("SDL Initialization Fail: %s\n", SDL_GetError());
 		exit(0);
 	}
@@ -404,12 +429,13 @@ void initialize(int width, int height) {
 #endif
 	g_window =
 		SDL_CreateWindow("EffectSong", SDL_WINDOWPOS_UNDEFINED,
-			SDL_WINDOWPOS_UNDEFINED, width, height, flags);
+						 SDL_WINDOWPOS_UNDEFINED, width, height, flags);
 	g_context = SDL_GL_CreateContext(g_window);
 	Renderer::getInstance()->resize(width, height);
 }
 
-void deInitialize() {
+void deInitialize()
+{
 	ArtShader::deleteInstance();
 	Renderer::deleteInstance();
 
@@ -419,9 +445,9 @@ void deInitialize() {
 	SDL_Quit();
 }
 
-void loop(float musicTime, bool isPlay) {
+void loop(float musicTime, bool isPlay)
+{
 	Renderer::getInstance()->update(musicTime, isPlay);
 	Renderer::getInstance()->render();
 	SDL_GL_SwapWindow(g_window);
 }
-

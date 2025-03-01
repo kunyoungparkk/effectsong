@@ -54,7 +54,6 @@ set(EFFECTSONG_LIBRARY_SOURCE_FILES
    ${PROJECT_ROOT}/src/Texture.cpp
 )
 
-set(COPTS "${COPTS} -DPLATFORM_DEPENDENCY=_WASM")
 set(COPTS "${COPTS} -sUSE_SDL=2")
 # set(COPTS "${COPTS} -sMEMORY64=1")
 
@@ -62,6 +61,7 @@ set(COPTS "${COPTS} -sUSE_SDL=2")
 set(LOPTS "${LOPTS} --closure 0")
 set(LOPTS "${LOPTS} -sUSE_SDL=2")
 set(LOPTS "${LOPTS} -lembind")
+set(LOPTS "${LOPTS} --emit-tsd ${OUTPUT_DIRECTORY}/../src/interfaces/effectsong-core.d.ts")
 set(LOPTS "${LOPTS} -sFULL_ES3")
 set(LOPTS "${LOPTS} -s USE_WEBGL2=1")
 set(LOPTS "${LOPTS} -sMAX_WEBGL_VERSION=2")
