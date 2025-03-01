@@ -14,7 +14,6 @@ declare namespace RuntimeExports {
         export let initialized: boolean;
         export let ignorePermissions: boolean;
         export { ErrnoError };
-        export let genericErrors: {};
         export let filesystems: any;
         export let syncFSRequests: number;
         export let readFiles: {};

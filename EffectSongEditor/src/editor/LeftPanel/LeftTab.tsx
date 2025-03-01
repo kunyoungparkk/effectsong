@@ -5,8 +5,48 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import HierarchyView from './HierarchyView';
 import SettingsView from './SettingsView';
+import * as core from '../../interfaces/effectsong-core';
 
-const StyledTabs = styled((props) => (
+// const StyledTabs = styled((props) => (
+//   <Tabs
+//     {...props}
+//     TabIndicatorProps={{ children: <span className="MuiTabs-indicatorSpan" /> }}
+//   />
+// ))({
+//   '& .MuiTabs-indicator': {
+//     display: 'flex',
+//     justifyContent: 'center',
+//     backgroundColor: 'transparent',
+//   },
+//   '& .MuiTabs-indicatorSpan': {
+//     maxWidth: 40,
+//     width: '100%',
+//     backgroundColor: '#868686',
+//   },
+// });
+
+// const StyledTab = styled((props) => <Tab disableRipple {...props} />)(
+//   ({ theme }) => ({
+//     textTransform: 'none',
+//     fontWeight: theme.typography.fontWeightRegular,
+//     fontSize: theme.typography.pxToRem(12),
+//     marginRight: theme.spacing(0),
+//     color: '#868686',
+//     '&.Mui-selected': {
+//       color: 'rgba(255, 255, 255, 255.7)',
+//     },
+//     '&.Mui-focusVisible': {
+//       backgroundColor: 'rgba(100, 95, 228, 0.32)',
+//     },
+//   }),
+// );
+interface StyledTabsProps {
+  children?: React.ReactNode;
+  value: number;
+  onChange: (event: React.SyntheticEvent, newValue: number) => void;
+}
+
+const StyledTabs = styled((props: StyledTabsProps) => (
   <Tabs
     {...props}
     TabIndicatorProps={{ children: <span className="MuiTabs-indicatorSpan" /> }}
@@ -20,34 +60,47 @@ const StyledTabs = styled((props) => (
   '& .MuiTabs-indicatorSpan': {
     maxWidth: 40,
     width: '100%',
-    backgroundColor: '#868686',
+    backgroundColor: '#635ee7',
   },
 });
 
-const StyledTab = styled((props) => <Tab disableRipple {...props} />)(
-  ({ theme }) => ({
-    textTransform: 'none',
-    fontWeight: theme.typography.fontWeightRegular,
-    fontSize: theme.typography.pxToRem(12),
-    marginRight: theme.spacing(0),
-    color: '#868686',
-    '&.Mui-selected': {
-      color: 'rgba(255, 255, 255, 255.7)',
-    },
-    '&.Mui-focusVisible': {
-      backgroundColor: 'rgba(100, 95, 228, 0.32)',
-    },
-  }),
-);
+interface StyledTabProps {
+  label: string;
+}
 
-export default function LeftTab({ module, hierarchyData, selectCallback, expandIdList, setExpandIdList, targetNode }) {
+const StyledTab = styled((props: StyledTabProps) => (
+  <Tab disableRipple {...props} />
+))(({ theme }) => ({
+  textTransform: 'none',
+  fontWeight: theme.typography.fontWeightRegular,
+  fontSize: theme.typography.pxToRem(15),
+  marginRight: theme.spacing(1),
+  color: 'rgba(255, 255, 255, 0.7)',
+  '&.Mui-selected': {
+    color: '#fff',
+  },
+  '&.Mui-focusVisible': {
+    backgroundColor: 'rgba(100, 95, 228, 0.32)',
+  },
+}));
+
+type leftTabProps = {
+  module: core.MainModule,
+  hierarchyData: {},
+  selectCallback: any,//(event: React.SyntheticEvent, id: string, isSelected: boolean) => {},
+  expandIdList: string[],
+  setExpandIdList: any,//(itemIds: string[]) => {},
+  targetNode: any//core.Node
+}
+
+export default function LeftTab({ module, hierarchyData, selectCallback, expandIdList, setExpandIdList, targetNode }: leftTabProps) {
   const [value, setValue] = React.useState(0);
 
-  const handleChange = (event, newValue) => {
+  const handleChange = (event: any, newValue: any) => {
     setValue(newValue);
   };
 
-  const getPage = (index) => {
+  const getPage = (index: number) => {
     switch (index) {
       case 0:
         return <HierarchyView
@@ -57,7 +110,7 @@ export default function LeftTab({ module, hierarchyData, selectCallback, expandI
           setExpandIdList={setExpandIdList}
         />
       case 1:
-        return <SettingsView module={module} targetNode={targetNode}/>
+        return <SettingsView module={module} targetNode={targetNode} />
       default:
         return null;
     }

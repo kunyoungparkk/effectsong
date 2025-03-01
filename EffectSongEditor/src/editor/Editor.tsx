@@ -22,9 +22,9 @@ export default function Editor() {
   const currentWidth = useRef(1000);
   const currentHeight = useRef(1000);
   const [module, setModule] = useState<core.MainModule>(null!);
-  const audioRef = useRef(null);
+  const audioRef = useRef<AudioPlayer>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const canvasDivRef = useRef(null);
+  const canvasDivRef = useRef<HTMLDivElement>(null);
 
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [notifySuccess, setNotifySuccess] = useState(false);
@@ -115,13 +115,15 @@ export default function Editor() {
   }, [setSelectedNode, getNodeById]);
 
   const onResizeEngine = useCallback((width: number, height: number) => {
+    if (canvasRef.current === null || canvasDivRef.current === null) {
+      return;
+    }
+
     currentWidth.current = width;
     currentHeight.current = height;
 
     const engineAspectRatio = parseFloat(width.toString()) / height;
-    const divAspectRatio = parseFloat(
-      canvasDivRef.current.offsetWidth / canvasDivRef.current.offsetHeight
-    );
+    const divAspectRatio = parseFloat(canvasDivRef.current.offsetWidth.toString()) / canvasDivRef.current.offsetHeight;
     canvasRef.current.width = width;
     canvasRef.current.height = height;
     if (engineAspectRatio > divAspectRatio) {
@@ -142,11 +144,17 @@ export default function Editor() {
   const startEngine = () => {
     //module.canvas.addEventListener("webglcontextlost", (e) => { alert('WebGL context lost. You will need to reload the page.'); e.preventDefault(); }, false);
     const startMusicPath = module.getRootPath() + "res/music/unity.mp3";
-    module.Renderer.getInstance().setAudioFile(startMusicPath);
+    module.Renderer.getInstance()!.setAudioFile(startMusicPath);
 
     let arrayBuffer = module.FS.readFile(startMusicPath);
     const blob = new Blob([arrayBuffer], { type: "audio/mpeg" });
     const url = URL.createObjectURL(blob);
+
+    //TODO: Error!
+    if(audioRef.current === null || audioRef.current.audio.current === null){
+      return;
+    }
+
     audioRef.current.audio.current.src = url;
 
     module.FS.unlink(startMusicPath);
@@ -164,33 +172,35 @@ export default function Editor() {
     camNode.setRotation(new module.quat(0, 0, 1, 0));
 
     camNode.setCamera(cam);
-    module.Renderer.getInstance().addScene(scene);
+    module.Renderer.getInstance()!.addScene(scene);
 
-    module.Renderer.getInstance().setActiveCamera(cam);
-    updateHierarchy(null);
+    module.Renderer.getInstance()!.setActiveCamera(cam);
+    updateHierarchy();
 
     setLoading(false);
   };
 
   useEffect(() => {
     if (module) {
-      updateHierarchy(selectedNode);
+      updateHierarchy();
     }
   }, [module, selectedNode, updateHierarchy]);
 
   useEffect(() => {
-    let tempInstance = null;
-    window.createModule().then((instance) => {
-      tempInstance = instance;
+    core.default().then((instance) => {
+      //TODO: error
+      if('canvas' in instance === false){
+        return;
+      }
       instance.canvas = document.getElementById("canvas");
       instance.initialize(
         currentWidth.current,
         currentHeight.current,
         instance.addFunction(function () {
-          return audioRef.current.audio.current.currentTime;
+          return audioRef.current!.audio.current!.currentTime;
         }, "f"),
         instance.addFunction(function () {
-          return audioRef.current.isPlaying();
+          return audioRef.current!.isPlaying();
         }, "i")
       );
       onResizeEngine(currentWidth.current, currentHeight.current);
@@ -225,8 +235,9 @@ export default function Editor() {
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("resize", handleResize);
       //TODO: removeFunction
-      tempInstance.deInitialize();
-      setModule(null);
+      module.deInitialize();
+      //TODO: How to remove module?
+      //setModule(null);
     };
   }, []);
 
