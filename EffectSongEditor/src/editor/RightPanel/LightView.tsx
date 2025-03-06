@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import Util from "../Util";
 
-const LightView = ({ module, targetNode }) => {
+const LightView = ({ module, targetNode }: any) => {
   const light = targetNode?.getLight();
 
   // const [name, setName] = useState("");
@@ -122,7 +122,7 @@ const LightView = ({ module, targetNode }) => {
               id="color-r"
               label="r"
               value={color[0]}
-              onChange={(e) => {
+              onChange={(e: any) => {
                 if (Util.isValidNum(e.target.value)) {
                   const floatValue = parseFloat(e.target.value);
 
@@ -146,7 +146,7 @@ const LightView = ({ module, targetNode }) => {
               id="color-g"
               label="g"
               value={color[1]}
-              onChange={(e) => {
+              onChange={(e: any) => {
                 if (Util.isValidNum(e.target.value)) {
                   const floatValue = parseFloat(e.target.value);
 
@@ -170,7 +170,7 @@ const LightView = ({ module, targetNode }) => {
               id="color-b"
               label="b"
               value={color[2]}
-              onChange={(e) => {
+              onChange={(e: any) => {
                 if (Util.isValidNum(e.target.value)) {
                   const floatValue = parseFloat(e.target.value);
 
@@ -194,7 +194,7 @@ const LightView = ({ module, targetNode }) => {
               id="intensity-input"
               label="intensity"
               value={intensity}
-              onChange={(e) => {
+              onChange={(e: any) => {
                 if (Util.isValidNum(e.target.value)) {
                   const floatValue = parseFloat(e.target.value);
                   light.intensity = floatValue;
@@ -218,7 +218,7 @@ const LightView = ({ module, targetNode }) => {
                 id="range-input"
                 label="range"
                 value={range}
-                onChange={(e) => {
+                onChange={(e: any) => {
                   if (Util.isValidNum(e.target.value)) {
                     const floatValue = parseFloat(e.target.value);
                     light.range = floatValue;
@@ -245,7 +245,7 @@ const LightView = ({ module, targetNode }) => {
                   id="innerConeAngle-input"
                   label="innerConeAngle"
                   value={innerConeAngle}
-                  onChange={(e) => {
+                  onChange={(e: any) => {
                     if (Util.isValidNum(e.target.value)) {
                       const floatValue = parseFloat(e.target.value);
                       light.innerConeAngle = floatValue;
@@ -268,7 +268,7 @@ const LightView = ({ module, targetNode }) => {
                   id="outerConeAngle-input"
                   label="outerConeAngle"
                   value={outerConeAngle}
-                  onChange={(e) => {
+                  onChange={(e: any) => {
                     if (Util.isValidNum(e.target.value)) {
                       const floatValue = parseFloat(e.target.value);
                       light.outerConeAngle = floatValue;

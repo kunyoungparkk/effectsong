@@ -3,10 +3,10 @@ import { Button, Modal, Box } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import FileUpload from "./FileUpload";
 
-const MusicImport = ({ module, audioPlayerRef, notify, setLoading }) => {
+const MusicImport = ({ module, audioPlayerRef, notify, setLoading }: any) => {
   const [modalOpen, setModalOpen] = useState(false);
 
-  const procMusicInput = (file) => {
+  const procMusicInput = (file: any) => {
     setLoading(true);
     setModalOpen(false);
     let reader = new FileReader();
@@ -15,7 +15,7 @@ const MusicImport = ({ module, audioPlayerRef, notify, setLoading }) => {
         module.FS.mkdir(MUSIC_ROOT_PATH);
     }
 
-    reader.onload = (e) => {
+    reader.onload = (e: any) => {
       let arrayBuffer = e.target.result;
       let filePath = MUSIC_ROOT_PATH + file.name;
       module.FS.writeFile(filePath, new Uint8Array(arrayBuffer));
@@ -73,10 +73,10 @@ const MusicImport = ({ module, audioPlayerRef, notify, setLoading }) => {
             width="100%"
             height="100%"
             accept="audio/mp3, audio/wav, audio/flac"
-            onChange={(e) => {
+            onChange={(e: any) => {
               procMusicInput(e.target?.files[0]);
             }}
-            onDrop={(e) => {
+            onDrop={(e: any) => {
               let files = e.dataTransfer?.files;
               if (files.length > 1) {
                 notify("please upload single audio file");

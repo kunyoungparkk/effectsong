@@ -12,12 +12,12 @@ const FileUpload = ({
   onChange,
   onDrop,
   isMultiple = false,
-}) => {
+}: any) => {
   const [labelText, setLabelText] = useState(hoverLabel);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isMouseOver, setIsMouseOver] = useState(false);
 
-  const stopDefaults = (e) => {
+  const stopDefaults = (e: any) => {
     e.stopPropagation();
     e.preventDefault();
   };
@@ -29,18 +29,18 @@ const FileUpload = ({
     onMouseLeave: () => {
       setIsMouseOver(false);
     },
-    onDragEnter: (e) => {
+    onDragEnter: (e: any) => {
       stopDefaults(e);
       setIsDragOver(true);
       setLabelText(dropLabel);
     },
-    onDragLeave: (e) => {
+    onDragLeave: (e: any) => {
       stopDefaults(e);
       setIsDragOver(false);
       setLabelText(hoverLabel);
     },
     onDragOver: stopDefaults,
-    onDrop: (e) => {
+    onDrop: (e: any) => {
       stopDefaults(e);
       setLabelText(hoverLabel);
       setIsDragOver(false);
@@ -54,7 +54,7 @@ const FileUpload = ({
     },
   };
 
-  const onChangeProc = (e) => {
+  const onChangeProc = (e: any) => {
     const files = e.target?.files;
     if (files) {
       setLabelText(files[0].name);
@@ -80,30 +80,30 @@ const FileUpload = ({
         style={
           isDragOver
             ? {
-                "& img": {
-                  opacity: 0.3,
-                },
-                "& p, svg": {
-                  opacity: 1,
-                },
-                width: { width },
-                height: { height },
-              }
+              "& img": {
+                opacity: 0.3,
+              },
+              "& p, svg": {
+                opacity: 1,
+              },
+              width: { width },
+              height: { height },
+            } as unknown as React.CSSProperties
             : {
-                cursor: "pointer",
-                textAlign: "center",
-                "&:hover p,&:hover svg,& img": {
-                  opacity: 1,
-                },
-                "& p, svg": {
-                  opacity: 0.4,
-                },
-                "&:hover img": {
-                  opacity: 0.3,
-                },
-                width: { width },
-                height: { height },
-              }
+              cursor: "pointer",
+              textAlign: "center",
+              "&:hover p,&:hover svg,& img": {
+                opacity: 1,
+              },
+              "& p, svg": {
+                opacity: 0.4,
+              },
+              "&:hover img": {
+                opacity: 0.3,
+              },
+              width: { width },
+              height: { height },
+            } as unknown as React.CSSProperties
         }
       >
         <Box

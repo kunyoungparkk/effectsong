@@ -15,7 +15,7 @@ function ScriptEditor({
   targetShaderIndex,
   setTargetShaderIndex,
   compileShader
-}) {
+}: any) {
   const simpleVS = `//shader art sample
     #define PI 3.14159
     #define NUM_SEGMENTS 51.0

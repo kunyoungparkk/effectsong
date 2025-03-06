@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Grid, FormControl, InputLabel, NativeSelect } from "@mui/material";
 
-const SettingsView = ({ module, targetNode }) => {
-  const [cameraList, setCameraList] = useState([]);
+const SettingsView = ({ module, targetNode }: any) => {
+  const [cameraList, setCameraList] = useState<Array<any>>([]);
   const [activeCameraIndex, setActiveCameraIndex] = useState(-1);
 
   useEffect(() => {
@@ -55,7 +55,7 @@ const SettingsView = ({ module, targetNode }) => {
               id: "active-camera",
             }}
             style={{ color: "white" }}
-            onChange={(e) => {
+            onChange={(e: any) => {
               let newActiveCamera = cameraList[e.target.value].getCamera();
               module.Renderer.getInstance().setActiveCamera(newActiveCamera);
               setActiveCameraIndex(e.target.value);

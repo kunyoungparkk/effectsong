@@ -20,7 +20,7 @@ import ScriptEditor from "./ScriptEditor";
 import Util from "../Util";
 import Slider from "@mui/material/Slider";
 
-const ShaderSettings = ({ module, onResizeEngine }) => {
+const ShaderSettings = ({ module, onResizeEngine }: any) => {
   const DEFAULT_SHADER = useMemo(()=>`//shader art sample
 #define PI 3.14159
 #define NUM_SEGMENTS 51.0
@@ -128,7 +128,7 @@ void main() {
     setHeight(renderer.getHeight());
   }, [module, DEFAULT_SHADER]);
 
-  const compileShader = (targetShader) => {
+  const compileShader = (targetShader: any) => {
     let success = module.ArtShader.getInstance().setVertexShader(targetShader);
     console.log("compile: " + success);
   }
@@ -172,7 +172,7 @@ void main() {
             step={0.01}
             min={0.0}
             max={1.0}
-            onChange={(e) => {
+            onChange={(e: any) => {
               setScriptOpacity(e.target.value);
             }}
             style={{ paddingTop: 17, color: "#868686" }}
@@ -190,7 +190,7 @@ void main() {
               name: "Primitive",
               id: "primitive-select",
             }}
-            onChange={(e) => {
+            onChange={(e: any) => {
               module.ArtShader.getInstance().setPrimitiveMode(e.target.value);
               setPrimitiveMode(e.target.value);
             }}
@@ -216,7 +216,7 @@ void main() {
             type="number"
             variant="standard"
             value={vertexCount}
-            onChange={(e) => {
+            onChange={(e: any) => {
               if (Util.isValidNum(e.target.value)) {
                 let intValue = parseInt(e.target.value);
                 intValue = Math.min(1000000, intValue);
@@ -242,7 +242,7 @@ void main() {
             type="number"
             variant="standard"
             value={diffuseIBLIntensity}
-            onChange={(e) => {
+            onChange={(e: any) => {
               if (Util.isValidNum(e.target.value)) {
                 const floatValue = parseFloat(e.target.value);
                 module.Renderer.getInstance().setDiffuseIBLIntensity(
@@ -273,7 +273,7 @@ void main() {
             type="number"
             variant="standard"
             value={width}
-            onChange={(e) => {
+            onChange={(e: any) => {
               if (Util.isValidNum(e.target.value)) {
                 let intValue = parseInt(e.target.value);
                 intValue = Math.min(10000, intValue);
@@ -302,7 +302,7 @@ void main() {
             type="number"
             variant="standard"
             value={height}
-            onChange={(e) => {
+            onChange={(e: any) => {
               if (Util.isValidNum(e.target.value)) {
                 let intValue = parseInt(e.target.value);
                 intValue = Math.min(10000, intValue);

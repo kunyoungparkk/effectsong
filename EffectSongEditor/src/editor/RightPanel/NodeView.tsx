@@ -18,7 +18,7 @@ const NodeView = ({
   targetNode,
   updateHierarchy,
   removeSelectedNode,
-}) => {
+}: any) => {
   const [name, setName] = useState("");
   const [position, setPosition] = useState([0.0, 0.0, 0.0]);
   const [rotation, setRotation] = useState([0.0, 0.0, 0.0]);
@@ -145,7 +145,7 @@ const NodeView = ({
                 id="position-x"
                 label="x"
                 value={position[0]}
-                onChange={(e) => {
+                onChange={(e: any) => {
                   let tempPosition = targetNode.getPosition();
                   if (Util.isValidNum(e.target.value)) {
                     const floatValue = parseFloat(e.target.value);
@@ -173,7 +173,7 @@ const NodeView = ({
                 id="position-y"
                 label="y"
                 value={position[1]}
-                onChange={(e) => {
+                onChange={(e: any) => {
                   let tempPosition = targetNode.getPosition();
                   if (Util.isValidNum(e.target.value)) {
                     const floatValue = parseFloat(e.target.value);
@@ -201,7 +201,7 @@ const NodeView = ({
                 id="position-z"
                 label="z"
                 value={position[2]}
-                onChange={(e) => {
+                onChange={(e: any) => {
                   let tempPosition = targetNode.getPosition();
                   if (Util.isValidNum(e.target.value)) {
                     const floatValue = parseFloat(e.target.value);
@@ -232,7 +232,7 @@ const NodeView = ({
                 id="rotation-x"
                 label="x"
                 value={rotation[0]}
-                onChange={(e) => {
+                onChange={(e: any) => {
                   if (Util.isValidNum(e.target.value)) {
                     let tempRot = [
                       parseFloat(e.target.value),
@@ -261,7 +261,7 @@ const NodeView = ({
                 id="rotation-y"
                 label="y"
                 value={rotation[1]}
-                onChange={(e) => {
+                onChange={(e: any) => {
                   if (Util.isValidNum(e.target.value)) {
                     let tempRot = [
                       rotation[0],
@@ -290,7 +290,7 @@ const NodeView = ({
                 id="rotation-z"
                 label="z"
                 value={rotation[2]}
-                onChange={(e) => {
+                onChange={(e: any) => {
                   if (Util.isValidNum(e.target.value)) {
                     let tempRot = [
                       rotation[0],
@@ -350,7 +350,7 @@ const NodeView = ({
                     id="reactive-origin-scale"
                     label="origin scale"
                     value={reactiveOriginScale}
-                    onChange={(e) => {
+                    onChange={(e: any) => {
                       if (Util.isValidNum(e.target.value)) {
                         const floatValue = parseFloat(e.target.value);
                         targetNode.m_reactiveOriginScale = floatValue;
@@ -373,7 +373,7 @@ const NodeView = ({
                     id="reactive-changing-scale"
                     label="reactive scale"
                     value={reactiveChangingScale}
-                    onChange={(e) => {
+                    onChange={(e: any) => {
                       if (Util.isValidNum(e.target.value)) {
                         const floatValue = parseFloat(e.target.value);
                         targetNode.m_reactiveChangingScale = floatValue;
@@ -399,7 +399,7 @@ const NodeView = ({
                     id="scale-x"
                     label="x"
                     value={scale[0]}
-                    onChange={(e) => {
+                    onChange={(e: any) => {
                       let tempScale = targetNode.getScale();
                       if (Util.isValidNum(e.target.value)) {
                         const floatValue = parseFloat(e.target.value);
@@ -427,7 +427,7 @@ const NodeView = ({
                     id="scale-y"
                     label="y"
                     value={scale[1]}
-                    onChange={(e) => {
+                    onChange={(e: any) => {
                       let tempScale = targetNode.getScale();
                       if (Util.isValidNum(e.target.value)) {
                         const floatValue = parseFloat(e.target.value);
@@ -455,7 +455,7 @@ const NodeView = ({
                     id="scale-z"
                     label="z"
                     value={scale[2]}
-                    onChange={(e) => {
+                    onChange={(e: any) => {
                       let tempScale = targetNode.getScale();
                       if (Util.isValidNum(e.target.value)) {
                         const floatValue = parseFloat(e.target.value);

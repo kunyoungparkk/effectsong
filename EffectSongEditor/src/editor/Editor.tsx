@@ -1,21 +1,22 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import AudioPlayer from "react-h5-audio-player";
-import "react-h5-audio-player/lib/styles.css";
+
 import ShaderSettings from "./ScriptEditor/ShaderSettings";
 import LeftTab from "./LeftPanel/LeftTab";
 import RightTab from "./RightPanel/RightTab";
-import Typography from "@mui/material/Typography";
-import { floor } from "mathjs";
 import MusicImport from "./Import/MusicImport";
 import GLTFImport from "./Import/GLTFImport";
 import * as core from '../interfaces/effectsong-core';
 
+import AudioPlayer from "react-h5-audio-player";
+import "react-h5-audio-player/lib/styles.css";
+import { floor } from "mathjs";
 import {
   Grid,
   Snackbar,
   Alert,
   CircularProgress,
   Backdrop,
+  Typography
 } from "@mui/material";
 
 export default function Editor() {

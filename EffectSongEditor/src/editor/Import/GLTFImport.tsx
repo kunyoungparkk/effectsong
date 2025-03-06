@@ -3,10 +3,10 @@ import { Button, Modal, Box } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import FileUpload from "./FileUpload";
 
-const GLTFImport = ({ module, updateHierarchy, notify, setLoading }) => {
+const GLTFImport = ({ module, updateHierarchy, notify, setLoading }: any) => {
   const [modalOpen, setModalOpen] = useState(false);
 
-  const procGLTFInput = (files) => {
+  const procGLTFInput = (files: any) => {
     //glb인지, gltf인지, 혹은 둘다, 혹은 없는지, 혹은 여러개인지 확인.
     let isGLTF = false;
     let isGLB = false;
@@ -48,10 +48,10 @@ const GLTFImport = ({ module, updateHierarchy, notify, setLoading }) => {
     let gltfFilePath = "";
     let readPromises = [];
     for (let i = 0; i < files.length; i++) {
-      readPromises.push(new Promise((resolve, reject) => {
+      readPromises.push(new Promise<void>((resolve, reject) => {
         let file = files[i];
         let reader = new FileReader();
-        reader.onload = function (e) {
+        reader.onload = function (e: any) {
           let arrayBuffer = e.target.result;
           let filePath = TARGET_GLTF_ROOT_PATH + file.name;
 
@@ -91,7 +91,7 @@ const GLTFImport = ({ module, updateHierarchy, notify, setLoading }) => {
           module.FS.unlink(TARGET_GLTF_ROOT_PATH + dir_info[i]);
         }
         module.FS.rmdir(TARGET_GLTF_ROOT_PATH);
-        
+
         setLoading(false);
         notify(fileName + " loaded failed ", false);
         console.log(error);
@@ -137,10 +137,10 @@ const GLTFImport = ({ module, updateHierarchy, notify, setLoading }) => {
             width="100%"
             height="100%"
             isMultiple={true}
-            onChange={(e) => {
+            onChange={(e: any) => {
               procGLTFInput(e.target?.files);
             }}
-            onDrop={(e) => {
+            onDrop={(e: any) => {
               let files = e.dataTransfer?.files;
               procGLTFInput(files);
             }}

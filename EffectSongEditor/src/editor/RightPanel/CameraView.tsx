@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { TextField, Grid, FormControl, InputLabel, NativeSelect } from "@mui/material";
 import Util from "../Util";
 
-const CameraView = ({ module, targetNode }) => {
+const CameraView = ({ module, targetNode }: any) => {
   const camera = targetNode?.getCamera();
 
   //const [name, setName] = useState("");
@@ -105,7 +105,7 @@ const CameraView = ({ module, targetNode }) => {
               id="fov-input"
               label="fov"
               value={fov}
-              onChange={(e) => {
+              onChange={(e: any) => {
                 if (Util.isValidNum(e.target.value)) {
                   const floatValue = parseFloat(e.target.value);
                   camera.fov = floatValue;
@@ -128,7 +128,7 @@ const CameraView = ({ module, targetNode }) => {
               id="near-input"
               label="near"
               value={near}
-              onChange={(e) => {
+              onChange={(e: any) => {
                 if (Util.isValidNum(e.target.value)) {
                   const floatValue = parseFloat(e.target.value);
                   camera.zNear = floatValue;
@@ -151,7 +151,7 @@ const CameraView = ({ module, targetNode }) => {
               id="far-input"
               label="far"
               value={far}
-              onChange={(e) => {
+              onChange={(e: any) => {
                 if (Util.isValidNum(e.target.value)) {
                   const floatValue = parseFloat(e.target.value);
                   camera.zFar = floatValue;
@@ -176,7 +176,7 @@ const CameraView = ({ module, targetNode }) => {
                   id="xMag-input"
                   label="xMag"
                   value={xMag}
-                  onChange={(e) => {
+                  onChange={(e: any) => {
                     if (Util.isValidNum(e.target.value)) {
                       const floatValue = parseFloat(e.target.value);
                       camera.xMag = floatValue;
@@ -199,7 +199,7 @@ const CameraView = ({ module, targetNode }) => {
                   id="yMag-input"
                   label="yMag"
                   value={yMag}
-                  onChange={(e) => {
+                  onChange={(e: any) => {
                     if (Util.isValidNum(e.target.value)) {
                       const floatValue = parseFloat(e.target.value);
                       camera.yMag = floatValue;
