@@ -5,8 +5,8 @@ import LeftTab from "./LeftPanel/LeftTab";
 import RightTab from "./RightPanel/RightTab";
 import MusicImport from "./Import/MusicImport";
 import GLTFImport from "./Import/GLTFImport";
-import * as core from '../interfaces/effectsong-core';
-
+import createModule from "../core/effectsong-core.js"
+import * as core from '../core/effectsong-core';
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 import { floor } from "mathjs";
@@ -152,7 +152,7 @@ export default function Editor() {
     const url = URL.createObjectURL(blob);
 
     //TODO: Error!
-    if(audioRef.current === null || audioRef.current.audio.current === null){
+    if (audioRef.current === null || audioRef.current.audio.current === null) {
       return;
     }
 
@@ -188,12 +188,9 @@ export default function Editor() {
   }, [module, selectedNode, updateHierarchy]);
 
   useEffect(() => {
-    core.default().then((instance) => {
-      //TODO: error
-      if('canvas' in instance === false){
-        return;
-      }
-      instance.canvas = document.getElementById("canvas");
+    createModule().then((instance: core.MainModule) => {
+      (instance as any)['canvas']! = document.getElementById("canvas");
+
       instance.initialize(
         currentWidth.current,
         currentHeight.current,

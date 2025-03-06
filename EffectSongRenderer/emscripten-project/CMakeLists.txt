@@ -1,14 +1,11 @@
-# 요구 CMake 최소 버전
 cmake_minimum_required(VERSION 3.19)
 
-# 프로젝트 이름 및 버전
 project("effectsong-core")
 set(PROJECT_VERSION_MAJOR 0)
 set(PROJECT_VERSION_MINOR 1)
 set(PROJECT_VERSION_PATCH 0)
 set(PROJECT_ROOT ${CMAKE_SOURCE_DIR}/..)
 
-# 빌드 형상(Configuration)
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
   message(STATUS
@@ -21,12 +18,12 @@ else()
   endif()
 endif()
 
-# 빌드 대상 파일명
+# file name
 set(WASM_OUTPUT_NAME  "effectsong-core")
 
 # 파일 출력 경로 : 바로 Editor로 넘기기
 #set(OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/${CMAKE_BUILD_TYPE})
-set(OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../../EffectSongEditor/public)
+set(OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../../EffectSongEditor/src/core)
 
 set(EFFECTSONG_INCLUDE
   ${PROJECT_ROOT}/include
@@ -37,7 +34,6 @@ set(EFFECTSONG_INCLUDE
   ${PROJECT_ROOT}/thirdparty/stb-master
 )
 
-# 빌드 대상 라이브러리 소스 파일 목록
 set(EFFECTSONG_LIBRARY_SOURCE_FILES
    ${PROJECT_ROOT}/src/ArtShader.cpp
    ${PROJECT_ROOT}/src/Camera.cpp
@@ -61,7 +57,8 @@ set(COPTS "${COPTS} -sUSE_SDL=2")
 set(LOPTS "${LOPTS} --closure 0")
 set(LOPTS "${LOPTS} -sUSE_SDL=2")
 set(LOPTS "${LOPTS} -lembind")
-set(LOPTS "${LOPTS} --emit-tsd ${OUTPUT_DIRECTORY}/../src/interfaces/effectsong-core.d.ts")
+set(LOPTS "${LOPTS} --emit-tsd ${OUTPUT_DIRECTORY}/effectsong-core.d.ts")
+set(LOPTS "${LOPTS} -std=c++11")
 set(LOPTS "${LOPTS} -sFULL_ES3")
 set(LOPTS "${LOPTS} -s USE_WEBGL2=1")
 set(LOPTS "${LOPTS} -sMAX_WEBGL_VERSION=2")
@@ -76,9 +73,13 @@ set(LOPTS "${LOPTS} -s EXPORTED_RUNTIME_METHODS=['addFunction','removeFunction',
 set(LOPTS "${LOPTS} -s ALLOW_TABLE_GROWTH=1")
 set(LOPTS "${LOPTS} -s MODULARIZE=1")
 set(LOPTS "${LOPTS} -s EXPORT_NAME='createModule'")
-set(LOPTS "${LOPTS} -std=c++11")
-set(LOPTS "${LOPTS} --preload-file ../res/IBL")
-set(LOPTS "${LOPTS} --preload-file ../res/music")
+set(LOPTS "${LOPTS} -s SINGLE_FILE=1")
+set(LOPTS "${LOPTS} -s EXPORT_ES6=1")
+# without module: below code &  main function required
+# set(LOPTS "${LOPTS} -s INVOKE_RUN=0")
+# set(LOPTS "${LOPTS} -s NO_EXIT_RUNTIME=1")
+set(LOPTS "${LOPTS} --embed-file ../res/IBL")
+set(LOPTS "${LOPTS} --embed-file ../res/music")
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LOPTS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COPTS}")

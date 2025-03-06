@@ -27,14 +27,14 @@ const CustomTreeItem = React.forwardRef(function MyTreeItem(props: TreeItem2Prop
         content: { onClick: handleContentClick },
         iconContainer: { onClick: handleIconContainerClick }
       }}
-      // sx={{
-      //   "& .Mui-selected": {
-      //     backgroundColor: "transparent"
-      //   },
-      //   "& .MuiTreeItem-content": {
-      //     height: "32px"
-      //   }
-      // }}
+    // sx={{
+    //   "& .Mui-selected": {
+    //     backgroundColor: "transparent"
+    //   },
+    //   "& .MuiTreeItem-content": {
+    //     height: "32px"
+    //   }
+    // }}
     />
   );
 });

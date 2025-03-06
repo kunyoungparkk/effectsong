@@ -13,6 +13,9 @@
 #include <emscripten/emscripten.h>
 #include <emscripten/bind.h>
 using namespace emscripten;
+// int main(){
+// 	return 0;
+// }
 #endif
 
 SDL_GLContext g_context;

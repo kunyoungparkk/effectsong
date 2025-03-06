@@ -28,7 +28,10 @@ EffectSongEditor/coverage
 EffectSongEditor/build
 
 # misc
-EffectSongEditor/.DS_Store
+.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
 EffectSongEditor/.env.local
 EffectSongEditor/.env.development.local
 EffectSongEditor/.env.test.local

@@ -5,41 +5,8 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import HierarchyView from './HierarchyView';
 import SettingsView from './SettingsView';
-import * as core from '../../interfaces/effectsong-core';
+import * as core from '../../core/effectsong-core';
 
-// const StyledTabs = styled((props) => (
-//   <Tabs
-//     {...props}
-//     TabIndicatorProps={{ children: <span className="MuiTabs-indicatorSpan" /> }}
-//   />
-// ))({
-//   '& .MuiTabs-indicator': {
-//     display: 'flex',
-//     justifyContent: 'center',
-//     backgroundColor: 'transparent',
-//   },
-//   '& .MuiTabs-indicatorSpan': {
-//     maxWidth: 40,
-//     width: '100%',
-//     backgroundColor: '#868686',
-//   },
-// });
-
-// const StyledTab = styled((props) => <Tab disableRipple {...props} />)(
-//   ({ theme }) => ({
-//     textTransform: 'none',
-//     fontWeight: theme.typography.fontWeightRegular,
-//     fontSize: theme.typography.pxToRem(12),
-//     marginRight: theme.spacing(0),
-//     color: '#868686',
-//     '&.Mui-selected': {
-//       color: 'rgba(255, 255, 255, 255.7)',
-//     },
-//     '&.Mui-focusVisible': {
-//       backgroundColor: 'rgba(100, 95, 228, 0.32)',
-//     },
-//   }),
-// );
 interface StyledTabsProps {
   children?: React.ReactNode;
   value: number;
@@ -60,7 +27,7 @@ const StyledTabs = styled((props: StyledTabsProps) => (
   '& .MuiTabs-indicatorSpan': {
     maxWidth: 40,
     width: '100%',
-    backgroundColor: '#635ee7',
+    backgroundColor: '#868686',
   },
 });
 
@@ -73,9 +40,9 @@ const StyledTab = styled((props: StyledTabProps) => (
 ))(({ theme }) => ({
   textTransform: 'none',
   fontWeight: theme.typography.fontWeightRegular,
-  fontSize: theme.typography.pxToRem(15),
-  marginRight: theme.spacing(1),
-  color: 'rgba(255, 255, 255, 0.7)',
+  fontSize: theme.typography.pxToRem(12),
+  marginRight: theme.spacing(0),
+  color: '#868686',
   '&.Mui-selected': {
     color: '#fff',
   },
