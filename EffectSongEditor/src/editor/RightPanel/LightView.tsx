@@ -7,19 +7,24 @@ import {
   NativeSelect,
 } from "@mui/material";
 import Util from "../Util";
+import * as core from '../../core/effectsong-core'
 
-const LightView = ({ module, targetNode }: any) => {
+type lightViewType = {
+  module: core.MainModule,
+  targetNode: core.Node | null
+}
+const LightView = ({ module, targetNode }: lightViewType) => {
   const light = targetNode?.getLight();
 
   // const [name, setName] = useState("");
-  const [color, setColor] = useState([0.0, 0.0, 0.0]);
-  const [intensity, setIntensity] = useState(0.0);
-  const [range, setRange] = useState(0.0);
-  const [innerConeAngle, setInnerConeAngle] = useState(0.0);
-  const [outerConeAngle, setOuterConeAngle] = useState(0.0);
+  const [color, setColor] = useState<Array<number | string>>([0.0, 0.0, 0.0]);
+  const [intensity, setIntensity] = useState<number | string>(0.0);
+  const [range, setRange] = useState<number | string>(0.0);
+  const [innerConeAngle, setInnerConeAngle] = useState<number | string>(0.0);
+  const [outerConeAngle, setOuterConeAngle] = useState<number | string>(0.0);
   const [type, setType] = useState("");
 
-  const lightTypes = useMemo(()=>["None", "Directional Light", "Point Light", "Spot Light"], []);
+  const lightTypes = useMemo(() => ["None", "Directional Light", "Point Light", "Spot Light"], []);
 
   useEffect(() => {
     if (!light) {
@@ -122,15 +127,12 @@ const LightView = ({ module, targetNode }: any) => {
               id="color-r"
               label="r"
               value={color[0]}
-              onChange={(e: any) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                 if (Util.isValidNum(e.target.value)) {
                   const floatValue = parseFloat(e.target.value);
-
-                  light.color = new module.vec3(floatValue, color[1], color[2]);
-                  setColor([floatValue, color[1], color[2]]);
-                } else {
-                  setColor([e.target.value, color[1], color[2]]);
+                  light.color = new module.vec3(floatValue, light.color.y, light.color.z);
                 }
+                setColor([e.target.value, color[1], color[2]]);
               }}
               InputLabelProps={{
                 shrink: true,
@@ -146,15 +148,12 @@ const LightView = ({ module, targetNode }: any) => {
               id="color-g"
               label="g"
               value={color[1]}
-              onChange={(e: any) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                 if (Util.isValidNum(e.target.value)) {
                   const floatValue = parseFloat(e.target.value);
-
-                  light.color = new module.vec3(color[0], floatValue, color[2]);
-                  setColor([color[0], floatValue, color[2]]);
-                } else {
-                  setColor([color[0], e.target.value, color[2]]);
+                  light.color = new module.vec3(light.color.x, floatValue, light.color.z);
                 }
+                setColor([color[0], e.target.value, color[2]]);
               }}
               InputLabelProps={{
                 shrink: true,
@@ -170,15 +169,12 @@ const LightView = ({ module, targetNode }: any) => {
               id="color-b"
               label="b"
               value={color[2]}
-              onChange={(e: any) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                 if (Util.isValidNum(e.target.value)) {
                   const floatValue = parseFloat(e.target.value);
-
-                  light.color = new module.vec3(color[0], color[1], floatValue);
-                  setColor([color[0], color[1], floatValue]);
-                } else {
-                  setColor([color[0], color[1], e.target.value]);
+                  light.color = new module.vec3(light.color.x, light.color.y, floatValue);
                 }
+                setColor([color[0], color[1], e.target.value]);
               }}
               InputLabelProps={{
                 shrink: true,
@@ -194,14 +190,12 @@ const LightView = ({ module, targetNode }: any) => {
               id="intensity-input"
               label="intensity"
               value={intensity}
-              onChange={(e: any) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                 if (Util.isValidNum(e.target.value)) {
                   const floatValue = parseFloat(e.target.value);
                   light.intensity = floatValue;
-                  setIntensity(floatValue);
-                } else {
-                  setIntensity(e.target.value);
                 }
+                setIntensity(e.target.value);
               }}
               InputLabelProps={{
                 shrink: true,
@@ -218,14 +212,12 @@ const LightView = ({ module, targetNode }: any) => {
                 id="range-input"
                 label="range"
                 value={range}
-                onChange={(e: any) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                   if (Util.isValidNum(e.target.value)) {
                     const floatValue = parseFloat(e.target.value);
                     light.range = floatValue;
-                    setRange(floatValue);
-                  } else {
-                    setRange(e.target.value);
                   }
+                  setRange(e.target.value);
                 }}
                 InputLabelProps={{
                   shrink: true,
@@ -245,14 +237,13 @@ const LightView = ({ module, targetNode }: any) => {
                   id="innerConeAngle-input"
                   label="innerConeAngle"
                   value={innerConeAngle}
-                  onChange={(e: any) => {
+                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                     if (Util.isValidNum(e.target.value)) {
                       const floatValue = parseFloat(e.target.value);
                       light.innerConeAngle = floatValue;
-                      setInnerConeAngle(floatValue);
-                    } else {
-                      setInnerConeAngle(e.target.value);
                     }
+                    setInnerConeAngle(e.target.value);
+
                   }}
                   InputLabelProps={{
                     shrink: true,
@@ -268,14 +259,12 @@ const LightView = ({ module, targetNode }: any) => {
                   id="outerConeAngle-input"
                   label="outerConeAngle"
                   value={outerConeAngle}
-                  onChange={(e: any) => {
+                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                     if (Util.isValidNum(e.target.value)) {
                       const floatValue = parseFloat(e.target.value);
                       light.outerConeAngle = floatValue;
-                      setOuterConeAngle(floatValue);
-                    } else {
-                      setOuterConeAngle(e.target.value);
                     }
+                    setOuterConeAngle(e.target.value);
                   }}
                   InputLabelProps={{
                     shrink: true,

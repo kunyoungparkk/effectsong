@@ -4,17 +4,23 @@ import { Box, Button, Grid, Typography, TextField } from "@mui/material";
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
+type ScriptEditorType = {
+  vertexShader: string,
+  setVertexShader: React.Dispatch<React.SetStateAction<string>>,
+  opacity: number,
+  compileShader: (targetShader: string) => void
+}
 function ScriptEditor({
-  module,
   vertexShader,
   setVertexShader,
   opacity,
-  setPrimitiveMode,
-  setVertexCount,
-  targetShaderIndex,
-  setTargetShaderIndex,
-  compileShader
-}: any) {
+  compileShader,
+  // module,
+  // setPrimitiveMode,
+  // setVertexCount,
+  // targetShaderIndex,
+  // setTargetShaderIndex,
+}: ScriptEditorType) {
   const [aiRequest, setAIRequest] = useState("");
 
   useEffect(() => {
@@ -274,6 +280,9 @@ function ScriptEditor({
         value={vertexShader}
         theme="transparentTheme"
         onChange={(value) => {
+          if(value === undefined){
+            return;
+          }
           setVertexShader(value);
         }}
         options={{

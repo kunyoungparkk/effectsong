@@ -2,11 +2,22 @@ import { useState } from "react";
 import { Button, Modal, Box } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import FileUpload from "./FileUpload";
+import * as core from '../../core/effectsong-core';
 
-const GLTFImport = ({ module, updateHierarchy, notify, setLoading }: any) => {
+type gltfImportType = {
+  module: core.MainModule,
+  updateHierarchy: () => void,
+  notify: (message: string, isSuccess: boolean) => void,
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+}
+const GLTFImport = ({ module, updateHierarchy, notify, setLoading }: gltfImportType) => {
   const [modalOpen, setModalOpen] = useState(false);
 
-  const procGLTFInput = (files: any) => {
+  const procGLTFInput = (files: FileList | null) => {
+    if(!files){
+      return;
+    }
+
     //glb인지, gltf인지, 혹은 둘다, 혹은 없는지, 혹은 여러개인지 확인.
     let isGLTF = false;
     let isGLB = false;
@@ -28,10 +39,10 @@ const GLTFImport = ({ module, updateHierarchy, notify, setLoading }: any) => {
     }
 
     if (!isGLTF && !isGLB) {
-      notify('failed to load model.');
+      notify('failed to load model.', false);
       return;
     } else if (modelCount > 1) {
-      notify('can\'t import multiple models.');
+      notify('can\'t import multiple models.', false);
       return;
     }
 
@@ -41,7 +52,7 @@ const GLTFImport = ({ module, updateHierarchy, notify, setLoading }: any) => {
     const targetEXT = isGLTF ? "gltf" : "glb";
     const TARGET_GLTF_ROOT_PATH = module.getRootPath() + "res/" + fileName + "/";
     console.log(TARGET_GLTF_ROOT_PATH);
-    if (!module.FS.analyzePath(TARGET_GLTF_ROOT_PATH).exists) {
+    if (!module.FS.analyzePath(TARGET_GLTF_ROOT_PATH, false).exists) {
       module.FS.mkdir(TARGET_GLTF_ROOT_PATH);
     }
 
@@ -51,8 +62,12 @@ const GLTFImport = ({ module, updateHierarchy, notify, setLoading }: any) => {
       readPromises.push(new Promise<void>((resolve, reject) => {
         let file = files[i];
         let reader = new FileReader();
-        reader.onload = function (e: any) {
-          let arrayBuffer = e.target.result;
+        reader.onload = function (e: ProgressEvent<FileReader>) {
+          if(!e.target){
+            return false;
+          }
+
+          let arrayBuffer = e.target.result as ArrayBuffer;
           let filePath = TARGET_GLTF_ROOT_PATH + file.name;
 
           if (file.name.split(".")[1] === targetEXT) {
@@ -137,10 +152,10 @@ const GLTFImport = ({ module, updateHierarchy, notify, setLoading }: any) => {
             width="100%"
             height="100%"
             isMultiple={true}
-            onChange={(e: any) => {
-              procGLTFInput(e.target?.files);
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              procGLTFInput(e.target.files);
             }}
-            onDrop={(e: any) => {
+            onDrop={(e: React.DragEvent<HTMLLabelElement>) => {
               let files = e.dataTransfer?.files;
               procGLTFInput(files);
             }}

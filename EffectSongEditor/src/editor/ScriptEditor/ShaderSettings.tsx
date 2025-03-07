@@ -19,9 +19,15 @@ import HelpIcon from "@mui/icons-material/Help";
 import ScriptEditor from "./ScriptEditor";
 import Util from "../Util";
 import Slider from "@mui/material/Slider";
+import * as core from '../../core/effectsong-core';
+import { isArray } from "mathjs";
 
-const ShaderSettings = ({ module, onResizeEngine }: any) => {
-  const DEFAULT_SHADER = useMemo(()=>`//shader art sample
+type ShaderSettingsType = {
+  module: core.MainModule,
+  onResizeEngine: (width: number, height: number) => void
+}
+const ShaderSettings = ({ module, onResizeEngine }: ShaderSettingsType) => {
+  const DEFAULT_SHADER = useMemo(() => `//shader art sample
 #define PI 3.14159
 #define NUM_SEGMENTS 51.0
 #define NUM_POINTS (NUM_SEGMENTS * 2.0)
@@ -83,7 +89,7 @@ void main() {
     vec4 color = vec4(hsv2rgb(vec3(hue, invCPulse, 1.0)), 1.0);
     v_color = mix(color, background, radius - cPulse);
 }
-`,[]);
+`, []);
   const [scriptOpacity, setScriptOpacity] = useState(0.2);
   const primitiveTypes = [
     "POINTS",
@@ -96,44 +102,44 @@ void main() {
   ];
   const [primitiveMode, setPrimitiveMode] = useState(0);
   const [scriptVisible, setScriptVisible] = useState(true);
-  const [vertexCount, setVertexCount] = useState(0);
-  const [diffuseIBLIntensity, setDiffuseIBLIntensity] = useState(0.0);
-  const [width, setWidth] = useState(0);
-  const [height, setHeight] = useState(0);
+  const [vertexCount, setVertexCount] = useState<string>('0');
+  const [diffuseIBLIntensity, setDiffuseIBLIntensity] = useState<string>('0');
+  const [width, setWidth] = useState<string>('0');
+  const [height, setHeight] = useState<string>('0');
 
   const [helpModalOpen, setHelpModalOpen] = useState(false);
 
   const [vertexShader, setVertexShader] = useState(DEFAULT_SHADER);
-  const [targetShaderIndex, setTargetShaderIndex] = useState(0);
+  //const [targetShaderIndex, setTargetShaderIndex] = useState(0);
 
   useEffect(() => {
     if (!module) {
       return;
     }
-     module.ArtShader.getInstance().setVertexShader(vertexShader);
+    module.ArtShader.getInstance()!.setVertexShader(vertexShader);
   }, [module]);
 
   useEffect(() => {
     if (!module) {
       return;
     }
-    let artShader = module.ArtShader.getInstance();
+    let artShader = module.ArtShader.getInstance()!;
     setPrimitiveMode(artShader.getPrimitiveMode());
-    setVertexCount(artShader.getVertexCount());
+    setVertexCount(artShader.getVertexCount().toString());
     artShader.setVertexShader(DEFAULT_SHADER);
 
-    const renderer = module.Renderer.getInstance();
-    setDiffuseIBLIntensity(renderer.getDiffuseIBLIntensity());
-    setWidth(renderer.getWidth());
-    setHeight(renderer.getHeight());
+    const renderer = module.Renderer.getInstance()!;
+    setDiffuseIBLIntensity(renderer.getDiffuseIBLIntensity().toString());
+    setWidth(renderer.getWidth().toString());
+    setHeight(renderer.getHeight().toString());
   }, [module, DEFAULT_SHADER]);
 
-  const compileShader = (targetShader: any) => {
-    let success = module.ArtShader.getInstance().setVertexShader(targetShader);
+  const compileShader = (targetShader: string) => {
+    let success = module.ArtShader.getInstance()!.setVertexShader(targetShader);
     console.log("compile: " + success);
   }
 
-  
+
   return (
     <div>
       <Grid
@@ -172,8 +178,14 @@ void main() {
             step={0.01}
             min={0.0}
             max={1.0}
-            onChange={(e: any) => {
-              setScriptOpacity(e.target.value);
+            onChange={(e: Event, value: number | number[]) => {
+              //TODO: check array value
+              console.log(value);
+              if (isArray(value)) {
+                setScriptOpacity(value[0]);
+              } else {
+                setScriptOpacity(value);
+              }
             }}
             style={{ paddingTop: 17, color: "#868686" }}
           />
@@ -190,9 +202,9 @@ void main() {
               name: "Primitive",
               id: "primitive-select",
             }}
-            onChange={(e: any) => {
-              module.ArtShader.getInstance().setPrimitiveMode(e.target.value);
-              setPrimitiveMode(e.target.value);
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              module.ArtShader.getInstance()!.setPrimitiveMode(parseInt(e.target.value));
+              setPrimitiveMode(parseInt(e.target.value));
             }}
             style={{ color: "#868686" }}
           >
@@ -216,17 +228,16 @@ void main() {
             type="number"
             variant="standard"
             value={vertexCount}
-            onChange={(e: any) => {
+            onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
               if (Util.isValidNum(e.target.value)) {
                 let intValue = parseInt(e.target.value);
                 intValue = Math.min(1000000, intValue);
                 intValue = Math.max(0, intValue);
-                module.ArtShader.getInstance().setVertexCount(intValue);
-                setVertexCount(intValue);
+                module.ArtShader.getInstance()!.setVertexCount(intValue);
               } else {
-                module.ArtShader.getInstance().setVertexCount(0);
-                setVertexCount(e.target.value);
+                module.ArtShader.getInstance()!.setVertexCount(0);
               }
+              setVertexCount(e.target.value);
             }}
             inputProps={{ style: { color: "#868686" } }}
           />
@@ -242,17 +253,14 @@ void main() {
             type="number"
             variant="standard"
             value={diffuseIBLIntensity}
-            onChange={(e: any) => {
+            onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
               if (Util.isValidNum(e.target.value)) {
                 const floatValue = parseFloat(e.target.value);
-                module.Renderer.getInstance().setDiffuseIBLIntensity(
-                  floatValue
-                );
-                setDiffuseIBLIntensity(floatValue);
+                module.Renderer.getInstance()!.setDiffuseIBLIntensity(floatValue);
               } else {
-                module.Renderer.getInstance().setDiffuseIBLIntensity(0.0);
-                setDiffuseIBLIntensity(e.target.value);
+                module.Renderer.getInstance()!.setDiffuseIBLIntensity(0.0);
               }
+              setDiffuseIBLIntensity(e.target.value);
             }}
             inputProps={{ style: { color: "#868686" } }}
           />
@@ -273,19 +281,20 @@ void main() {
             type="number"
             variant="standard"
             value={width}
-            onChange={(e: any) => {
+            onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+              const heightValue = module.Renderer.getInstance()!.getHeight();
               if (Util.isValidNum(e.target.value)) {
-                let intValue = parseInt(e.target.value);
-                intValue = Math.min(10000, intValue);
-                intValue = Math.max(0, intValue);
-                module.Renderer.getInstance().resize(intValue, height);
-                setWidth(intValue);
-                onResizeEngine(intValue, height);
+                let newWidth = parseInt(e.target.value);
+                newWidth = Math.min(10000, newWidth);
+                newWidth = Math.max(0, newWidth);
+
+                module.Renderer.getInstance()!.resize(newWidth, heightValue);
+                onResizeEngine(newWidth, heightValue);
               } else {
-                module.Renderer.getInstance().resize(0, height);
-                setWidth(e.target.value);
-                onResizeEngine(0, height);
+                module.Renderer.getInstance()!.resize(0, heightValue);
+                onResizeEngine(0, heightValue);
               }
+              setWidth(e.target.value);
             }}
             inputProps={{ style: { color: "#868686" } }}
           />
@@ -302,19 +311,20 @@ void main() {
             type="number"
             variant="standard"
             value={height}
-            onChange={(e: any) => {
+            onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+              const widthValue = module.Renderer.getInstance()!.getWidth();
               if (Util.isValidNum(e.target.value)) {
-                let intValue = parseInt(e.target.value);
-                intValue = Math.min(10000, intValue);
-                intValue = Math.max(0, intValue);
-                module.Renderer.getInstance().resize(width, intValue);
-                setHeight(intValue);
-                onResizeEngine(width, intValue);
+                let newHeight = parseInt(e.target.value);
+                newHeight = Math.min(10000, newHeight);
+                newHeight = Math.max(0, newHeight);
+
+                module.Renderer.getInstance()!.resize(widthValue, newHeight);
+                onResizeEngine(widthValue, newHeight);
               } else {
-                module.Renderer.getInstance().resize(width, 0);
-                setHeight(e.target.value);
-                onResizeEngine(width, 0);
+                module.Renderer.getInstance()!.resize(widthValue, 0);
+                onResizeEngine(widthValue, 0);
               }
+              setHeight(e.target.value);
             }}
             inputProps={{ style: { color: "#868686" } }}
           />
@@ -404,15 +414,15 @@ void main() {
 
       {scriptVisible ? (
         <ScriptEditor
-          module={module}
           vertexShader={vertexShader}
           setVertexShader={setVertexShader}
           opacity={scriptOpacity}
-          setPrimitiveMode={setPrimitiveMode}
-          setVertexCount={setVertexCount}
-          targetShaderIndex={targetShaderIndex}
-          setTargetShaderIndex={setTargetShaderIndex}
           compileShader={compileShader}
+          //module={module}
+          //setPrimitiveMode={setPrimitiveMode}
+          //setVertexCount={setVertexCount}
+          //targetShaderIndex={targetShaderIndex}
+          //setTargetShaderIndex={setTargetShaderIndex}
         ></ScriptEditor>
       ) : (
         <></>

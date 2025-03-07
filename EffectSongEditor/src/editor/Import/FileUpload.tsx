@@ -2,6 +2,17 @@ import React, { useState } from "react";
 import { Box, Typography } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
+type fileUploadProps = {
+  hoverLabel?: string,
+  dropLabel?: string,
+  backgroundColor?: string,
+  width: string,
+  height: string,
+  accept?: string,
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
+  onDrop: (e: React.DragEvent<HTMLLabelElement>) => void,
+  isMultiple?: boolean,
+}
 const FileUpload = ({
   hoverLabel = "Click or drag to upload files",
   dropLabel = "Drop file here",
@@ -12,12 +23,12 @@ const FileUpload = ({
   onChange,
   onDrop,
   isMultiple = false,
-}: any) => {
+}: fileUploadProps) => {
   const [labelText, setLabelText] = useState(hoverLabel);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isMouseOver, setIsMouseOver] = useState(false);
 
-  const stopDefaults = (e: any) => {
+  const stopDefaults = (e: React.DragEvent<HTMLLabelElement>) => {
     e.stopPropagation();
     e.preventDefault();
   };
@@ -29,18 +40,18 @@ const FileUpload = ({
     onMouseLeave: () => {
       setIsMouseOver(false);
     },
-    onDragEnter: (e: any) => {
+    onDragEnter: (e: React.DragEvent<HTMLLabelElement>) => {
       stopDefaults(e);
       setIsDragOver(true);
       setLabelText(dropLabel);
     },
-    onDragLeave: (e: any) => {
+    onDragLeave: (e: React.DragEvent<HTMLLabelElement>) => {
       stopDefaults(e);
       setIsDragOver(false);
       setLabelText(hoverLabel);
     },
     onDragOver: stopDefaults,
-    onDrop: (e: any) => {
+    onDrop: (e: React.DragEvent<HTMLLabelElement>) => {
       stopDefaults(e);
       setLabelText(hoverLabel);
       setIsDragOver(false);
@@ -54,7 +65,7 @@ const FileUpload = ({
     },
   };
 
-  const onChangeProc = (e: any) => {
+  const onChangeProc = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target?.files;
     if (files) {
       setLabelText(files[0].name);

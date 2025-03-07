@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { Grid, FormControl, InputLabel, NativeSelect } from "@mui/material";
+import * as core from '../../core/effectsong-core'
+import Util from "../Util";
 
-const SettingsView = ({ module, targetNode }: any) => {
+type settingsViewType ={
+  module: core.MainModule,
+  targetNode: core.Node | null
+}
+const SettingsView = ({ module, targetNode }: settingsViewType) => {
   const [cameraList, setCameraList] = useState<Array<any>>([]);
   const [activeCameraIndex, setActiveCameraIndex] = useState(-1);
 
@@ -10,17 +16,17 @@ const SettingsView = ({ module, targetNode }: any) => {
       return;
     }
     let tempCameraList = [];
-    const renderer = module.Renderer.getInstance();
+    const renderer = module.Renderer.getInstance()!;
     const activeCamera = renderer.getActiveCamera();
     //when camera deleted on attribute panel
     if(!activeCamera){
       setActiveCameraIndex(-1);
     }
     for (let i = 0; i < renderer.getSceneCount(); i++) {
-      const scene = renderer.getSceneAt(i);
+      const scene = renderer.getSceneAt(i)!;
       for (let j = 0; j < scene.getCameraCount(); j++) {
-        const camera = scene.getCameraAt(j);
-        if (activeCamera && camera.$$.ptr === activeCamera.$$.ptr) {
+        const camera = scene.getCameraAt(j)!;
+        if(activeCamera && camera.isAliasOf(activeCamera)){
           setActiveCameraIndex(tempCameraList.length);
         }
         tempCameraList.push(camera.getNode());
@@ -55,10 +61,15 @@ const SettingsView = ({ module, targetNode }: any) => {
               id: "active-camera",
             }}
             style={{ color: "white" }}
-            onChange={(e: any) => {
-              let newActiveCamera = cameraList[e.target.value].getCamera();
-              module.Renderer.getInstance().setActiveCamera(newActiveCamera);
-              setActiveCameraIndex(e.target.value);
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              if(!Util.isValidNum(e.target.value)){
+                return;
+              }
+
+              const inputIndex = Number(e.target.value);
+              let newActiveCamera = cameraList[inputIndex].getCamera();
+              module.Renderer.getInstance()!.setActiveCamera(newActiveCamera);
+              setActiveCameraIndex(inputIndex);
             }}
           >
             {cameraList.map((cameraNode, index) => {

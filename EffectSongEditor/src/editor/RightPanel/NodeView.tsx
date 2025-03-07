@@ -13,20 +13,28 @@ import LightView from "./LightView";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import MusicOffIcon from "@mui/icons-material/MusicOff";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import * as core from '../../core/effectsong-core'
+
+type NodeViewType = {
+  module: core.MainModule,
+  targetNode: core.Node,
+  updateHierarchy: () => void,
+  removeSelectedNode: () => void
+}
 const NodeView = ({
   module,
   targetNode,
   updateHierarchy,
   removeSelectedNode,
-}: any) => {
+}: NodeViewType) => {
   const [name, setName] = useState("");
-  const [position, setPosition] = useState([0.0, 0.0, 0.0]);
-  const [rotation, setRotation] = useState([0.0, 0.0, 0.0]);
-  const [scale, setScale] = useState([0.0, 0.0, 0.0]);
+  const [position, setPosition] = useState<Array<string>>(['0', '0', '0']);
+  const [rotation, setRotation] = useState<Array<string>>(['0', '0', '0']);
+  const [scale, setScale] = useState<Array<string>>(['0', '0', '0']);
 
-  const [audioReactiveScale, setAudioReactiveScale] = useState(false);
-  const [reactiveOriginScale, setReactiveOriginScale] = useState(0.0);
-  const [reactiveChangingScale, setReactiveChangingScale] = useState(0.0);
+  const [audioReactiveScale, setAudioReactiveScale] = useState<boolean>(false);
+  const [reactiveOriginScale, setReactiveOriginScale] = useState<string>('0');
+  const [reactiveChangingScale, setReactiveChangingScale] = useState<string>('0');
 
   useEffect(() => {
     if (!module || !targetNode) {
@@ -38,29 +46,61 @@ const NodeView = ({
 
     setName(targetNode.getName());
     setPosition([
-      Util.roundToNearestStep(inputPos.x),
-      Util.roundToNearestStep(inputPos.y),
-      Util.roundToNearestStep(inputPos.z),
+      Util.roundToNearestStep(inputPos.x).toString(),
+      Util.roundToNearestStep(inputPos.y).toString(),
+      Util.roundToNearestStep(inputPos.z).toString(),
     ]);
     setRotation([
-      Util.roundToNearestStep(inputEuler.x),
-      Util.roundToNearestStep(inputEuler.y),
-      Util.roundToNearestStep(inputEuler.z),
+      Util.roundToNearestStep(inputEuler.x).toString(),
+      Util.roundToNearestStep(inputEuler.y).toString(),
+      Util.roundToNearestStep(inputEuler.z).toString(),
     ]);
     setScale([
-      Util.roundToNearestStep(inputScale.x),
-      Util.roundToNearestStep(inputScale.y),
-      Util.roundToNearestStep(inputScale.z),
+      Util.roundToNearestStep(inputScale.x).toString(),
+      Util.roundToNearestStep(inputScale.y).toString(),
+      Util.roundToNearestStep(inputScale.z).toString(),
     ]);
 
     setAudioReactiveScale(targetNode.m_bAudioReactiveScale);
     setReactiveOriginScale(
-      Util.roundToNearestStep(targetNode.m_reactiveOriginScale)
+      Util.roundToNearestStep(targetNode.m_reactiveOriginScale).toString()
     );
     setReactiveChangingScale(
-      Util.roundToNearestStep(targetNode.m_reactiveChangingScale)
+      Util.roundToNearestStep(targetNode.m_reactiveChangingScale).toString()
     );
   }, [module, targetNode]);
+
+  const changePosition = (targetPosition: [string, string, string]) => {
+    let tempPosition: [number, number, number] = [
+      Util.isValidNum(targetPosition[0]) ? parseFloat(targetPosition[0]) : 0.0,
+      Util.isValidNum(targetPosition[1]) ? parseFloat(targetPosition[1]) : 0.0,
+      Util.isValidNum(targetPosition[2]) ? parseFloat(targetPosition[2]) : 0.0
+    ];
+
+    targetNode.setPosition(new module.vec3(...tempPosition));
+    setPosition(targetPosition);
+  };
+  const changeRotation = (targetRotation: [string, string, string]) => {
+    let tempRot: [number, number, number] = [
+      Util.isValidNum(targetRotation[0]) ? parseFloat(targetRotation[0]) : 0.0,
+      Util.isValidNum(targetRotation[1]) ? parseFloat(targetRotation[1]) : 0.0,
+      Util.isValidNum(targetRotation[2]) ? parseFloat(targetRotation[2]) : 0.0
+    ];
+
+    targetNode.setRotationByEuler(new module.vec3(...tempRot));
+    setRotation(targetRotation);
+  }
+  const changeScale = (targetScale: [string, string, string]) => {
+    let tempScale: [number, number, number] = [
+      Util.isValidNum(targetScale[0]) ? parseFloat(targetScale[0]) : 0.0,
+      Util.isValidNum(targetScale[1]) ? parseFloat(targetScale[1]) : 0.0,
+      Util.isValidNum(targetScale[2]) ? parseFloat(targetScale[2]) : 0.0
+    ];
+
+    targetNode.setPosition(new module.vec3(...tempScale));
+    setPosition(targetScale);
+  };
+
   return (
     <Box
       sx={{
@@ -85,7 +125,7 @@ const NodeView = ({
             size="small"
             variant="contained"
             startIcon={<DeleteForeverIcon />}
-            sx={{ width: "100%", backgroundColor:"#7d0e0e" }}
+            sx={{ width: "100%", backgroundColor: "#7d0e0e" }}
             onClick={() => {
               removeSelectedNode();
             }}
@@ -145,19 +185,9 @@ const NodeView = ({
                 id="position-x"
                 label="x"
                 value={position[0]}
-                onChange={(e: any) => {
-                  let tempPosition = targetNode.getPosition();
-                  if (Util.isValidNum(e.target.value)) {
-                    const floatValue = parseFloat(e.target.value);
-                    tempPosition.x = floatValue;
-                    targetNode.setPosition(tempPosition);
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+                  changePosition([e.target.value, position[1], position[2]]);
 
-                    setPosition([floatValue, position[1], position[2]]);
-                  } else {
-                    tempPosition.x = 0.0;
-                    targetNode.setPosition(tempPosition);
-                    setPosition([e.target.value, position[1], position[2]]);
-                  }
                 }}
                 InputLabelProps={{
                   shrink: true,
@@ -173,19 +203,8 @@ const NodeView = ({
                 id="position-y"
                 label="y"
                 value={position[1]}
-                onChange={(e: any) => {
-                  let tempPosition = targetNode.getPosition();
-                  if (Util.isValidNum(e.target.value)) {
-                    const floatValue = parseFloat(e.target.value);
-                    tempPosition.y = floatValue;
-                    targetNode.setPosition(tempPosition);
-
-                    setPosition([position[0], floatValue, position[2]]);
-                  } else {
-                    tempPosition.y = 0.0;
-                    targetNode.setPosition(tempPosition);
-                    setPosition([position[0], e.target.value, position[2]]);
-                  }
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+                  changePosition([position[0], e.target.value, position[2]]);
                 }}
                 InputLabelProps={{
                   shrink: true,
@@ -201,19 +220,8 @@ const NodeView = ({
                 id="position-z"
                 label="z"
                 value={position[2]}
-                onChange={(e: any) => {
-                  let tempPosition = targetNode.getPosition();
-                  if (Util.isValidNum(e.target.value)) {
-                    const floatValue = parseFloat(e.target.value);
-                    tempPosition.z = floatValue;
-                    targetNode.setPosition(tempPosition);
-
-                    setPosition([position[0], position[1], floatValue]);
-                  } else {
-                    tempPosition.z = 0.0;
-                    targetNode.setPosition(tempPosition);
-                    setPosition([position[0], position[1], e.target.value]);
-                  }
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+                  changePosition([position[0], position[1], e.target.value]);
                 }}
                 InputLabelProps={{
                   shrink: true,
@@ -232,20 +240,8 @@ const NodeView = ({
                 id="rotation-x"
                 label="x"
                 value={rotation[0]}
-                onChange={(e: any) => {
-                  if (Util.isValidNum(e.target.value)) {
-                    let tempRot = [
-                      parseFloat(e.target.value),
-                      rotation[1],
-                      rotation[2],
-                    ];
-                    targetNode.setRotationByEuler(
-                      new module.vec3(tempRot[0], tempRot[1], tempRot[2])
-                    );
-                    setRotation(tempRot);
-                  } else {
-                    setRotation([e.target.value, rotation[1], rotation[2]]);
-                  }
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+                  changeRotation([e.target.value, rotation[1], rotation[2]]);
                 }}
                 InputLabelProps={{
                   shrink: true,
@@ -261,20 +257,8 @@ const NodeView = ({
                 id="rotation-y"
                 label="y"
                 value={rotation[1]}
-                onChange={(e: any) => {
-                  if (Util.isValidNum(e.target.value)) {
-                    let tempRot = [
-                      rotation[0],
-                      parseFloat(e.target.value),
-                      rotation[2],
-                    ];
-                    targetNode.setRotationByEuler(
-                      new module.vec3(tempRot[0], tempRot[1], tempRot[2])
-                    );
-                    setRotation(tempRot);
-                  } else {
-                    setRotation([rotation[0], e.target.value, rotation[2]]);
-                  }
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+                  changeRotation([rotation[0], e.target.value, rotation[2]]);
                 }}
                 InputLabelProps={{
                   shrink: true,
@@ -290,20 +274,8 @@ const NodeView = ({
                 id="rotation-z"
                 label="z"
                 value={rotation[2]}
-                onChange={(e: any) => {
-                  if (Util.isValidNum(e.target.value)) {
-                    let tempRot = [
-                      rotation[0],
-                      rotation[1],
-                      parseFloat(e.target.value),
-                    ];
-                    targetNode.setRotationByEuler(
-                      new module.vec3(tempRot[0], tempRot[1], tempRot[2])
-                    );
-                    setRotation(tempRot);
-                  } else {
-                    setRotation([rotation[0], rotation[1], e.target.value]);
-                  }
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+                  changeRotation([rotation[0], rotation[1], e.target.value]);
                 }}
                 InputLabelProps={{
                   shrink: true,
@@ -322,9 +294,9 @@ const NodeView = ({
                   if (audioReactiveScale) {
                     const inputScale = targetNode.getScale();
                     setScale([
-                      Util.roundToNearestStep(inputScale.x),
-                      Util.roundToNearestStep(inputScale.y),
-                      Util.roundToNearestStep(inputScale.z),
+                      Util.roundToNearestStep(inputScale.x).toString(),
+                      Util.roundToNearestStep(inputScale.y).toString(),
+                      Util.roundToNearestStep(inputScale.z).toString(),
                     ]);
                   }
                   setAudioReactiveScale(!audioReactiveScale);
@@ -350,14 +322,12 @@ const NodeView = ({
                     id="reactive-origin-scale"
                     label="origin scale"
                     value={reactiveOriginScale}
-                    onChange={(e: any) => {
+                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                       if (Util.isValidNum(e.target.value)) {
                         const floatValue = parseFloat(e.target.value);
                         targetNode.m_reactiveOriginScale = floatValue;
-                        setReactiveOriginScale(floatValue);
-                      } else {
-                        setReactiveOriginScale(e.target.value);
                       }
+                      setReactiveOriginScale(e.target.value);
                     }}
                     InputLabelProps={{
                       shrink: true,
@@ -373,14 +343,12 @@ const NodeView = ({
                     id="reactive-changing-scale"
                     label="reactive scale"
                     value={reactiveChangingScale}
-                    onChange={(e: any) => {
+                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                       if (Util.isValidNum(e.target.value)) {
                         const floatValue = parseFloat(e.target.value);
                         targetNode.m_reactiveChangingScale = floatValue;
-                        setReactiveChangingScale(floatValue);
-                      } else {
-                        setReactiveChangingScale(e.target.value);
                       }
+                      setReactiveChangingScale(e.target.value);
                     }}
                     InputLabelProps={{
                       shrink: true,
@@ -399,19 +367,8 @@ const NodeView = ({
                     id="scale-x"
                     label="x"
                     value={scale[0]}
-                    onChange={(e: any) => {
-                      let tempScale = targetNode.getScale();
-                      if (Util.isValidNum(e.target.value)) {
-                        const floatValue = parseFloat(e.target.value);
-                        tempScale.x = floatValue;
-                        targetNode.setScale(tempScale);
-
-                        setScale([floatValue, scale[1], scale[2]]);
-                      } else {
-                        tempScale.x = 0.0;
-                        targetNode.setScale(tempScale);
-                        setScale([e.target.value, position[1], position[2]]);
-                      }
+                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+                      changeScale([e.target.value, scale[1], scale[2]]);
                     }}
                     InputLabelProps={{
                       shrink: true,
@@ -427,19 +384,8 @@ const NodeView = ({
                     id="scale-y"
                     label="y"
                     value={scale[1]}
-                    onChange={(e: any) => {
-                      let tempScale = targetNode.getScale();
-                      if (Util.isValidNum(e.target.value)) {
-                        const floatValue = parseFloat(e.target.value);
-                        tempScale.y = floatValue;
-                        targetNode.setScale(tempScale);
-
-                        setScale([scale[0], floatValue, scale[2]]);
-                      } else {
-                        tempScale.y = 0.0;
-                        targetNode.setScale(tempScale);
-                        setScale([scale[0], e.target.value, scale[2]]);
-                      }
+                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+                      changeScale([scale[0], e.target.value, scale[2]]);
                     }}
                     InputLabelProps={{
                       shrink: true,
@@ -455,19 +401,8 @@ const NodeView = ({
                     id="scale-z"
                     label="z"
                     value={scale[2]}
-                    onChange={(e: any) => {
-                      let tempScale = targetNode.getScale();
-                      if (Util.isValidNum(e.target.value)) {
-                        const floatValue = parseFloat(e.target.value);
-                        tempScale.z = floatValue;
-                        targetNode.setScale(tempScale);
-
-                        setScale([scale[0], scale[1], floatValue]);
-                      } else {
-                        tempScale.z = 0.0;
-                        targetNode.setScale(tempScale);
-                        setScale([scale[0], scale[1], e.target.value]);
-                      }
+                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+                      changeScale([scale[0], scale[1], e.target.value]);
                     }}
                     InputLabelProps={{
                       shrink: true,

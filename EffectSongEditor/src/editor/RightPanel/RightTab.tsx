@@ -5,6 +5,7 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import NodeView from './NodeView';
 import VisualScriptView from './VisualScriptView';
+import * as core from '../../core/effectsong-core'
 
 interface StyledTabsProps {
   children?: React.ReactNode;
@@ -51,18 +52,16 @@ const StyledTab = styled((props: StyledTabProps) => (
   },
 }));
 
-//   type leftTabProps = {
-//     module: core.MainModule,
-//     hierarchyData: {},
-//     selectCallback: any,//(event: React.SyntheticEvent, id: string, isSelected: boolean) => {},
-//     expandIdList: string[],
-//     setExpandIdList: any,//(itemIds: string[]) => {},
-//     targetNode: any//core.Node
-//   }
+type rightTabProps = {
+  module: core.MainModule,
+  updateHierarchy: () => void,
+  targetNode: core.Node | null,
+  removeSelectedNode: () => void
+}
 
-export default function RightTab({ updateHierarchy, module, targetNode, removeSelectedNode }: any) {
+export default function RightTab({ module, updateHierarchy, targetNode, removeSelectedNode }: rightTabProps) {
   const [value, setValue] = React.useState<number>(0);
-  const handleChange = (event: any, newValue: any) => {
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 

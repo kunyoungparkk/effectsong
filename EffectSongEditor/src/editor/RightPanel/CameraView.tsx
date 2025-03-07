@@ -1,16 +1,21 @@
 import { useEffect, useState, useMemo } from "react";
 import { TextField, Grid, FormControl, InputLabel, NativeSelect } from "@mui/material";
 import Util from "../Util";
+import * as core from '../../core/effectsong-core'
 
-const CameraView = ({ module, targetNode }: any) => {
+type cameraView = {
+  module: core.MainModule,
+  targetNode: core.Node | null
+}
+const CameraView = ({ module, targetNode }: cameraView) => {
   const camera = targetNode?.getCamera();
 
   //const [name, setName] = useState("");
-  const [fov, setFov] = useState(0.0);
-  const [near, setNear] = useState(0.0);
-  const [far, setFar] = useState(0.0);
-  const [xMag, setXMag] = useState(0.0);
-  const [yMag, setYMag] = useState(0.0);
+  const [fov, setFov] = useState<number | string>();
+  const [near, setNear] = useState<number | string>();
+  const [far, setFar] = useState<number | string>();
+  const [xMag, setXMag] = useState<number | string>();
+  const [yMag, setYMag] = useState<number | string>();
   const [type, setType] = useState('');
 
   const cameraTypes = useMemo(()=>['Perspective', 'Orthographic'], []);
@@ -105,7 +110,7 @@ const CameraView = ({ module, targetNode }: any) => {
               id="fov-input"
               label="fov"
               value={fov}
-              onChange={(e: any) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                 if (Util.isValidNum(e.target.value)) {
                   const floatValue = parseFloat(e.target.value);
                   camera.fov = floatValue;
@@ -128,7 +133,7 @@ const CameraView = ({ module, targetNode }: any) => {
               id="near-input"
               label="near"
               value={near}
-              onChange={(e: any) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                 if (Util.isValidNum(e.target.value)) {
                   const floatValue = parseFloat(e.target.value);
                   camera.zNear = floatValue;
@@ -151,7 +156,7 @@ const CameraView = ({ module, targetNode }: any) => {
               id="far-input"
               label="far"
               value={far}
-              onChange={(e: any) => {
+              onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                 if (Util.isValidNum(e.target.value)) {
                   const floatValue = parseFloat(e.target.value);
                   camera.zFar = floatValue;
@@ -176,7 +181,7 @@ const CameraView = ({ module, targetNode }: any) => {
                   id="xMag-input"
                   label="xMag"
                   value={xMag}
-                  onChange={(e: any) => {
+                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                     if (Util.isValidNum(e.target.value)) {
                       const floatValue = parseFloat(e.target.value);
                       camera.xMag = floatValue;
@@ -199,7 +204,7 @@ const CameraView = ({ module, targetNode }: any) => {
                   id="yMag-input"
                   label="yMag"
                   value={yMag}
-                  onChange={(e: any) => {
+                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                     if (Util.isValidNum(e.target.value)) {
                       const floatValue = parseFloat(e.target.value);
                       camera.yMag = floatValue;

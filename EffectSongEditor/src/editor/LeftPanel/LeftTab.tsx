@@ -4,6 +4,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import HierarchyView from './HierarchyView';
+import type {hierarchyNodeType} from './HierarchyView.d';
 import SettingsView from './SettingsView';
 import * as core from '../../core/effectsong-core';
 
@@ -53,17 +54,17 @@ const StyledTab = styled((props: StyledTabProps) => (
 
 type leftTabProps = {
   module: core.MainModule,
-  hierarchyData: {},
-  selectCallback: any,//(event: React.SyntheticEvent, id: string, isSelected: boolean) => {},
+  hierarchyData: Array<hierarchyNodeType>,
+  selectCallback: (event: React.SyntheticEvent, id: string, isSelected: boolean) => void,
   expandIdList: string[],
-  setExpandIdList: any,//(itemIds: string[]) => {},
-  targetNode: any//core.Node
+  setExpandIdList: (itemIds: string[]) => void,
+  targetNode: core.Node | null
 }
 
 export default function LeftTab({ module, hierarchyData, selectCallback, expandIdList, setExpandIdList, targetNode }: leftTabProps) {
   const [value, setValue] = React.useState(0);
 
-  const handleChange = (event: any, newValue: any) => {
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 

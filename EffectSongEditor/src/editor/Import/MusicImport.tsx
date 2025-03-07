@@ -2,30 +2,43 @@ import { useState } from "react";
 import { Button, Modal, Box } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import FileUpload from "./FileUpload";
+import AudioPlayer from "react-h5-audio-player";
+import * as core from '../../core/effectsong-core';
 
-const MusicImport = ({ module, audioPlayerRef, notify, setLoading }: any) => {
+type musicImportType = {
+  module: core.MainModule,
+  audioPlayerRef: React.RefObject<AudioPlayer>,
+  notify: (message: string, isSuccess: boolean) => void,
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+const MusicImport = ({ module, audioPlayerRef, notify, setLoading }: musicImportType) => {
   const [modalOpen, setModalOpen] = useState(false);
 
-  const procMusicInput = (file: any) => {
+  const procMusicInput = (file: File) => {
     setLoading(true);
     setModalOpen(false);
     let reader = new FileReader();
     const MUSIC_ROOT_PATH = module.getRootPath() + "res/music/";
-    if (!module.FS.analyzePath(MUSIC_ROOT_PATH).exists) {
+    if (!module.FS.analyzePath(MUSIC_ROOT_PATH, false).exists) {
         module.FS.mkdir(MUSIC_ROOT_PATH);
     }
 
-    reader.onload = (e: any) => {
-      let arrayBuffer = e.target.result;
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      if(!e.target){
+        return false;
+      }
+
+      let arrayBuffer = e.target.result as ArrayBuffer;
       let filePath = MUSIC_ROOT_PATH + file.name;
       module.FS.writeFile(filePath, new Uint8Array(arrayBuffer));
-      module.Renderer.getInstance().setAudioFile(filePath);
+      module.Renderer.getInstance()!.setAudioFile(filePath);
       module.FS.unlink(filePath);
       //audio 변경
       const blob = new Blob([arrayBuffer], { type: file.type });
       const url = URL.createObjectURL(blob);
-      const prevURL = audioPlayerRef.current.audio.current.src;
-      audioPlayerRef.current.audio.current.src = url;
+      const prevURL = audioPlayerRef.current!.audio.current!.src;
+      audioPlayerRef.current!.audio.current!.src = url;
       URL.revokeObjectURL(prevURL);
 
       setLoading(false);
@@ -73,20 +86,23 @@ const MusicImport = ({ module, audioPlayerRef, notify, setLoading }: any) => {
             width="100%"
             height="100%"
             accept="audio/mp3, audio/wav, audio/flac"
-            onChange={(e: any) => {
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              if(!e.target.files){
+                return;
+              }
               procMusicInput(e.target?.files[0]);
             }}
-            onDrop={(e: any) => {
+            onDrop={(e: React.DragEvent<HTMLLabelElement>) => {
               let files = e.dataTransfer?.files;
               if (files.length > 1) {
-                notify("please upload single audio file");
+                notify("please upload single audio file", false);
                 return;
               } else if (
                 files[0].type !== "audio/flac" &&
                 files[0].type !== "audio/wav" &&
                 files[0].type !== "audio/mpeg"
               ) {
-                notify("Audio file type mismatch. Only MP3, WAV, and FLAC are supported.");
+                notify("Audio file type mismatch. Only MP3, WAV, and FLAC are supported.", false);
                 return;
               }
               procMusicInput(files[0]);

@@ -5,8 +5,12 @@ import LeftTab from "./LeftPanel/LeftTab";
 import RightTab from "./RightPanel/RightTab";
 import MusicImport from "./Import/MusicImport";
 import GLTFImport from "./Import/GLTFImport";
+
 import createModule from "../core/effectsong-core.js"
 import * as core from '../core/effectsong-core';
+
+import { hierarchyNodeType } from "./LeftPanel/HierarchyView.d";
+
 import AudioPlayer from "react-h5-audio-player";
 import "react-h5-audio-player/lib/styles.css";
 import { floor } from "mathjs";
@@ -32,18 +36,11 @@ export default function Editor() {
   const [notifyMessage, setNotifyMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
-  //Hierarchy Data State
-  type currentDataType = {
-    id: string,
-    name: string,
-    isSelected: boolean,
-    children: Array<currentDataType>
-  }
-  const [hierarchyData, setHierarchyData] = useState<Array<currentDataType>>([]);
-  const [expandIdList, setExpandIdList] = useState([]);
+  const [hierarchyData, setHierarchyData] = useState<Array<hierarchyNodeType>>([]);
+  const [expandIdList, setExpandIdList] = useState<Array<string>>([]);
   const [selectedNode, setSelectedNode] = useState<core.Node | null>(null);
 
-  const notify = useCallback((message: string, isSuccess: boolean = false) => {
+  const notify = useCallback((message: string, isSuccess: boolean) => {
     setNotifySuccess(isSuccess);
     setNotifyMessage(message);
     setNotifyOpen(true);
@@ -77,7 +74,7 @@ export default function Editor() {
 
   const recursiveWriteNodes = useCallback((curNode: core.Node, id: string) => {
     //현재 노드 기록
-    let currentData: currentDataType = {
+    let currentData: hierarchyNodeType = {
       id: id,
       name: curNode.getName(),
       isSelected: false,
