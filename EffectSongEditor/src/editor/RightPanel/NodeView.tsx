@@ -14,37 +14,42 @@ import MusicNoteIcon from "@mui/icons-material/MusicNote";
 import MusicOffIcon from "@mui/icons-material/MusicOff";
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import * as core from '../../core/effectsong-core'
+import CoreManager from "../CoreManager";
+
+import { useAtom } from 'jotai';
+import { selectedNodeAtom } from "../atom";
 
 type NodeViewType = {
-  module: core.MainModule,
-  targetNode: core.Node,
-  updateHierarchy: () => void,
-  removeSelectedNode: () => void
+  updateHierarchy: () => void
 }
 const NodeView = ({
-  module,
-  targetNode,
-  updateHierarchy,
-  removeSelectedNode,
+  updateHierarchy
 }: NodeViewType) => {
+  const module = CoreManager.getInstance().getModule();
+
+  const [selectedNode, setSelectedNode] = useAtom(selectedNodeAtom);
+  if(!selectedNode){
+    return<></>
+  }
+
   const [name, setName] = useState("");
-  const [position, setPosition] = useState<Array<string>>(['0', '0', '0']);
-  const [rotation, setRotation] = useState<Array<string>>(['0', '0', '0']);
-  const [scale, setScale] = useState<Array<string>>(['0', '0', '0']);
+  const [position, setPosition] = useState<[string, string, string]>(['0', '0', '0']);
+  const [rotation, setRotation] = useState<[string, string, string]>(['0', '0', '0']);
+  const [scale, setScale] = useState<[string, string, string]>(['0', '0', '0']);
 
   const [audioReactiveScale, setAudioReactiveScale] = useState<boolean>(false);
   const [reactiveOriginScale, setReactiveOriginScale] = useState<string>('0');
   const [reactiveChangingScale, setReactiveChangingScale] = useState<string>('0');
 
   useEffect(() => {
-    if (!module || !targetNode) {
+    if (!selectedNode) {
       return;
     }
-    const inputPos = targetNode.getPosition();
-    const inputEuler = targetNode.getEulerRotation();
-    const inputScale = targetNode.getScale();
+    const inputPos = selectedNode.getPosition();
+    const inputEuler = selectedNode.getEulerRotation();
+    const inputScale = selectedNode.getScale();
 
-    setName(targetNode.getName());
+    setName(selectedNode.getName());
     setPosition([
       Util.roundToNearestStep(inputPos.x).toString(),
       Util.roundToNearestStep(inputPos.y).toString(),
@@ -61,14 +66,25 @@ const NodeView = ({
       Util.roundToNearestStep(inputScale.z).toString(),
     ]);
 
-    setAudioReactiveScale(targetNode.m_bAudioReactiveScale);
+    setAudioReactiveScale(selectedNode.m_bAudioReactiveScale);
     setReactiveOriginScale(
-      Util.roundToNearestStep(targetNode.m_reactiveOriginScale).toString()
+      Util.roundToNearestStep(selectedNode.m_reactiveOriginScale).toString()
     );
     setReactiveChangingScale(
-      Util.roundToNearestStep(targetNode.m_reactiveChangingScale).toString()
+      Util.roundToNearestStep(selectedNode.m_reactiveChangingScale).toString()
     );
-  }, [module, targetNode]);
+  }, [selectedNode]);
+
+  const removeNode = (node: core.Node) => {
+    const parentNode = node.getParent();
+    if (parentNode) {
+      parentNode.removeChild(node);
+    } else {
+      CoreManager.getInstance().getRenderer().removeScene(node as core.Scene);
+    }
+
+    setSelectedNode(null);
+  }
 
   const changePosition = (targetPosition: [string, string, string]) => {
     let tempPosition: [number, number, number] = [
@@ -77,7 +93,7 @@ const NodeView = ({
       Util.isValidNum(targetPosition[2]) ? parseFloat(targetPosition[2]) : 0.0
     ];
 
-    targetNode.setPosition(new module.vec3(...tempPosition));
+    selectedNode.setPosition(new module.vec3(...tempPosition));
     setPosition(targetPosition);
   };
   const changeRotation = (targetRotation: [string, string, string]) => {
@@ -87,7 +103,7 @@ const NodeView = ({
       Util.isValidNum(targetRotation[2]) ? parseFloat(targetRotation[2]) : 0.0
     ];
 
-    targetNode.setRotationByEuler(new module.vec3(...tempRot));
+    selectedNode.setRotationByEuler(new module.vec3(...tempRot));
     setRotation(targetRotation);
   }
   const changeScale = (targetScale: [string, string, string]) => {
@@ -97,8 +113,8 @@ const NodeView = ({
       Util.isValidNum(targetScale[2]) ? parseFloat(targetScale[2]) : 0.0
     ];
 
-    targetNode.setPosition(new module.vec3(...tempScale));
-    setPosition(targetScale);
+    selectedNode.setScale(new module.vec3(...tempScale));
+    setScale(targetScale);
   };
 
   return (
@@ -119,20 +135,6 @@ const NodeView = ({
           paddingRight: 2,
         }}
       >
-        <Grid item xs={8}></Grid>
-        <Grid item xs={4}>
-          <Button
-            size="small"
-            variant="contained"
-            startIcon={<DeleteForeverIcon />}
-            sx={{ width: "100%", backgroundColor: "#7d0e0e" }}
-            onClick={() => {
-              removeSelectedNode();
-            }}
-          >
-            remove
-          </Button>
-        </Grid>
         <Grid item xs={12}>
           <TextField
             type="text"
@@ -141,7 +143,7 @@ const NodeView = ({
             label="name"
             value={name}
             onChange={(e) => {
-              targetNode.setName(e.target.value);
+              selectedNode.setName(e.target.value);
               setName(e.target.value);
               updateHierarchy();
             }}
@@ -289,10 +291,10 @@ const NodeView = ({
               <IconButton
                 aria-label="use-reactive-scale"
                 onClick={() => {
-                  targetNode.m_bAudioReactiveScale = !audioReactiveScale;
+                  selectedNode.m_bAudioReactiveScale = !audioReactiveScale;
                   //when disable reactivescale
                   if (audioReactiveScale) {
-                    const inputScale = targetNode.getScale();
+                    const inputScale = selectedNode.getScale();
                     setScale([
                       Util.roundToNearestStep(inputScale.x).toString(),
                       Util.roundToNearestStep(inputScale.y).toString(),
@@ -325,7 +327,7 @@ const NodeView = ({
                     onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                       if (Util.isValidNum(e.target.value)) {
                         const floatValue = parseFloat(e.target.value);
-                        targetNode.m_reactiveOriginScale = floatValue;
+                        selectedNode.m_reactiveOriginScale = floatValue;
                       }
                       setReactiveOriginScale(e.target.value);
                     }}
@@ -346,7 +348,7 @@ const NodeView = ({
                     onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                       if (Util.isValidNum(e.target.value)) {
                         const floatValue = parseFloat(e.target.value);
-                        targetNode.m_reactiveChangingScale = floatValue;
+                        selectedNode.m_reactiveChangingScale = floatValue;
                       }
                       setReactiveChangingScale(e.target.value);
                     }}
@@ -429,7 +431,7 @@ const NodeView = ({
           </Divider>
         </Grid>
         <Grid item xs={12}>
-          <CameraView module={module} targetNode={targetNode} />
+          <CameraView targetNode={selectedNode} />
         </Grid>
         <Grid item xs={12}>
           <Divider
@@ -444,7 +446,34 @@ const NodeView = ({
           </Divider>
         </Grid>
         <Grid item xs={12}>
-          <LightView module={module} targetNode={targetNode} />
+          <LightView targetNode={selectedNode} />
+        </Grid>
+
+        <Grid item xs={12}>
+          <Divider
+            sx={{
+              color: "#868686",
+              "&::before, &::after": {
+                borderColor: "#868686",
+              },
+            }}
+          >
+            Control
+          </Divider>
+        </Grid>
+        <Grid item xs={6}></Grid>
+        <Grid item xs={6}>
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<DeleteForeverIcon />}
+            sx={{ width: "100%", backgroundColor: "#7d0e0e" }}
+            onClick={() => {
+              removeNode(selectedNode);
+            }}
+          >
+            remove
+          </Button>
         </Grid>
       </Grid>
     </Box>

@@ -23,7 +23,7 @@ const Util =  {
                 return true;
             }
         },
-        roundToNearestStep: (value: number, step: number = 0.0001, epsilon: number = 1e-4) => {
+        roundToNearestStep: (value: number, step: number = 0.001, epsilon: number = 1e-7) => {
             const nearest = Math.round(value / step) * step;
             return Math.abs(value - nearest) < epsilon ? nearest : value;
         }

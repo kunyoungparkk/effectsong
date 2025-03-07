@@ -1,13 +1,13 @@
 import { useEffect, useState, useMemo } from "react";
 import { TextField, Grid, FormControl, InputLabel, NativeSelect } from "@mui/material";
 import Util from "../Util";
-import * as core from '../../core/effectsong-core'
+import * as core from '../../core/effectsong-core';
+import CoreManager from "../CoreManager";
 
 type cameraView = {
-  module: core.MainModule,
   targetNode: core.Node | null
 }
-const CameraView = ({ module, targetNode }: cameraView) => {
+const CameraView = ({ targetNode }: cameraView) => {
   const camera = targetNode?.getCamera();
 
   //const [name, setName] = useState("");
@@ -82,9 +82,9 @@ const CameraView = ({ module, targetNode }: cameraView) => {
                 style={{ color: "white" }}
                 onChange={(e) => {
                   if (e.target.value === "Perspective") {
-                    camera.projectionType = module.ProjectionType.PERSPECTIVE;
+                    camera.projectionType = CoreManager.getInstance().getModule().ProjectionType.PERSPECTIVE;
                   } else {
-                    camera.projectionType = module.ProjectionType.ORTHOGRAPHIC;
+                    camera.projectionType = CoreManager.getInstance().getModule().ProjectionType.ORTHOGRAPHIC;
                   }
                   setType(e.target.value);
                 }}

@@ -1,33 +1,22 @@
-import { useState, useEffect, useMemo } from "react";
-import {
-  NativeSelect,
-  TextField,
-  Grid,
-  IconButton,
-  Button,
-  Modal,
-  Typography,
-  Box,
-} from "@mui/material";
-import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
-import CategoryIcon from "@mui/icons-material/Category";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import LightModeIcon from "@mui/icons-material/LightMode";
-import HeightIcon from "@mui/icons-material/Height";
-import HelpIcon from "@mui/icons-material/Help";
-import ScriptEditor from "./ScriptEditor";
-import Util from "../Util";
-import Slider from "@mui/material/Slider";
-import * as core from '../../core/effectsong-core';
-import { isArray } from "mathjs";
+import { useState, useEffect } from 'react';
+import { NativeSelect, TextField, Grid, IconButton, Button, Modal, Typography, Box } from '@mui/material';
+import ScatterPlotIcon from '@mui/icons-material/ScatterPlot';
+import CategoryIcon from '@mui/icons-material/Category';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import HeightIcon from '@mui/icons-material/Height';
+import HelpIcon from '@mui/icons-material/Help';
+import ScriptEditor from './ScriptEditor';
+import Util from '../Util';
+import Slider from '@mui/material/Slider';
+import CoreManager from '../CoreManager';
 
 type ShaderSettingsType = {
-  module: core.MainModule,
-  onResizeEngine: (width: number, height: number) => void
-}
-const ShaderSettings = ({ module, onResizeEngine }: ShaderSettingsType) => {
-  const DEFAULT_SHADER = useMemo(() => `//shader art sample
+  onResizeEngine: (width: number, height: number) => void;
+};
+const ShaderSettings = ({ onResizeEngine }: ShaderSettingsType) => {
+  const DEFAULT_SHADER = `//shader art sample
 #define PI 3.14159
 #define NUM_SEGMENTS 51.0
 #define NUM_POINTS (NUM_SEGMENTS * 2.0)
@@ -89,17 +78,9 @@ void main() {
     vec4 color = vec4(hsv2rgb(vec3(hue, invCPulse, 1.0)), 1.0);
     v_color = mix(color, background, radius - cPulse);
 }
-`, []);
+`;
   const [scriptOpacity, setScriptOpacity] = useState(0.2);
-  const primitiveTypes = [
-    "POINTS",
-    "LINES",
-    "LINE_LOOP",
-    "LINE_STRIP",
-    "TRIANGLES",
-    "TRI_STRIP",
-    "TRI_FAN",
-  ];
+  const primitiveTypes = ['POINTS', 'LINES', 'LINE_LOOP', 'LINE_STRIP', 'TRIANGLES', 'TRI_STRIP', 'TRI_FAN'];
   const [primitiveMode, setPrimitiveMode] = useState(0);
   const [scriptVisible, setScriptVisible] = useState(true);
   const [vertexCount, setVertexCount] = useState<string>('0');
@@ -112,60 +93,52 @@ void main() {
   const [vertexShader, setVertexShader] = useState(DEFAULT_SHADER);
   //const [targetShaderIndex, setTargetShaderIndex] = useState(0);
 
+  const coreManager = CoreManager.getInstance();
   useEffect(() => {
-    if (!module) {
-      return;
-    }
-    module.ArtShader.getInstance()!.setVertexShader(vertexShader);
-  }, [module]);
+    coreManager.getArtShader().setVertexShader(vertexShader);
+  }, []);
 
   useEffect(() => {
-    if (!module) {
-      return;
-    }
-    let artShader = module.ArtShader.getInstance()!;
+    let artShader = coreManager.getArtShader();
     setPrimitiveMode(artShader.getPrimitiveMode());
     setVertexCount(artShader.getVertexCount().toString());
     artShader.setVertexShader(DEFAULT_SHADER);
 
-    const renderer = module.Renderer.getInstance()!;
+    const renderer = coreManager.getRenderer();
     setDiffuseIBLIntensity(renderer.getDiffuseIBLIntensity().toString());
     setWidth(renderer.getWidth().toString());
     setHeight(renderer.getHeight().toString());
-  }, [module, DEFAULT_SHADER]);
+  }, []);
 
   const compileShader = (targetShader: string) => {
-    let success = module.ArtShader.getInstance()!.setVertexShader(targetShader);
-    console.log("compile: " + success);
-  }
-
+    let success = coreManager.getArtShader().setVertexShader(targetShader);
+    console.log('compile: ' + success);
+  };
 
   return (
     <div>
       <Grid
         container
         sx={{
-          width: "calc(100% -  650px)",
-          height: "40px",
-          backgroundColor: "white",
-          textAlign: "right",
-          paddingLeft: "15px",
-          paddingTop: "3px",
-          float: "left",
-        }}
-      >
+          width: 'calc(100% -  650px)',
+          height: '40px',
+          backgroundColor: 'white',
+          textAlign: 'right',
+          paddingLeft: '15px',
+          paddingTop: '3px',
+          float: 'left',
+        }}>
         <Grid item xs={0.5} key="script-visible-button">
           <IconButton
             aria-label="shader-visible"
             onClick={() => {
               setScriptVisible(!scriptVisible);
             }}
-            style={{ paddingTop: 4, color: "#868686" }}
-          >
+            style={{ paddingTop: 4, color: '#868686' }}>
             {scriptVisible ? (
-              <VisibilityIcon sx={{ color: "#868686" }} />
+              <VisibilityIcon sx={{ color: '#868686' }} />
             ) : (
-              <VisibilityOffIcon sx={{ color: "#868686" }} />
+              <VisibilityOffIcon sx={{ color: '#868686' }} />
             )}
           </IconButton>
         </Grid>
@@ -179,35 +152,28 @@ void main() {
             min={0.0}
             max={1.0}
             onChange={(e: Event, value: number | number[]) => {
-              //TODO: check array value
-              console.log(value);
-              if (isArray(value)) {
-                setScriptOpacity(value[0]);
-              } else {
+              if (!Array.isArray(value)) {
                 setScriptOpacity(value);
               }
             }}
-            style={{ paddingTop: 17, color: "#868686" }}
+            style={{ paddingTop: 17, color: '#868686' }}
           />
         </Grid>
         <Grid item xs={0.5} key="primitive-select-icon">
-          <CategoryIcon
-            sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }}
-          />
+          <CategoryIcon sx={{ fontSize: '20px', paddingTop: '7px', color: '#868686' }} />
         </Grid>
         <Grid item xs={1.3} key="primitive-select">
           <NativeSelect
             value={primitiveMode}
             inputProps={{
-              name: "Primitive",
-              id: "primitive-select",
+              name: 'Primitive',
+              id: 'primitive-select',
             }}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              module.ArtShader.getInstance()!.setPrimitiveMode(parseInt(e.target.value));
+              coreManager.getArtShader().setPrimitiveMode(parseInt(e.target.value));
               setPrimitiveMode(parseInt(e.target.value));
             }}
-            style={{ color: "#868686" }}
-          >
+            style={{ color: '#868686' }}>
             {primitiveTypes.map((value, index) => {
               return (
                 <option value={index} key={index}>
@@ -218,9 +184,7 @@ void main() {
           </NativeSelect>
         </Grid>
         <Grid item xs={0.5} key="vertex-count-icon">
-          <ScatterPlotIcon
-            sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }}
-          />
+          <ScatterPlotIcon sx={{ fontSize: '20px', paddingTop: '7px', color: '#868686' }} />
         </Grid>
         <Grid item xs={0.1} key="space0" />
         <Grid item xs={1.0} key="vertex-count">
@@ -233,19 +197,17 @@ void main() {
                 let intValue = parseInt(e.target.value);
                 intValue = Math.min(1000000, intValue);
                 intValue = Math.max(0, intValue);
-                module.ArtShader.getInstance()!.setVertexCount(intValue);
+                coreManager.getArtShader().setVertexCount(intValue);
               } else {
-                module.ArtShader.getInstance()!.setVertexCount(0);
+                coreManager.getArtShader().setVertexCount(0);
               }
               setVertexCount(e.target.value);
             }}
-            inputProps={{ style: { color: "#868686" } }}
+            inputProps={{ style: { color: '#868686' } }}
           />
         </Grid>
         <Grid item xs={0.5} key="diffuse-ibl-intensity-icon">
-          <LightModeIcon
-            sx={{ fontSize: "20px", paddingTop: "5px", color: "#868686" }}
-          />
+          <LightModeIcon sx={{ fontSize: '20px', paddingTop: '5px', color: '#868686' }} />
         </Grid>
         <Grid item xs={0.1} key="space1" />
         <Grid item xs={1.0} key="diffuse-ibl-intensity">
@@ -256,22 +218,22 @@ void main() {
             onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
               if (Util.isValidNum(e.target.value)) {
                 const floatValue = parseFloat(e.target.value);
-                module.Renderer.getInstance()!.setDiffuseIBLIntensity(floatValue);
+                coreManager.getRenderer().setDiffuseIBLIntensity(floatValue);
               } else {
-                module.Renderer.getInstance()!.setDiffuseIBLIntensity(0.0);
+                coreManager.getRenderer().setDiffuseIBLIntensity(0.0);
               }
               setDiffuseIBLIntensity(e.target.value);
             }}
-            inputProps={{ style: { color: "#868686" } }}
+            inputProps={{ style: { color: '#868686' } }}
           />
         </Grid>
         <Grid item xs={0.5} key="width-icon">
           <HeightIcon
             sx={{
-              fontSize: "20px",
-              paddingLeft: "10px",
-              color: "#868686",
-              transform: "rotate(90deg)",
+              fontSize: '20px',
+              paddingLeft: '10px',
+              color: '#868686',
+              transform: 'rotate(90deg)',
             }}
           />
         </Grid>
@@ -282,28 +244,26 @@ void main() {
             variant="standard"
             value={width}
             onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-              const heightValue = module.Renderer.getInstance()!.getHeight();
+              const heightValue = coreManager.getRenderer().getHeight();
               if (Util.isValidNum(e.target.value)) {
                 let newWidth = parseInt(e.target.value);
                 newWidth = Math.min(10000, newWidth);
                 newWidth = Math.max(0, newWidth);
 
-                module.Renderer.getInstance()!.resize(newWidth, heightValue);
+                coreManager.getRenderer().resize(newWidth, heightValue);
                 onResizeEngine(newWidth, heightValue);
               } else {
-                module.Renderer.getInstance()!.resize(0, heightValue);
+                coreManager.getRenderer().resize(0, heightValue);
                 onResizeEngine(0, heightValue);
               }
               setWidth(e.target.value);
             }}
-            inputProps={{ style: { color: "#868686" } }}
+            inputProps={{ style: { color: '#868686' } }}
           />
         </Grid>
 
         <Grid item xs={0.5} key="height-icon">
-          <HeightIcon
-            sx={{ fontSize: "20px", paddingTop: "7px", color: "#868686" }}
-          />
+          <HeightIcon sx={{ fontSize: '20px', paddingTop: '7px', color: '#868686' }} />
         </Grid>
         <Grid item xs={0.1} key="space3" />
         <Grid item xs={1.0} key="height-size">
@@ -312,21 +272,21 @@ void main() {
             variant="standard"
             value={height}
             onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-              const widthValue = module.Renderer.getInstance()!.getWidth();
+              const widthValue = coreManager.getRenderer().getWidth();
               if (Util.isValidNum(e.target.value)) {
                 let newHeight = parseInt(e.target.value);
                 newHeight = Math.min(10000, newHeight);
                 newHeight = Math.max(0, newHeight);
 
-                module.Renderer.getInstance()!.resize(widthValue, newHeight);
+                coreManager.getRenderer().resize(widthValue, newHeight);
                 onResizeEngine(widthValue, newHeight);
               } else {
-                module.Renderer.getInstance()!.resize(widthValue, 0);
+                coreManager.getRenderer().resize(widthValue, 0);
                 onResizeEngine(widthValue, 0);
               }
               setHeight(e.target.value);
             }}
-            inputProps={{ style: { color: "#868686" } }}
+            inputProps={{ style: { color: '#868686' } }}
           />
         </Grid>
         <Grid item xs={0.5} key="space4" />
@@ -335,11 +295,10 @@ void main() {
             size="small"
             variant="contained"
             startIcon={<HelpIcon />}
-            sx={{ width: "100%" }}
+            sx={{ width: '100%' }}
             onClick={() => {
               setHelpModalOpen(true);
-            }}
-          >
+            }}>
             help
           </Button>
           <Modal
@@ -348,65 +307,38 @@ void main() {
               setHelpModalOpen(false);
             }}
             aria-labelledby="help-modal"
-            aria-describedby="help-modal-description"
-          >
+            aria-describedby="help-modal-description">
             <Box
               sx={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
                 width: 400,
-                bgcolor: "background.paper",
-                border: "2px solid #000",
+                bgcolor: 'background.paper',
+                border: '2px solid #000',
                 boxShadow: 24,
                 p: 4,
-              }}
-            >
+              }}>
               <Typography id="help-title" variant="h5" component="h2">
                 Shader Parameter Guide
               </Typography>
               <Typography id="help-subtitle" component="h5">
                 (GLSL 3.0 vertex shader)
               </Typography>
-              <Typography sx={{ mt: 2 }}>
-                float vertexId : current vertexId (0 ~ vertexCount - 1)
-              </Typography>
-              <Typography sx={{ mt: 2 }}>
-                float volume : current volume
-              </Typography>
-              <Typography sx={{ mt: 2 }}>
-                vec2 resolution : shader art texture resolution (maybe 2048,
-                2048)
-              </Typography>
-              <Typography sx={{ mt: 2 }}>
-                vec4 background : background color
-              </Typography>
-              <Typography sx={{ mt: 2 }}>
-                float time : current music time
-              </Typography>
-              <Typography sx={{ mt: 2 }}>
-                float vertexCount : total vertex counts
-              </Typography>
-              <Typography sx={{ mt: 2 }}>
-                sampler2D sound : left sound texture, use r channel
-              </Typography>
-              <Typography sx={{ mt: 2 }}>
-                sampler2D sound2 : right sound texture, use r channel
-              </Typography>
-              <Typography sx={{ mt: 2 }}>
-                bool isStereo : if stereo, it is true. if mono, it is false
-              </Typography>
+              <Typography sx={{ mt: 2 }}>float vertexId : current vertexId (0 ~ vertexCount - 1)</Typography>
+              <Typography sx={{ mt: 2 }}>float volume : current volume</Typography>
+              <Typography sx={{ mt: 2 }}>vec2 resolution : shader art texture resolution (maybe 2048, 2048)</Typography>
+              <Typography sx={{ mt: 2 }}>vec4 background : background color</Typography>
+              <Typography sx={{ mt: 2 }}>float time : current music time</Typography>
+              <Typography sx={{ mt: 2 }}>float vertexCount : total vertex counts</Typography>
+              <Typography sx={{ mt: 2 }}>sampler2D sound : left sound texture, use r channel</Typography>
+              <Typography sx={{ mt: 2 }}>sampler2D sound2 : right sound texture, use r channel</Typography>
+              <Typography sx={{ mt: 2 }}>bool isStereo : if stereo, it is true. if mono, it is false</Typography>
               <hr />
-              <Typography sx={{ mt: 2 }}>
-                vec4 v_color : output color
-              </Typography>
-              <Typography sx={{ mt: 2 }}>
-                vec4 gl_Position : output position (NDC)
-              </Typography>
-              <Typography sx={{ mt: 2 }}>
-                float gl_PointSize : output point size
-              </Typography>
+              <Typography sx={{ mt: 2 }}>vec4 v_color : output color</Typography>
+              <Typography sx={{ mt: 2 }}>vec4 gl_Position : output position (NDC)</Typography>
+              <Typography sx={{ mt: 2 }}>float gl_PointSize : output point size</Typography>
             </Box>
           </Modal>
         </Grid>
@@ -418,7 +350,6 @@ void main() {
           setVertexShader={setVertexShader}
           opacity={scriptOpacity}
           compileShader={compileShader}
-          //module={module}
           //setPrimitiveMode={setPrimitiveMode}
           //setVertexCount={setVertexCount}
           //targetShaderIndex={targetShaderIndex}

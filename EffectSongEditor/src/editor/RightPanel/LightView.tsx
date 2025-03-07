@@ -7,21 +7,22 @@ import {
   NativeSelect,
 } from "@mui/material";
 import Util from "../Util";
-import * as core from '../../core/effectsong-core'
+import * as core from '../../core/effectsong-core';
+import CoreManager from "../CoreManager";
 
 type lightViewType = {
-  module: core.MainModule,
   targetNode: core.Node | null
 }
-const LightView = ({ module, targetNode }: lightViewType) => {
+const LightView = ({ targetNode }: lightViewType) => {
   const light = targetNode?.getLight();
+  const module = CoreManager.getInstance().getModule();
 
   // const [name, setName] = useState("");
-  const [color, setColor] = useState<Array<number | string>>([0.0, 0.0, 0.0]);
-  const [intensity, setIntensity] = useState<number | string>(0.0);
-  const [range, setRange] = useState<number | string>(0.0);
-  const [innerConeAngle, setInnerConeAngle] = useState<number | string>(0.0);
-  const [outerConeAngle, setOuterConeAngle] = useState<number | string>(0.0);
+  const [color, setColor] = useState<[string, string, string]>(['0', '0', '0']);
+  const [intensity, setIntensity] = useState<string>('0.0');
+  const [range, setRange] = useState<string>('0.0');
+  const [innerConeAngle, setInnerConeAngle] = useState<string>('0.0');
+  const [outerConeAngle, setOuterConeAngle] = useState<string>('0.0');
   const [type, setType] = useState("");
 
   const lightTypes = useMemo(() => ["None", "Directional Light", "Point Light", "Spot Light"], []);
@@ -32,16 +33,31 @@ const LightView = ({ module, targetNode }: lightViewType) => {
     }
     // setName(light.name);
     setColor([
-      Util.roundToNearestStep(light.color.x),
-      Util.roundToNearestStep(light.color.y),
-      Util.roundToNearestStep(light.color.z),
+      Util.roundToNearestStep(light.color.x).toString(),
+      Util.roundToNearestStep(light.color.y).toString(),
+      Util.roundToNearestStep(light.color.z).toString(),
     ]);
-    setIntensity(Util.roundToNearestStep(light.intensity));
-    setRange(Util.roundToNearestStep(light.range));
-    setInnerConeAngle(Util.roundToNearestStep(light.innerConeAngle));
-    setOuterConeAngle(Util.roundToNearestStep(light.outerConeAngle));
+    setIntensity(Util.roundToNearestStep(light.intensity).toString());
+    setRange(Util.roundToNearestStep(light.range).toString());
+    setInnerConeAngle(Util.roundToNearestStep(light.innerConeAngle).toString());
+    setOuterConeAngle(Util.roundToNearestStep(light.outerConeAngle).toString());
     setType(lightTypes[light.lightType.value]);
   }, [light, lightTypes]);
+
+  const changeColor = (targetColor: [string, string, string]) => {
+    if(!light){
+      return;
+    }
+    
+    let tempColor: [number, number, number] = [
+      Util.isValidNum(targetColor[0]) ? parseFloat(targetColor[0]) : 0.0,
+      Util.isValidNum(targetColor[1]) ? parseFloat(targetColor[1]) : 0.0,
+      Util.isValidNum(targetColor[2]) ? parseFloat(targetColor[2]) : 0.0
+    ];
+
+    light.color = (new module.vec3(...tempColor));
+    setColor(targetColor);
+  }
 
   const getView = () => {
     if (!light) {
@@ -128,11 +144,7 @@ const LightView = ({ module, targetNode }: lightViewType) => {
               label="r"
               value={color[0]}
               onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-                if (Util.isValidNum(e.target.value)) {
-                  const floatValue = parseFloat(e.target.value);
-                  light.color = new module.vec3(floatValue, light.color.y, light.color.z);
-                }
-                setColor([e.target.value, color[1], color[2]]);
+                changeColor([e.target.value, color[1], color[2]]);
               }}
               InputLabelProps={{
                 shrink: true,
@@ -149,11 +161,7 @@ const LightView = ({ module, targetNode }: lightViewType) => {
               label="g"
               value={color[1]}
               onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-                if (Util.isValidNum(e.target.value)) {
-                  const floatValue = parseFloat(e.target.value);
-                  light.color = new module.vec3(light.color.x, floatValue, light.color.z);
-                }
-                setColor([color[0], e.target.value, color[2]]);
+                changeColor([color[0], e.target.value, color[2]]);
               }}
               InputLabelProps={{
                 shrink: true,
@@ -170,11 +178,7 @@ const LightView = ({ module, targetNode }: lightViewType) => {
               label="b"
               value={color[2]}
               onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-                if (Util.isValidNum(e.target.value)) {
-                  const floatValue = parseFloat(e.target.value);
-                  light.color = new module.vec3(light.color.x, light.color.y, floatValue);
-                }
-                setColor([color[0], color[1], e.target.value]);
+                changeColor([color[0], color[1], e.target.value]);
               }}
               InputLabelProps={{
                 shrink: true,
@@ -279,7 +283,7 @@ const LightView = ({ module, targetNode }: lightViewType) => {
       );
     }
   };
-  return <>{getView()}</>;
+  return getView();
 };
 
 export default LightView;

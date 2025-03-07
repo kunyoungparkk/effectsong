@@ -4,9 +4,8 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import HierarchyView from './HierarchyView';
-import type {hierarchyNodeType} from './HierarchyView.d';
+import type { hierarchyNodeType } from '../common';
 import SettingsView from './SettingsView';
-import * as core from '../../core/effectsong-core';
 
 interface StyledTabsProps {
   children?: React.ReactNode;
@@ -15,10 +14,7 @@ interface StyledTabsProps {
 }
 
 const StyledTabs = styled((props: StyledTabsProps) => (
-  <Tabs
-    {...props}
-    TabIndicatorProps={{ children: <span className="MuiTabs-indicatorSpan" /> }}
-  />
+  <Tabs {...props} TabIndicatorProps={{ children: <span className="MuiTabs-indicatorSpan" /> }} />
 ))({
   '& .MuiTabs-indicator': {
     display: 'flex',
@@ -36,9 +32,7 @@ interface StyledTabProps {
   label: string;
 }
 
-const StyledTab = styled((props: StyledTabProps) => (
-  <Tab disableRipple {...props} />
-))(({ theme }) => ({
+const StyledTab = styled((props: StyledTabProps) => <Tab disableRipple {...props} />)(({ theme }) => ({
   textTransform: 'none',
   fontWeight: theme.typography.fontWeightRegular,
   fontSize: theme.typography.pxToRem(12),
@@ -53,15 +47,12 @@ const StyledTab = styled((props: StyledTabProps) => (
 }));
 
 type leftTabProps = {
-  module: core.MainModule,
-  hierarchyData: Array<hierarchyNodeType>,
-  selectCallback: (event: React.SyntheticEvent, id: string, isSelected: boolean) => void,
-  expandIdList: string[],
-  setExpandIdList: (itemIds: string[]) => void,
-  targetNode: core.Node | null
-}
+  hierarchyData: Array<hierarchyNodeType>;
+  expandIdList: string[];
+  setExpandIdList: (itemIds: string[]) => void;
+};
 
-export default function LeftTab({ module, hierarchyData, selectCallback, expandIdList, setExpandIdList, targetNode }: leftTabProps) {
+export default function LeftTab({ hierarchyData, expandIdList, setExpandIdList }: leftTabProps) {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -71,27 +62,24 @@ export default function LeftTab({ module, hierarchyData, selectCallback, expandI
   const getPage = (index: number) => {
     switch (index) {
       case 0:
-        return <HierarchyView
-          hierarchyData={hierarchyData}
-          selectCallback={selectCallback}
-          expandIdList={expandIdList}
-          setExpandIdList={setExpandIdList}
-        />
+        return (
+          <HierarchyView
+            hierarchyData={hierarchyData}
+            expandIdList={expandIdList}
+            setExpandIdList={setExpandIdList}
+          />
+        );
       case 1:
-        return <SettingsView module={module} targetNode={targetNode} />
+        return <SettingsView />;
       default:
         return null;
     }
-  }
+  };
 
   return (
     <Box>
       <Box sx={{ width: '100%', height: '70px' }}>
-        <StyledTabs
-          value={value}
-          onChange={handleChange}
-          aria-label="styled tabs example"
-        >
+        <StyledTabs value={value} onChange={handleChange} aria-label="styled tabs example">
           <StyledTab label="Hierarchy" />
           <StyledTab label="Settings" />
         </StyledTabs>

@@ -1,22 +1,22 @@
-import React, { useState } from "react";
-import { Box, Typography } from "@mui/material";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import React, { useState } from 'react';
+import { Box, Typography } from '@mui/material';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 type fileUploadProps = {
-  hoverLabel?: string,
-  dropLabel?: string,
-  backgroundColor?: string,
-  width: string,
-  height: string,
-  accept?: string,
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
-  onDrop: (e: React.DragEvent<HTMLLabelElement>) => void,
-  isMultiple?: boolean,
-}
+  hoverLabel?: string;
+  dropLabel?: string;
+  backgroundColor?: string;
+  width: string;
+  height: string;
+  accept?: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onDrop: (e: React.DragEvent<HTMLLabelElement>) => void;
+  isMultiple?: boolean;
+};
 const FileUpload = ({
-  hoverLabel = "Click or drag to upload files",
-  dropLabel = "Drop file here",
-  backgroundColor = "#fff",
+  hoverLabel = 'Click or drag to upload files',
+  dropLabel = 'Drop file here',
+  backgroundColor = '#fff',
   width,
   height,
   accept,
@@ -59,7 +59,7 @@ const FileUpload = ({
       if (files) {
         onDrop(e);
       } else {
-        setLabelText("upload error. try again.");
+        setLabelText('upload error. try again.');
         return;
       }
     },
@@ -80,7 +80,7 @@ const FileUpload = ({
         id="file-upload"
         type="file"
         style={{
-          display: "none",
+          display: 'none',
         }}
         multiple={isMultiple}
       />
@@ -90,55 +90,52 @@ const FileUpload = ({
         {...dragEvents}
         style={
           isDragOver
-            ? {
-              "& img": {
-                opacity: 0.3,
-              },
-              "& p, svg": {
-                opacity: 1,
-              },
-              width: { width },
-              height: { height },
-            } as unknown as React.CSSProperties
-            : {
-              cursor: "pointer",
-              textAlign: "center",
-              "&:hover p,&:hover svg,& img": {
-                opacity: 1,
-              },
-              "& p, svg": {
-                opacity: 0.4,
-              },
-              "&:hover img": {
-                opacity: 0.3,
-              },
-              width: { width },
-              height: { height },
-            } as unknown as React.CSSProperties
-        }
-      >
+            ? ({
+                '& img': {
+                  opacity: 0.3,
+                },
+                '& p, svg': {
+                  opacity: 1,
+                },
+                width: { width },
+                height: { height },
+              } as unknown as React.CSSProperties)
+            : ({
+                cursor: 'pointer',
+                textAlign: 'center',
+                '&:hover p,&:hover svg,& img': {
+                  opacity: 1,
+                },
+                '& p, svg': {
+                  opacity: 0.4,
+                },
+                '&:hover img': {
+                  opacity: 0.3,
+                },
+                width: { width },
+                height: { height },
+              } as unknown as React.CSSProperties)
+        }>
         <Box
           width={width}
           height={height}
           bgcolor={backgroundColor}
           sx={{ border: 1 }}
           style={{
-            pointerEvents: "none",
-          }}
-        >
+            pointerEvents: 'none',
+          }}>
           {(true || isDragOver || isMouseOver) && (
             <>
               <Box
                 height={height}
                 width={width}
                 style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  position: "absolute",
-                }}
-              >
+                  display: 'flex',
+                  justifyContent: 'center',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  position: 'absolute',
+                }}>
                 <CloudUploadIcon fontSize="large" />
                 <Typography>{labelText}</Typography>
               </Box>

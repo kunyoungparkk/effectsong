@@ -1,31 +1,31 @@
-import { useState } from "react";
-import { Button, Modal, Box } from "@mui/material";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import FileUpload from "./FileUpload";
-import AudioPlayer from "react-h5-audio-player";
-import * as core from '../../core/effectsong-core';
+import { useState } from 'react';
+import { Button, Modal, Box } from '@mui/material';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import FileUpload from './FileUpload';
+import AudioPlayer from 'react-h5-audio-player';
+import CoreManager from '../CoreManager';
 
 type musicImportType = {
-  module: core.MainModule,
-  audioPlayerRef: React.RefObject<AudioPlayer>,
-  notify: (message: string, isSuccess: boolean) => void,
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>
-}
+  audioPlayerRef: React.RefObject<AudioPlayer>;
+  notify: (message: string, isSuccess: boolean) => void;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+};
 
-const MusicImport = ({ module, audioPlayerRef, notify, setLoading }: musicImportType) => {
+const MusicImport = ({ audioPlayerRef, notify, setLoading }: musicImportType) => {
   const [modalOpen, setModalOpen] = useState(false);
 
   const procMusicInput = (file: File) => {
     setLoading(true);
     setModalOpen(false);
     let reader = new FileReader();
-    const MUSIC_ROOT_PATH = module.getRootPath() + "res/music/";
+    const module = CoreManager.getInstance().getModule();
+    const MUSIC_ROOT_PATH = module.getRootPath() + 'res/music/';
     if (!module.FS.analyzePath(MUSIC_ROOT_PATH, false).exists) {
-        module.FS.mkdir(MUSIC_ROOT_PATH);
+      module.FS.mkdir(MUSIC_ROOT_PATH);
     }
 
     reader.onload = (e: ProgressEvent<FileReader>) => {
-      if(!e.target){
+      if (!e.target) {
         return false;
       }
 
@@ -42,7 +42,7 @@ const MusicImport = ({ module, audioPlayerRef, notify, setLoading }: musicImport
       URL.revokeObjectURL(prevURL);
 
       setLoading(false);
-      notify(file.name + " loaded successfully ", true);
+      notify(file.name + ' loaded successfully ', true);
     };
     reader.readAsArrayBuffer(file);
   };
@@ -53,11 +53,10 @@ const MusicImport = ({ module, audioPlayerRef, notify, setLoading }: musicImport
         size="small"
         variant="contained"
         startIcon={<CloudUploadIcon />}
-        sx={{ width: "100%" }}
+        sx={{ width: '100%' }}
         onClick={() => {
           setModalOpen(true);
-        }}
-      >
+        }}>
         music
       </Button>
       <Modal
@@ -66,28 +65,26 @@ const MusicImport = ({ module, audioPlayerRef, notify, setLoading }: musicImport
           setModalOpen(false);
         }}
         aria-labelledby="music-import-modal"
-        aria-describedby="music-import-description"
-      >
+        aria-describedby="music-import-description">
         <Box
           sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: "50%",
-            height: "50%",
-            bgcolor: "background.paper",
-            border: "2px solid #000",
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '50%',
+            height: '50%',
+            bgcolor: 'background.paper',
+            border: '2px solid #000',
             boxShadow: 24,
             p: 4,
-          }}
-        >
+          }}>
           <FileUpload
             width="100%"
             height="100%"
             accept="audio/mp3, audio/wav, audio/flac"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              if(!e.target.files){
+              if (!e.target.files) {
                 return;
               }
               procMusicInput(e.target?.files[0]);
@@ -95,14 +92,14 @@ const MusicImport = ({ module, audioPlayerRef, notify, setLoading }: musicImport
             onDrop={(e: React.DragEvent<HTMLLabelElement>) => {
               let files = e.dataTransfer?.files;
               if (files.length > 1) {
-                notify("please upload single audio file", false);
+                notify('please upload single audio file', false);
                 return;
               } else if (
-                files[0].type !== "audio/flac" &&
-                files[0].type !== "audio/wav" &&
-                files[0].type !== "audio/mpeg"
+                files[0].type !== 'audio/flac' &&
+                files[0].type !== 'audio/wav' &&
+                files[0].type !== 'audio/mpeg'
               ) {
-                notify("Audio file type mismatch. Only MP3, WAV, and FLAC are supported.", false);
+                notify('Audio file type mismatch. Only MP3, WAV, and FLAC are supported.', false);
                 return;
               }
               procMusicInput(files[0]);

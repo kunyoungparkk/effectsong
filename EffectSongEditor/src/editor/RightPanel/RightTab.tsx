@@ -5,7 +5,8 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import NodeView from './NodeView';
 import VisualScriptView from './VisualScriptView';
-import * as core from '../../core/effectsong-core'
+import { selectedNodeAtom } from '../atom';
+import { useAtomValue } from 'jotai';
 
 interface StyledTabsProps {
   children?: React.ReactNode;
@@ -53,29 +54,27 @@ const StyledTab = styled((props: StyledTabProps) => (
 }));
 
 type rightTabProps = {
-  module: core.MainModule,
-  updateHierarchy: () => void,
-  targetNode: core.Node | null,
-  removeSelectedNode: () => void
+  updateHierarchy: () => void
 }
 
-export default function RightTab({ module, updateHierarchy, targetNode, removeSelectedNode }: rightTabProps) {
-  const [value, setValue] = React.useState<number>(0);
+export default function RightTab({ updateHierarchy }: rightTabProps) {
+  const selectedNode = useAtomValue(selectedNodeAtom);
+  const [value, setValue] = React.useState(0);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
 
-  const getPage = (index: number) => {
-    if (!targetNode) {
-      return <></>
+  const getPage = (index: number) : JSX.Element => {
+    if(!selectedNode){
+      return <></>;
     }
     switch (index) {
       case 0:
-        return <NodeView module={module} targetNode={targetNode} updateHierarchy={updateHierarchy} removeSelectedNode={removeSelectedNode} />
+        return <NodeView updateHierarchy={updateHierarchy} />
       case 1:
         return <VisualScriptView />
       default:
-        return null;
+        return <></>;
     }
   }
   return (

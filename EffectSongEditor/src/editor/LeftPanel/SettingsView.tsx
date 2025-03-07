@@ -1,39 +1,35 @@
-import { useState, useEffect } from "react";
-import { Grid, FormControl, InputLabel, NativeSelect } from "@mui/material";
-import * as core from '../../core/effectsong-core'
-import Util from "../Util";
+import { useState, useEffect } from 'react';
+import { Grid, FormControl, InputLabel, NativeSelect } from '@mui/material';
+import Util from '../Util';
+import CoreManager from '../CoreManager';
+import { selectedNodeAtom } from '../atom';
+import { useAtomValue } from 'jotai';
 
-type settingsViewType ={
-  module: core.MainModule,
-  targetNode: core.Node | null
-}
-const SettingsView = ({ module, targetNode }: settingsViewType) => {
+const SettingsView = () => {
   const [cameraList, setCameraList] = useState<Array<any>>([]);
   const [activeCameraIndex, setActiveCameraIndex] = useState(-1);
+  const selectedNode = useAtomValue(selectedNodeAtom);
 
   useEffect(() => {
-    if(!module){
-      return;
-    }
     let tempCameraList = [];
-    const renderer = module.Renderer.getInstance()!;
+    const renderer = CoreManager.getInstance().getRenderer();
     const activeCamera = renderer.getActiveCamera();
     //when camera deleted on attribute panel
-    if(!activeCamera){
+    if (!activeCamera) {
       setActiveCameraIndex(-1);
     }
     for (let i = 0; i < renderer.getSceneCount(); i++) {
       const scene = renderer.getSceneAt(i)!;
       for (let j = 0; j < scene.getCameraCount(); j++) {
         const camera = scene.getCameraAt(j)!;
-        if(activeCamera && camera.isAliasOf(activeCamera)){
+        if (activeCamera && camera.isAliasOf(activeCamera)) {
           setActiveCameraIndex(tempCameraList.length);
         }
         tempCameraList.push(camera.getNode());
       }
     }
     setCameraList(tempCameraList);
-  }, [module, targetNode]);
+  }, [selectedNode]);
 
   return (
     <Grid
@@ -43,42 +39,32 @@ const SettingsView = ({ module, targetNode }: settingsViewType) => {
       sx={{
         paddingLeft: 2,
         paddingRight: 2,
-      }}
-    >
+      }}>
       <Grid item xs={12}>
-        <FormControl sx={{ width: "100%" }}>
-          <InputLabel
-            variant="standard"
-            htmlFor="active-camera"
-            style={{ color: "#868686" }}
-          >
+        <FormControl sx={{ width: '100%' }}>
+          <InputLabel variant="standard" htmlFor="active-camera" style={{ color: '#868686' }}>
             Active Camera
           </InputLabel>
           <NativeSelect
             value={activeCameraIndex}
             inputProps={{
-              name: "active-camera",
-              id: "active-camera",
+              name: 'active-camera',
+              id: 'active-camera',
             }}
-            style={{ color: "white" }}
+            style={{ color: 'white' }}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-              if(!Util.isValidNum(e.target.value)){
+              if (!Util.isValidNum(e.target.value)) {
                 return;
               }
 
               const inputIndex = Number(e.target.value);
               let newActiveCamera = cameraList[inputIndex].getCamera();
-              module.Renderer.getInstance()!.setActiveCamera(newActiveCamera);
+              CoreManager.getInstance().getRenderer().setActiveCamera(newActiveCamera);
               setActiveCameraIndex(inputIndex);
-            }}
-          >
+            }}>
             {cameraList.map((cameraNode, index) => {
               return (
-                <option
-                  value={index}
-                  key={index}
-                  style={{ color: "white", backgroundColor: "#2e2e2e" }}
-                >
+                <option value={index} key={index} style={{ color: 'white', backgroundColor: '#2e2e2e' }}>
                   {cameraNode.getName()}
                 </option>
               );

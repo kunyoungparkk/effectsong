@@ -17,7 +17,7 @@
 .transfromInput{
   width: 50px;
 }
-.hierarchy{
+.leftPanel{
   background-color: #000000;
   font-family: 'NanumSquare';
   color: white;
@@ -25,7 +25,7 @@
   width: 300px;
   float: left;
 }
-.attribute{
+.rightPanel{
   background-color: #000000;
   font-family: 'NanumSquare';
   color: white;
