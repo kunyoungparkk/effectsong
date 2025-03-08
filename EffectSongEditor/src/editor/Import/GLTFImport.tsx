@@ -3,14 +3,16 @@ import { Button, Modal, Box } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import FileUpload from './FileUpload';
 import CoreManager from '../CoreManager';
+import { notifyMessageAtom, loadingAtom } from '../atom';
+import { useSetAtom } from 'jotai';
 
 type gltfImportType = {
   updateHierarchy: () => void;
-  notify: (message: string, isSuccess: boolean) => void;
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
-const GLTFImport = ({ updateHierarchy, notify, setLoading }: gltfImportType) => {
+const GLTFImport = ({ updateHierarchy}: gltfImportType) => {
   const [modalOpen, setModalOpen] = useState(false);
+  const setNotifyMessage = useSetAtom(notifyMessageAtom);
+  const setLoading = useSetAtom(loadingAtom);
 
   const procGLTFInput = (files: FileList | null) => {
     if (!files) {
@@ -37,10 +39,18 @@ const GLTFImport = ({ updateHierarchy, notify, setLoading }: gltfImportType) => 
     }
 
     if (!isGLTF && !isGLB) {
-      notify('failed to load model.', false);
+      setNotifyMessage({
+        open: true,
+        success: false,
+        message: 'failed to load model.',
+      });
       return;
     } else if (modelCount > 1) {
-      notify("can't import multiple models.", false);
+      setNotifyMessage({
+        open: true,
+        success: false,
+        message: "can't import multiple models.",
+      });
       return;
     }
 
@@ -50,7 +60,6 @@ const GLTFImport = ({ updateHierarchy, notify, setLoading }: gltfImportType) => 
     const module = CoreManager.getInstance().getModule();
     const targetEXT = isGLTF ? 'gltf' : 'glb';
     const TARGET_GLTF_ROOT_PATH = module.getRootPath() + 'res/' + fileName + '/';
-    console.log(TARGET_GLTF_ROOT_PATH);
     if (!module.FS.analyzePath(TARGET_GLTF_ROOT_PATH, false).exists) {
       module.FS.mkdir(TARGET_GLTF_ROOT_PATH);
     }
@@ -98,7 +107,11 @@ const GLTFImport = ({ updateHierarchy, notify, setLoading }: gltfImportType) => 
 
         updateHierarchy();
         setLoading(false);
-        notify(fileName + ' loaded successfully ', true);
+        setNotifyMessage({
+          open: true,
+          success: true,
+          message: fileName + ' loaded successfully ',
+        });
       })
       .catch(error => {
         //delete loaded files
@@ -109,7 +122,11 @@ const GLTFImport = ({ updateHierarchy, notify, setLoading }: gltfImportType) => 
         module.FS.rmdir(TARGET_GLTF_ROOT_PATH);
 
         setLoading(false);
-        notify(fileName + ' loaded failed ', false);
+        setNotifyMessage({
+          open: true,
+          success: false,
+          message: fileName + ' loaded failed ',
+        });
         console.log(error);
       });
   };

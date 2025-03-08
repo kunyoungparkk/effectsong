@@ -4,15 +4,17 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import FileUpload from './FileUpload';
 import AudioPlayer from 'react-h5-audio-player';
 import CoreManager from '../CoreManager';
+import { notifyMessageAtom, loadingAtom } from '../atom';
+import { useSetAtom } from 'jotai';
 
 type musicImportType = {
   audioPlayerRef: React.RefObject<AudioPlayer>;
-  notify: (message: string, isSuccess: boolean) => void;
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const MusicImport = ({ audioPlayerRef, notify, setLoading }: musicImportType) => {
+const MusicImport = ({ audioPlayerRef }: musicImportType) => {
   const [modalOpen, setModalOpen] = useState(false);
+  const setNotifyMessage = useSetAtom(notifyMessageAtom);
+  const setLoading = useSetAtom(loadingAtom);
 
   const procMusicInput = (file: File) => {
     setLoading(true);
@@ -42,7 +44,11 @@ const MusicImport = ({ audioPlayerRef, notify, setLoading }: musicImportType) =>
       URL.revokeObjectURL(prevURL);
 
       setLoading(false);
-      notify(file.name + ' loaded successfully ', true);
+      setNotifyMessage({
+        open: true,
+        success: true,
+        message: file.name + ' loaded successfully',
+      });
     };
     reader.readAsArrayBuffer(file);
   };
@@ -92,14 +98,22 @@ const MusicImport = ({ audioPlayerRef, notify, setLoading }: musicImportType) =>
             onDrop={(e: React.DragEvent<HTMLLabelElement>) => {
               let files = e.dataTransfer?.files;
               if (files.length > 1) {
-                notify('please upload single audio file', false);
+                setNotifyMessage({
+                  open: true,
+                  success: false,
+                  message: 'please upload single audio file',
+                });
                 return;
               } else if (
                 files[0].type !== 'audio/flac' &&
                 files[0].type !== 'audio/wav' &&
                 files[0].type !== 'audio/mpeg'
               ) {
-                notify('Audio file type mismatch. Only MP3, WAV, and FLAC are supported.', false);
+                setNotifyMessage({
+                  open: true,
+                  success: false,
+                  message: 'Audio file type mismatch. Only MP3, WAV, and FLAC are supported.',
+                });
                 return;
               }
               procMusicInput(files[0]);

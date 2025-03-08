@@ -4,7 +4,6 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import HierarchyView from './HierarchyView';
-import type { hierarchyNodeType } from '../common';
 import SettingsView from './SettingsView';
 
 interface StyledTabsProps {
@@ -46,14 +45,9 @@ const StyledTab = styled((props: StyledTabProps) => <Tab disableRipple {...props
   },
 }));
 
-type leftTabProps = {
-  hierarchyData: Array<hierarchyNodeType>;
-  expandIdList: string[];
-  setExpandIdList: (itemIds: string[]) => void;
-};
-
-export default function LeftTab({ hierarchyData, expandIdList, setExpandIdList }: leftTabProps) {
+export default function LeftTab() {
   const [value, setValue] = React.useState(0);
+  const [expandIdList, setExpandIdList] = React.useState<Array<string>>([]);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -63,11 +57,7 @@ export default function LeftTab({ hierarchyData, expandIdList, setExpandIdList }
     switch (index) {
       case 0:
         return (
-          <HierarchyView
-            hierarchyData={hierarchyData}
-            expandIdList={expandIdList}
-            setExpandIdList={setExpandIdList}
-          />
+          <HierarchyView expandIdList={expandIdList} setExpandIdList={setExpandIdList} />
         );
       case 1:
         return <SettingsView />;

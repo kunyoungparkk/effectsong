@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import ShaderSettings from './ScriptEditor/ShaderSettings';
 import LeftTab from './LeftPanel/LeftTab';
@@ -10,8 +10,8 @@ import CoreManager from './CoreManager';
 import * as core from '../core/effectsong-core';
 
 import { hierarchyNodeType } from './common';
-import { selectedNodeAtom, hierarchyDataAtom } from './atom';
-import { useAtom } from 'jotai';
+import { hierarchyDataAtom, notifyMessageAtom, loadingAtom } from './atom';
+import { useSetAtom, useAtom } from 'jotai';
 
 import AudioPlayer from 'react-h5-audio-player';
 import 'react-h5-audio-player/lib/styles.css';
@@ -20,67 +20,44 @@ import { Grid, Snackbar, Alert, CircularProgress, Backdrop, Typography } from '@
 export default function Editor() {
   const currentWidth = useRef(1000);
   const currentHeight = useRef(1000);
+
   const audioRef = useRef<AudioPlayer>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvasDivRef = useRef<HTMLDivElement>(null);
 
-  const [notifyOpen, setNotifyOpen] = useState(false);
-  const [notifySuccess, setNotifySuccess] = useState(false);
-  const [notifyMessage, setNotifyMessage] = useState('');
-
   const [moduleLoaded, setModuleLoaded] = useState<boolean>(false);
-  const [loading, setLoading] = useState(false);
 
-  const [hierarchyData, setHierarchyData] = useAtom(hierarchyDataAtom);
-  const [selectedNode, setSelectedNode] = useAtom(selectedNodeAtom);
+  const [notifyMessage, setNotifyMessage] = useAtom(notifyMessageAtom);
+  const [loading, setLoading] = useAtom(loadingAtom);
 
-  const [expandIdList, setExpandIdList] = useState<Array<string>>([]);
+  const setHierarchyData = useSetAtom(hierarchyDataAtom);
 
-  const notify = useCallback(
-    (message: string, isSuccess: boolean) => {
-      setNotifySuccess(isSuccess);
-      setNotifyMessage(message);
-      setNotifyOpen(true);
-    },
-    [setNotifySuccess, setNotifyMessage, setNotifyOpen],
-  );
+  const recursiveWriteNodes = (curNode: core.Node, id: string) => {
+    //현재 노드 기록
+    let currentData: hierarchyNodeType = {
+      id: id,
+      name: curNode.getName(),
+      children: [],
+    };
 
-  const recursiveWriteNodes = useCallback(
-    (curNode: core.Node, id: string) => {
-      //현재 노드 기록
-      let currentData: hierarchyNodeType = {
-        id: id,
-        name: curNode.getName(),
-        isSelected: false,
-        children: [],
-      };
-      if (curNode.isAliasOf(selectedNode as core.Node)) {
-        currentData.isSelected = true;
-      } else {
-        currentData.isSelected = false;
-      }
+    //0:scene, 1~: node
+    for (let i = 0; i < curNode.getChildrenCount(); i++) {
+      let currentChildNode = curNode.getChildAt(i);
+      currentData.children.push(recursiveWriteNodes(currentChildNode as core.Node, id + '-' + i));
+    }
+    return currentData;
+  };
 
-      //0:scene, 1~: node
-      for (let i = 0; i < curNode.getChildrenCount(); i++) {
-        let currentChildNode = curNode.getChildAt(i);
-        currentData.children.push(recursiveWriteNodes(currentChildNode as core.Node, id + '-' + i));
-      }
-      return currentData;
-    },
-    [selectedNode],
-  );
-
-  const updateHierarchy = useCallback(() => {
+  const updateHierarchy = () => {
     let data = [];
     let renderer = CoreManager.getInstance().getRenderer();
     for (let i = 0; i < renderer.getSceneCount(); i++) {
       data.push(recursiveWriteNodes(renderer.getSceneAt(i) as core.Node, i.toString()));
     }
     setHierarchyData(data);
-  }, [setHierarchyData, recursiveWriteNodes]);
+  };
 
-
-  const onResizeEngine = useCallback((width: number, height: number) => {
+  const onResizeEngine = (width: number, height: number) => {
     if (canvasRef.current === null || canvasDivRef.current === null) {
       return;
     }
@@ -102,13 +79,7 @@ export default function Editor() {
         `${Math.floor(canvasDivRef.current.offsetHeight * engineAspectRatio)}px`,
       );
     }
-  }, []);
-
-  useEffect(() => {
-    if (moduleLoaded) {
-      updateHierarchy();
-    }
-  }, [moduleLoaded, selectedNode, updateHierarchy]);
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -134,9 +105,6 @@ export default function Editor() {
       onResizeEngine(currentWidth.current, currentHeight.current);
     };
 
-    // const handleScroll = (e) => { };
-    // const handleMouseOver = (e) => { };
-    // const handleMouseOut = (e) => { };
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
     window.addEventListener('resize', handleResize);
@@ -161,13 +129,17 @@ export default function Editor() {
       {/*notify popup*/}
       <Snackbar
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        open={notifyOpen}
+        open={notifyMessage.open}
         onClose={() => {
-          setNotifyOpen(false);
+          setNotifyMessage({
+            open: false,
+            success: false,
+            message: ''
+          });
         }}
         key="notify">
-        <Alert severity={notifySuccess ? 'success' : 'error'} variant="filled" sx={{ width: '100%' }}>
-          {notifyMessage}
+        <Alert severity={notifyMessage.success ? 'success' : 'error'} variant="filled" sx={{ width: '100%' }}>
+          {notifyMessage.message}
         </Alert>
       </Snackbar>
 
@@ -185,13 +157,7 @@ export default function Editor() {
           }}>
           EffectSong.
         </Typography>
-        {moduleLoaded && (
-          <LeftTab
-            hierarchyData={hierarchyData}
-            expandIdList={expandIdList}
-            setExpandIdList={setExpandIdList}
-          />
-        )}
+        {moduleLoaded && <LeftTab />}
       </div>
       {moduleLoaded && <ShaderSettings onResizeEngine={onResizeEngine} />}
       <div className="engineDiv" id="engineDiv" ref={canvasDivRef}>
@@ -222,10 +188,10 @@ export default function Editor() {
                 height: '100%',
               }}>
               <Grid item xs={6}>
-                <GLTFImport updateHierarchy={updateHierarchy} notify={notify} setLoading={setLoading} />
+                <GLTFImport updateHierarchy={updateHierarchy}/>
               </Grid>
               <Grid item xs={6}>
-                <MusicImport audioPlayerRef={audioRef} notify={notify} setLoading={setLoading} />
+                <MusicImport audioPlayerRef={audioRef}/>
               </Grid>
             </Grid>
           </div>

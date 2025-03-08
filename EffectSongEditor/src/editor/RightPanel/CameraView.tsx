@@ -11,11 +11,11 @@ const CameraView = ({ targetNode }: cameraView) => {
   const camera = targetNode?.getCamera();
 
   //const [name, setName] = useState("");
-  const [fov, setFov] = useState<number | string>();
-  const [near, setNear] = useState<number | string>();
-  const [far, setFar] = useState<number | string>();
-  const [xMag, setXMag] = useState<number | string>();
-  const [yMag, setYMag] = useState<number | string>();
+  const [fov, setFov] = useState<number | string>('');
+  const [near, setNear] = useState<number | string>('');
+  const [far, setFar] = useState<number | string>('');
+  const [xMag, setXMag] = useState<number | string>('');
+  const [yMag, setYMag] = useState<number | string>('');
   const [type, setType] = useState('');
 
   const cameraTypes = useMemo(()=>['Perspective', 'Orthographic'], []);

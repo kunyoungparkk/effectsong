@@ -7,8 +7,8 @@ import type { hierarchyNodeType } from '../common';
 import { MuiEvent } from '@mui/x-tree-view/internals/models/events';
 import CoreManager from '../CoreManager';
 import * as core from '../../core/effectsong-core';
-import { selectedNodeAtom } from '../atom';
-import { useSetAtom } from 'jotai';
+import { selectedNodeAtom, hierarchyDataAtom } from '../atom';
+import { useSetAtom, useAtomValue } from 'jotai';
 
 const CustomTreeItem = React.forwardRef(function MyTreeItem(props: TreeItem2Props, ref: React.Ref<HTMLLIElement>) {
   const { interactions } = useTreeItem2Utils({
@@ -33,27 +33,19 @@ const CustomTreeItem = React.forwardRef(function MyTreeItem(props: TreeItem2Prop
         content: { onClick: handleContentClick },
         iconContainer: { onClick: handleIconContainerClick },
       }}
-      // sx={{
-      //   "& .Mui-selected": {
-      //     backgroundColor: "transparent"
-      //   },
-      //   "& .MuiTreeItem-content": {
-      //     height: "32px"
-      //   }
-      // }}
     />
   );
 });
 
 type hierarchyViewType = {
-  hierarchyData: Array<hierarchyNodeType>;
   expandIdList: string[];
   setExpandIdList: (itemIds: string[]) => void;
 };
 
-const HierarchyView = ({ hierarchyData, expandIdList, setExpandIdList }: hierarchyViewType) => {
+const HierarchyView = ({ expandIdList, setExpandIdList }: hierarchyViewType) => {
   const [selectedItem, setSelectedItem] = useState<string>('');
   const setSelectedNode = useSetAtom(selectedNodeAtom);
+  const hierarchyData = useAtomValue(hierarchyDataAtom);
 
   const getStyle = (isSelected: boolean) => {
     if (isSelected) {
@@ -67,7 +59,7 @@ const HierarchyView = ({ hierarchyData, expandIdList, setExpandIdList }: hierarc
       itemId={curNode.id}
       key={curNode.id}
       label={curNode.name ? curNode.name : 'Unnamed'}
-      style={getStyle(curNode.isSelected)}>
+      style={getStyle(curNode.id === selectedItem)}>
       {Array.isArray(curNode.children) ? curNode.children.map((node: hierarchyNodeType) => renderTree(node)) : null}
     </CustomTreeItem>
   );
