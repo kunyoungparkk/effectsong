@@ -1,30 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import Editor, { loader } from '@monaco-editor/react';
-import { Box, Button, Grid, Typography, TextField } from '@mui/material';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import { Box } from '@mui/material';
 
 type ScriptEditorType = {
   vertexShader: string;
   setVertexShader: React.Dispatch<React.SetStateAction<string>>;
   opacity: number;
-  compileShader: (targetShader: string) => void;
 };
 function ScriptEditor({
   vertexShader,
   setVertexShader,
   opacity,
-  compileShader,
   // module,
   // setPrimitiveMode,
   // setVertexCount,
   // targetShaderIndex,
   // setTargetShaderIndex,
 }: ScriptEditorType) {
-  const [aiRequest, setAIRequest] = useState('');
-
   useEffect(() => {
-    loader.init().then(monaco => {
+    loader.init().then((monaco) => {
       // 언어 등록
       monaco.languages.register({ id: 'glsles' });
 
@@ -165,89 +159,25 @@ function ScriptEditor({
     <Box
       sx={{
         position: 'fixed',
-        top: '40px',
+        top: '80px',
         left: '300px',
         width: 'calc(100% -  650px)',
-        height: 'calc(100vh - 130px)',
+        height: 'calc(100vh - 170px)',
         backgroundColor: `rgba(0.0, 0.0, 0.0, ${opacity})`,
         pointerEvents: 'auto',
       }}>
-      <Box
-        sx={{
-          width: '100%',
-          height: '50px',
-          backgroundColor: `rgba(255.0, 255.0, 255.0, ${opacity})`,
-          pointerEvents: 'auto',
-        }}>
-        <Grid
-          container
-          columnSpacing={{ xs: 1, sm: 2, md: 3 }}
-          sx={{
-            paddingTop: 1.2,
-            paddingLeft: 2,
-            paddingRight: 2,
-            paddingBottom: 1,
-            width: '100%',
-            height: '100%',
-          }}>
-          <Grid item xs={8}>
-            <TextField
-              id="standard-basic"
-              variant="standard"
-              value={aiRequest}
-              onChange={e => {
-                setAIRequest(e.target.value);
-              }}
-              sx={{ width: '100%', height: '50%' }}
-            />
-          </Grid>
-          <Grid item xs={1}>
-            <Button
-              size="small"
-              variant="contained"
-              startIcon={<AutoAwesomeIcon />}
-              sx={{ width: '100%', color: 'white' }}
-              onClick={() => {
-                //send request
-              }}></Button>
-          </Grid>
-          <Grid item xs={1}></Grid>
-          <Grid item xs={2}>
-            <Button
-              size="small"
-              variant="contained"
-              startIcon={<PlayArrowIcon />}
-              sx={{ width: '100%', color: 'white' }}
-              onClick={() => {
-                compileShader(vertexShader);
-              }}>
-              <Typography
-                variant="body2"
-                noWrap
-                style={{
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}>
-                compile
-              </Typography>
-            </Button>
-          </Grid>
-        </Grid>
-      </Box>
-
-      <Box
+      {/* <Box
         sx={{
           width: '100%',
           height: '50px',
           pointerEvents: 'auto',
-        }}></Box>
+        }}></Box> */}
       <Editor
-        height="calc(100% - 100px)"
+        height="100%"
         defaultLanguage="glsles"
         value={vertexShader}
         theme="transparentTheme"
-        onChange={value => {
+        onChange={(value) => {
           if (value === undefined) {
             return;
           }

@@ -11,6 +11,8 @@ import ScriptEditor from './ScriptEditor';
 import Util from '../Util';
 import Slider from '@mui/material/Slider';
 import CoreManager from '../CoreManager';
+// import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
 type ShaderSettingsType = {
   onResizeEngine: (width: number, height: number) => void;
@@ -93,16 +95,15 @@ void main() {
   const [vertexShader, setVertexShader] = useState(DEFAULT_SHADER);
   //const [targetShaderIndex, setTargetShaderIndex] = useState(0);
 
+  const [aiRequest, setAIRequest] = useState('');
+
   const coreManager = CoreManager.getInstance();
-  useEffect(() => {
-    coreManager.getArtShader().setVertexShader(vertexShader);
-  }, []);
 
   useEffect(() => {
     let artShader = coreManager.getArtShader();
     setPrimitiveMode(artShader.getPrimitiveMode());
     setVertexCount(artShader.getVertexCount().toString());
-    artShader.setVertexShader(DEFAULT_SHADER);
+    artShader.setVertexShader(vertexShader);
 
     const renderer = coreManager.getRenderer();
     setDiffuseIBLIntensity(renderer.getDiffuseIBLIntensity().toString());
@@ -110,10 +111,15 @@ void main() {
     setHeight(renderer.getHeight().toString());
   }, []);
 
-  const compileShader = (targetShader: string) => {
-    let success = coreManager.getArtShader().setVertexShader(targetShader);
+  //compile shader
+  useEffect(()=>{
+    let success = coreManager.getArtShader().setVertexShader(vertexShader);
+    //TODO: notify how?
+    if (success) {
+    } else {
+    }
     console.log('compile: ' + success);
-  };
+  },[vertexShader])
 
   return (
     <div>
@@ -121,7 +127,7 @@ void main() {
         container
         sx={{
           width: 'calc(100% -  650px)',
-          height: '40px',
+          height: '80px',
           backgroundColor: 'white',
           textAlign: 'right',
           paddingLeft: '15px',
@@ -342,6 +348,56 @@ void main() {
             </Box>
           </Modal>
         </Grid>
+        <Grid item xs={1.0}>
+          
+        </Grid>
+        <Grid item xs={8}>
+          <TextField
+            id="standard-basic"
+            variant="standard"
+            value={aiRequest}
+            placeholder='Explain the visual effect you want'
+            onChange={(e) => {
+              setAIRequest(e.target.value);
+            }}
+            sx={{ width: '100%', height: '50%' }}
+          />
+        </Grid>
+        <Grid item xs={0.5}/>
+        <Grid item xs={2}>
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<AutoAwesomeIcon />}
+            sx={{ width: '100%', color: 'white' }}
+            onClick={() => {
+              //send request
+            }}>
+            Generate
+          </Button>
+        </Grid>
+        <Grid item xs={0.5}/>
+        {/* <Grid item xs={2}>
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<PlayArrowIcon />}
+            sx={{ width: '100%', color: 'white' }}
+            onClick={() => {
+              compileShader(vertexShader);
+            }}>
+            <Typography
+              variant="body2"
+              noWrap
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+              compile
+            </Typography>
+          </Button>
+        </Grid> */}
       </Grid>
 
       {scriptVisible ? (
@@ -349,7 +405,6 @@ void main() {
           vertexShader={vertexShader}
           setVertexShader={setVertexShader}
           opacity={scriptOpacity}
-          compileShader={compileShader}
           //setPrimitiveMode={setPrimitiveMode}
           //setVertexCount={setVertexCount}
           //targetShaderIndex={targetShaderIndex}
