@@ -413,6 +413,7 @@ void initialize(int width, int height)
 	// #ifdef __EMSCRIPTEN__
 	//	emscripten_html5_remove_all_event_listeners();
 	// #endif
+	SDL_SetHint(SDL_HINT_EMSCRIPTEN_KEYBOARD_ELEMENT, "#canvas");
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
 		printf("SDL Initialization Fail: %s\n", SDL_GetError());

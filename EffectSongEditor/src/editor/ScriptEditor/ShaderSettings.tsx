@@ -112,14 +112,31 @@ void main() {
   }, []);
 
   //compile shader
-  useEffect(()=>{
+  useEffect(() => {
     let success = coreManager.getArtShader().setVertexShader(vertexShader);
     //TODO: notify how?
     if (success) {
     } else {
     }
     console.log('compile: ' + success);
-  },[vertexShader])
+  }, [vertexShader]);
+
+  const generateAIShader = () => {
+    // Initialize the EventSource, listening for server updates
+    const eventSource = new EventSource('http://localhost:7777/');
+    let code = "";
+    // Listen for messages from the server
+    eventSource.onmessage = function (event) {
+      console.log('data: ', event.data);
+      code += event.data;
+      setVertexShader(code);
+    };
+
+    // Log connection error
+    eventSource.onerror = function (event) {
+      console.log('Error occurred:', event);
+    };
+  };
 
   return (
     <div>
@@ -348,35 +365,31 @@ void main() {
             </Box>
           </Modal>
         </Grid>
-        <Grid item xs={1.0}>
-          
-        </Grid>
+        <Grid item xs={1.0}></Grid>
         <Grid item xs={8}>
           <TextField
             id="standard-basic"
             variant="standard"
             value={aiRequest}
-            placeholder='Explain the visual effect you want'
+            placeholder="Explain the visual effect you want"
             onChange={(e) => {
               setAIRequest(e.target.value);
             }}
             sx={{ width: '100%', height: '50%' }}
           />
         </Grid>
-        <Grid item xs={0.5}/>
+        <Grid item xs={0.5} />
         <Grid item xs={2}>
           <Button
             size="small"
             variant="contained"
             startIcon={<AutoAwesomeIcon />}
             sx={{ width: '100%', color: 'white' }}
-            onClick={() => {
-              //send request
-            }}>
+            onClick={generateAIShader}>
             Generate
           </Button>
         </Grid>
-        <Grid item xs={0.5}/>
+        <Grid item xs={0.5} />
         {/* <Grid item xs={2}>
           <Button
             size="small"

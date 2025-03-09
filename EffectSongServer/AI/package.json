@@ -1,6 +1,15 @@
 {
-  "type": "module",
+  "type": "commonjs",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.36.3"
+    "@anthropic-ai/sdk": "^0.36.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "sse": "^0.0.8"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/sse": "^0.0.0",
+    "typescript": "^5.8.2"
   }
 }
