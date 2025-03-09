@@ -8,7 +8,7 @@ const app = express();
 app.use(cors());
 
 const port = 7777;
-app.get("/", async (req, res) => {
+app.get("/stream", async (req, res) => {
 
   console.log(req);
   let predefinedRequest = `당신은 OpenGL ES 3.0에 정통한 전문적인 Shader 아티스트이자 창의적인 기술 전문가입니다.
@@ -161,7 +161,7 @@ app.get("/", async (req, res) => {
 
   await anthropic.messages
     .stream({
-      model: "claude-3-5-sonnet-20241022",
+      model: "claude-3-7-sonnet-20250219",
       max_tokens: 8192,
       temperature: 0,
       messages: [
@@ -179,9 +179,15 @@ app.get("/", async (req, res) => {
     .on("text", (text) => {
       console.log(text);
 
-      res.write(text);
-    });
-    res.end();
+      res.write(`data: ${text.replace(/\n/g, "\\n")}\n\n`);
+    })
+    .on("end", ()=>{
+      res.write(`data: EFFECTSONG_AIGENERATION_COMPLETED\n\n`);
+      //res.end();
+    })
+    .on("error", (error)=>{
+      res.end();
+    })
 });
 
 const server = app.listen(port, ()=>{

@@ -112,30 +112,48 @@ void main() {
   }, []);
 
   //compile shader
-  useEffect(() => {
-    let success = coreManager.getArtShader().setVertexShader(vertexShader);
-    //TODO: notify how?
-    if (success) {
-    } else {
-    }
-    console.log('compile: ' + success);
-  }, [vertexShader]);
+  // useEffect(() => {
+  //   // let success = coreManager.getArtShader().setVertexShader(vertexShader);
+  //   //TODO: notify how?
+  //   if (success) {
+  //   } else {
+  //   }
+  //   console.log('compile: ' + success);
+  // }, [vertexShader]);
 
   const generateAIShader = () => {
     // Initialize the EventSource, listening for server updates
-    const eventSource = new EventSource('http://localhost:7777/');
+    const eventSource = new EventSource('http://localhost:7777/stream');
     let code = "";
-    // Listen for messages from the server
+
+    eventSource.onopen = ()=>{
+      console.log('SSE connected');
+    }
+
     eventSource.onmessage = function (event) {
-      console.log('data: ', event.data);
-      code += event.data;
+      const currentData = event.data.replace(/\\n/g, "\n");
+      if(currentData === "EFFECTSONG_AIGENERATION_COMPLETED"){
+        console.log('end');
+        eventSource.close();
+        let success = coreManager.getArtShader().setVertexShader(code);
+        if (success) {
+        } else {
+        }
+
+        return;
+      }
+      
+      code += currentData;
       setVertexShader(code);
     };
 
     // Log connection error
     eventSource.onerror = function (event) {
       console.log('Error occurred:', event);
+      eventSource.close();
+      return;
     };
+
   };
 
   return (
@@ -385,7 +403,7 @@ void main() {
             variant="contained"
             startIcon={<AutoAwesomeIcon />}
             sx={{ width: '100%', color: 'white' }}
-            onClick={generateAIShader}>
+            onClick={()=>{generateAIShader();}}>
             Generate
           </Button>
         </Grid>

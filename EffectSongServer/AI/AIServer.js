@@ -19,7 +19,7 @@ const anthropic = new sdk_1.default();
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 const port = 7777;
-app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get("/stream", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(req);
     let predefinedRequest = `당신은 OpenGL ES 3.0에 정통한 전문적인 Shader 아티스트이자 창의적인 기술 전문가입니다.
 
@@ -167,7 +167,7 @@ app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     res.setHeader('Connection', 'keep-alive');
     yield anthropic.messages
         .stream({
-        model: "claude-3-5-sonnet-20241022",
+        model: "claude-3-7-sonnet-20250219",
         max_tokens: 8192,
         temperature: 0,
         messages: [
@@ -184,9 +184,14 @@ app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     })
         .on("text", (text) => {
         console.log(text);
-        res.write(text);
+        res.write(`data: ${text.replace(/\n/g, "\\n")}\n\n`);
+    })
+        .on("end", () => {
+        res.write(`data: EFFECTSONG_AIGENERATION_COMPLETED\n\n`);
+    })
+        .on("error", (error) => {
+        res.end();
     });
-    res.end();
 }));
 const server = app.listen(port, () => {
     console.log('server on ', port);
