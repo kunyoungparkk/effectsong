@@ -1,22 +1,27 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Editor, { loader } from '@monaco-editor/react';
 import { Box } from '@mui/material';
+import { editor } from 'monaco-editor';
 
 type ScriptEditorType = {
   vertexShader: string;
   setVertexShader: React.Dispatch<React.SetStateAction<string>>;
   opacity: number;
+  receivingCode: boolean
 };
 function ScriptEditor({
   vertexShader,
   setVertexShader,
   opacity,
+  receivingCode
   // module,
   // setPrimitiveMode,
   // setVertexCount,
   // targetShaderIndex,
   // setTargetShaderIndex,
 }: ScriptEditorType) {
+  const editorRef = useRef<any>(null);
+
   useEffect(() => {
     loader.init().then((monaco) => {
       // 언어 등록
@@ -142,7 +147,6 @@ function ScriptEditor({
           { open: "'", close: "'" },
         ],
       });
-
       monaco.editor.defineTheme('transparentTheme', {
         base: 'vs-dark',
         inherit: true,
@@ -153,7 +157,21 @@ function ScriptEditor({
       });
     });
   }, []);
-
+  useEffect(()=>{
+    if(receivingCode){
+      if(editorRef.current){
+        const model = editorRef.current.getModel();
+        if(model){
+          const lastLine = model.getLineCount();
+          editorRef.current.setPosition({
+            lineNumber: lastLine,
+            column: model.getLineMaxColumn(lastLine)
+          });
+          editorRef.current.revealLine(lastLine);
+        }
+      }
+    }
+  }, [vertexShader])
   // 에디터 렌더링
   return (
     <Box
@@ -182,6 +200,9 @@ function ScriptEditor({
             return;
           }
           setVertexShader(value);
+        }}
+        onMount={(editor: editor.IStandaloneCodeEditor)=>{
+          editorRef.current = editor;
         }}
         options={{
           fontSize: 14,

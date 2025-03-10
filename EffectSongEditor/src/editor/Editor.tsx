@@ -122,27 +122,6 @@ export default function Editor() {
 
   return (
     <div className="editor">
-      {/*loading popup*/}
-      <Backdrop open={loading}>
-        <CircularProgress color="primary" />
-      </Backdrop>
-      {/*notify popup*/}
-      <Snackbar
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        open={notifyMessage.open}
-        onClose={() => {
-          setNotifyMessage({
-            open: false,
-            success: false,
-            message: ''
-          });
-        }}
-        key="notify">
-        <Alert severity={notifyMessage.success ? 'success' : 'error'} variant="filled" sx={{ width: '100%' }}>
-          {notifyMessage.message}
-        </Alert>
-      </Snackbar>
-
       {/*editor*/}
       <div className="leftPanel">
         <Typography
@@ -198,6 +177,27 @@ export default function Editor() {
           <RightTab updateHierarchy={updateHierarchy} />
         </div>
       )}
+
+      {/*loading popup*/}
+      <Backdrop open={loading}>
+        <CircularProgress color="primary" />
+      </Backdrop>
+      {/*notify popup*/}
+      <Snackbar
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        open={notifyMessage.open}
+        onClose={() => {
+          setNotifyMessage({
+            open: false,
+            success: false,
+            message: ''
+          });
+        }}
+        key="notify">
+        <Alert severity={notifyMessage.success ? 'success' : 'error'} variant="filled" sx={{ width: '100%' }}>
+          {notifyMessage.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

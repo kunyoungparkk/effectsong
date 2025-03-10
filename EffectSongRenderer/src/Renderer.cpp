@@ -108,7 +108,7 @@ Renderer::Renderer() {
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glCullFace(GL_BACK);
+	//glCullFace(GL_BACK);
 	//glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 	//glEnable(GL_PROGRAM_POINT_SIZE);
 
