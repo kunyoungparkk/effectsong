@@ -95,7 +95,7 @@ class Renderer {
   GLint m_artProgram = -1;
   GLint m_volumeUniformLoc = -1;
   GLint m_resolutionUniformLoc = -1;
-  GLint m_backgroundUniformLoc = -1;
+  // GLint m_backgroundUniformLoc = -1;
   GLint m_timeUniformLoc = -1;
   GLint m_vertexCountUniformLoc = -1;
   GLint m_soundUniformLoc = -1;

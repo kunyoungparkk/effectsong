@@ -542,7 +542,7 @@ void Renderer::render() {
 		m_artProgram = artProgram;
 		m_volumeUniformLoc = glGetUniformLocation(artProgram, "volume");
 		m_resolutionUniformLoc = glGetUniformLocation(artProgram, "resolution");
-		m_backgroundUniformLoc = glGetUniformLocation(artProgram, "background");
+		// m_backgroundUniformLoc = glGetUniformLocation(artProgram, "background");
 		m_timeUniformLoc = glGetUniformLocation(artProgram, "time");
 		m_vertexCountUniformLoc = glGetUniformLocation(artProgram, "vertexCount");
 		m_soundUniformLoc = glGetUniformLocation(artProgram, "sound");
@@ -552,7 +552,7 @@ void Renderer::render() {
 	float resolution[2] = { 2048.0f, 2048.0f };
 	glUniform1f(m_volumeUniformLoc, m_soundTexture->getCurrentEnergy());
 	glUniform2fv(m_resolutionUniformLoc, 1, resolution);
-	glUniform4fv(m_backgroundUniformLoc, 1, glm::value_ptr(m_backgroundColor));
+	// glUniform4fv(m_backgroundUniformLoc, 1, glm::value_ptr(m_backgroundColor));
 	glUniform1f(m_timeUniformLoc, m_currentTime);
 	glUniform1f(m_vertexCountUniformLoc, (float)ArtShader::getInstance()->getVertexCount());
 	glUniform1i(m_soundUniformLoc, 4);

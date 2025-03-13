@@ -149,7 +149,13 @@ export default function Editor() {
           className="engineCanvas"></canvas>
       </div>
       <div className="musicPlayer">
-        <AudioPlayer ref={audioRef} volume={0.8} showSkipControls progressUpdateInterval={100} autoPlay={true} />
+        <AudioPlayer
+          ref={audioRef}
+          volume={0.8}
+          progressUpdateInterval={100}
+          autoPlay={true}
+          showSkipControls={false}
+        />
         {/* <div style={{ width: "90px", height: "80px" }}></div> */}
       </div>
       {moduleLoaded && (
@@ -167,10 +173,10 @@ export default function Editor() {
                 height: '100%',
               }}>
               <Grid item xs={6}>
-                <GLTFImport updateHierarchy={updateHierarchy}/>
+                <GLTFImport updateHierarchy={updateHierarchy} />
               </Grid>
               <Grid item xs={6}>
-                <MusicImport audioPlayerRef={audioRef}/>
+                <MusicImport audioPlayerRef={audioRef} />
               </Grid>
             </Grid>
           </div>
@@ -189,8 +195,8 @@ export default function Editor() {
         onClose={() => {
           setNotifyMessage({
             open: false,
-            success: false,
-            message: ''
+            success: notifyMessage.success,
+            message: notifyMessage.message,
           });
         }}
         key="notify">

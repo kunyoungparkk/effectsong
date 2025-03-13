@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { SimpleTreeView } from '@mui/x-tree-view';
 import { useTreeItem2Utils } from '@mui/x-tree-view/hooks';
 import { TreeItem2, TreeItem2Props } from '@mui/x-tree-view/TreeItem2';
@@ -8,7 +8,7 @@ import { MuiEvent } from '@mui/x-tree-view/internals/models/events';
 import CoreManager from '../CoreManager';
 import * as core from '../../core/effectsong-core';
 import { selectedNodeAtom, hierarchyDataAtom } from '../atom';
-import { useSetAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 
 const CustomTreeItem = React.forwardRef(function MyTreeItem(props: TreeItem2Props, ref: React.Ref<HTMLLIElement>) {
   const { interactions } = useTreeItem2Utils({
@@ -44,7 +44,7 @@ type hierarchyViewType = {
 
 const HierarchyView = ({ expandIdList, setExpandIdList }: hierarchyViewType) => {
   const [selectedItem, setSelectedItem] = useState<string>('');
-  const setSelectedNode = useSetAtom(selectedNodeAtom);
+  const [selectedNode, setSelectedNode] = useAtom(selectedNodeAtom);
   const hierarchyData = useAtomValue(hierarchyDataAtom);
 
   const getStyle = (isSelected: boolean) => {
@@ -59,7 +59,7 @@ const HierarchyView = ({ expandIdList, setExpandIdList }: hierarchyViewType) => 
       itemId={curNode.id}
       key={curNode.id}
       label={curNode.name ? curNode.name : 'Unnamed'}
-      style={getStyle(curNode.id === selectedItem)}>
+      style={selectedNode? getStyle(getNodeById(curNode.id).isAliasOf(selectedNode)): getStyle(false)}>
       {Array.isArray(curNode.children) ? curNode.children.map((node: hierarchyNodeType) => renderTree(node)) : null}
     </CustomTreeItem>
   );
@@ -72,7 +72,7 @@ const HierarchyView = ({ expandIdList, setExpandIdList }: hierarchyViewType) => 
     }
   };
 
-  const getNodeById = useCallback((id: string) => {
+  const getNodeById = (id: string) => {
     const idxList = id.split('-');
 
     let curNode: core.Node = CoreManager.getInstance().getRenderer().getSceneAt(parseInt(idxList[0]))!;
@@ -80,7 +80,7 @@ const HierarchyView = ({ expandIdList, setExpandIdList }: hierarchyViewType) => 
       curNode = curNode.getChildAt(parseInt(idxList[i]))!;
     }
     return curNode;
-  }, []);
+  }
 
   return (
     <SimpleTreeView
@@ -94,7 +94,7 @@ const HierarchyView = ({ expandIdList, setExpandIdList }: hierarchyViewType) => 
         scrollbarWidth: 'thin',
         scrollbarColor: '#868686 #2e2e2e',
       }}
-      selectedItems={selectedItem}
+      // selectedItems={selectedItem}
       onItemSelectionToggle={(event: React.SyntheticEvent, id: string, isSelected: boolean) => {
         if (!isSelected) {
           return;

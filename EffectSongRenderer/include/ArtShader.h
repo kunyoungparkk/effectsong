@@ -49,6 +49,8 @@ public:
 	}
 
 	GLuint getProgram() { return m_artShaderProgram; }
+
+	std::string getLastCompileError() { return m_lastVSCompileError; }
 private:
 	ArtShader();
 	static ArtShader* instance_;
@@ -57,6 +59,8 @@ private:
 	std::vector<float> m_vertices;
 	int m_vertexCount = 10000;
 	GLuint m_artShaderProgram;
+
+	std::string m_lastVSCompileError = "";
 
 	std::string fs_ = R"(#version 300 es
 	precision highp float;

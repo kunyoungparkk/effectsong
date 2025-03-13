@@ -84,6 +84,7 @@ const NodeView = ({
     }
 
     setSelectedNode(null);
+    updateHierarchy();
   }
 
   const changePosition = (targetPosition: [string, string, string]) => {

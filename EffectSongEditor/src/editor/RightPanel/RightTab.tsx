@@ -86,7 +86,7 @@ export default function RightTab({ updateHierarchy }: rightTabProps) {
           aria-label="styled tabs example"
         >
           <StyledTab label="Node" />
-          <StyledTab label="Visual Script" />
+          {/* <StyledTab label="Visual Script" /> */}
         </StyledTabs>
         <Box sx={{ p: 3 }} />
       </Box>

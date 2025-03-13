@@ -22,10 +22,9 @@ import ScriptEditor from './ScriptEditor';
 import Util from '../Util';
 import Slider from '@mui/material/Slider';
 import CoreManager from '../CoreManager';
-// import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import DeveloperModeIcon from '@mui/icons-material/DeveloperMode';
-import { loadingAtom } from '../atom';
+import { loadingAtom, notifyMessageAtom } from '../atom';
 import { useSetAtom } from 'jotai';
 
 type ShaderSettingsType = {
@@ -130,10 +129,13 @@ void main() {
 
   const [helpModalOpen, setHelpModalOpen] = useState(false);
   const [guideModalOpen, setGuideModalOpen] = useState(false);
+  const [compileError, setCompileError] = useState({
+    open: false,
+    message: '',
+  });
 
   const [vertexShader, setVertexShader] = useState(DEFAULT_SHADER);
   const lastCompiledShader = useRef(DEFAULT_SHADER);
-  //const [targetShaderIndex, setTargetShaderIndex] = useState(0);
 
   const [aiRequest, setAIRequest] = useState('');
   const [receivingCode, setReceivingCode] = useState(false);
@@ -143,6 +145,7 @@ void main() {
   const devMenuOpen = Boolean(menuAnchorElement);
 
   const setLoading = useSetAtom(loadingAtom);
+  const setNotifyMessage = useSetAtom(notifyMessageAtom);
 
   const coreManager = CoreManager.getInstance();
 
@@ -161,17 +164,31 @@ void main() {
 
   const compileShader = (shader: string) => {
     let success = coreManager.getArtShader().setVertexShader(shader);
+    let msg = '';
     if (success) {
       lastCompiledShader.current = shader;
-      console.log(success);
+      setNotifyMessage({
+        open: true,
+        success: true,
+        message: "Compiled successfully!"
+      })
     } else {
-      console.log(success);
+      msg = coreManager.getArtShader().getLastCompileError();
+      setNotifyMessage({
+        open: true,
+        success: false,
+        message: "Failed to compile"
+      })
     }
+    setCompileError({
+      open: !success,
+      message: msg,
+    });
   };
 
   const generateAIShader = (mode: number, request: string) => {
     setLoading(true);
-    setVertexShader("");
+    setVertexShader('');
     setScriptVisible(true);
 
     // Initialize the EventSource, listening for server updates
@@ -221,7 +238,7 @@ void main() {
           backgroundColor: 'white',
           textAlign: 'center',
           paddingLeft: '10px',
-          paddingTop: '3px',
+          paddingTop: '4px',
           float: 'left',
         }}>
         <Grid item xs={0.5} key="script-visible-button">
@@ -386,20 +403,20 @@ void main() {
           />
         </Grid>
         <Grid item xs={0.5} key="space5" />
-        <Grid item xs={1.0} key="help">
+        <Grid item xs={1.0} key="dev">
           <Button
+            id="devButton"
             size="small"
-            variant="contained"
-            startIcon={<HelpIcon />}
-            sx={{ width: '100%' }}
-            onClick={() => {
-              setHelpModalOpen(true);
+            variant="outlined"
+            startIcon={<DeveloperModeIcon />}
+            sx={{ width: '100%', color: '#868686' }}
+            onClick={(event) => {
+              setMenuAnchorElement(event.currentTarget);
             }}>
-            help
+            DEV
           </Button>
         </Grid>
         <Grid item xs={0.25} key="space6"></Grid>
-
       </Grid>
 
       <Grid
@@ -412,22 +429,21 @@ void main() {
           float: 'left',
         }}>
         {/* another line */}
-        <Grid item xs={0.1} sx={{ backgroundColor: "#000027" }}>
-        </Grid>
+        <Grid item xs={0.1} sx={{ backgroundColor: '#000027' }}></Grid>
         <Grid item xs={0.1} key="space12" />
-        <Grid item xs={1.2}>
+        <Grid item xs={1.2} key="req-primitive-select">
           <NativeSelect
             value={reqPrimitiveMode}
             inputProps={{
               name: 'Primitive',
-              id: 'primitive-select',
+              id: 'req-primitive-select',
             }}
             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
               setReqPrimitiveMode(parseInt(e.target.value) as typeof reqPrimitiveMode);
             }}
             style={{
               color: '#868686',
-              paddingTop: '4px'
+              paddingTop: '4px',
             }}>
             <option value={0} key={0}>
               {primitiveTypes[0]}
@@ -450,8 +466,7 @@ void main() {
             onChange={(e) => {
               setAIRequest(e.target.value);
             }}
-            sx={{ width: '100%', height: '50%', 
-              paddingTop: '4px' }}
+            sx={{ width: '100%', height: '50%', paddingTop: '4px' }}
           />
         </Grid>
         <Grid item xs={0.2} key="space8" />
@@ -461,7 +476,9 @@ void main() {
             variant="contained"
             startIcon={<AutoAwesomeIcon />}
             sx={{
-              width: '100%', color: 'white', marginTop: 0.4
+              width: '100%',
+              color: 'white',
+              marginTop: 0.4,
             }}
             onClick={() => {
               if (aiRequest.length > 0) {
@@ -474,15 +491,14 @@ void main() {
         <Grid item xs={0.25} key="space9" />
         <Grid item xs={1.0}>
           <Button
-            id="devButton"
             size="small"
-            variant="outlined"
-            startIcon={<DeveloperModeIcon />}
-            sx={{ width: '100%', color: '#868686', marginTop: 0.4 }}
-            onClick={(event) => {
-              setMenuAnchorElement(event.currentTarget);
+            variant="contained"
+            startIcon={<HelpIcon />}
+            sx={{ width: '100%', marginTop: 0.4 }}
+            onClick={() => {
+              setHelpModalOpen(true);
             }}>
-            DEV
+            help
           </Button>
         </Grid>
         <Grid item xs={0.25} key="space10" />
@@ -558,7 +574,7 @@ void main() {
           <Typography sx={{ mt: 2 }}>float vertexId : current vertexId (0 ~ vertexCount - 1)</Typography>
           <Typography sx={{ mt: 2 }}>float volume : current volume</Typography>
           <Typography sx={{ mt: 2 }}>vec2 resolution : shader art texture resolution (maybe 2048, 2048)</Typography>
-          <Typography sx={{ mt: 2 }}>vec4 background : background color</Typography>
+          {/* <Typography sx={{ mt: 2 }}>vec4 background : background color</Typography> */}
           <Typography sx={{ mt: 2 }}>float time : current music time</Typography>
           <Typography sx={{ mt: 2 }}>float vertexCount : total vertex counts</Typography>
           <Typography sx={{ mt: 2 }}>sampler2D sound : left sound texture, use r channel</Typography>
@@ -617,16 +633,43 @@ void main() {
         </Box>
       </Modal>
 
+      <Modal
+        open={compileError.open}
+        onClose={() => {
+          setCompileError({
+            open: false,
+            message: compileError.message,
+          });
+        }}
+        aria-labelledby="compile-modal"
+        aria-describedby="compile-modal-description">
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            bgcolor: 'background.paper',
+            border: '2px solid #000',
+            boxShadow: 24,
+            p: 4,
+          }}>
+          <Typography id="compile-error" variant="h6" component="h6">
+            {compileError.message}
+          </Typography>
+        </Box>
+      </Modal>
       {scriptVisible ? (
         <ScriptEditor
           vertexShader={vertexShader}
           setVertexShader={setVertexShader}
           opacity={scriptOpacity}
           receivingCode={receivingCode}
-        //setPrimitiveMode={setPrimitiveMode}
-        //setVertexCount={setVertexCount}
-        //targetShaderIndex={targetShaderIndex}
-        //setTargetShaderIndex={setTargetShaderIndex}
+          //setPrimitiveMode={setPrimitiveMode}
+          //setVertexCount={setVertexCount}
+          //targetShaderIndex={targetShaderIndex}
+          //setTargetShaderIndex={setTargetShaderIndex}
         ></ScriptEditor>
       ) : (
         <></>

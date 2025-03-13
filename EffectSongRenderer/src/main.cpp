@@ -379,7 +379,8 @@ EMSCRIPTEN_BINDINGS(SINGLETON)
 		.function("getPrimitiveMode", &ArtShader::getPrimitiveMode, allow_raw_pointers())
 		.function("setPrimitiveMode", &ArtShader::setPrimitiveMode, allow_raw_pointers())
 		.function("getVertexCount", &ArtShader::getVertexCount, allow_raw_pointers())
-		.function("setVertexCount", &ArtShader::setVertexCount, allow_raw_pointers());
+		.function("setVertexCount", &ArtShader::setVertexCount, allow_raw_pointers())
+		.function("getLastCompileError", &ArtShader::getLastCompileError, allow_raw_pointers());
 }
 
 EMSCRIPTEN_BINDINGS(BIND_GLM)

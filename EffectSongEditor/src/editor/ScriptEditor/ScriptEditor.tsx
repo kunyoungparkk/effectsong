@@ -172,7 +172,7 @@ function ScriptEditor({
       }
     }
   }, [vertexShader])
-  // 에디터 렌더링
+  
   return (
     <Box
       sx={{

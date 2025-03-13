@@ -35,7 +35,7 @@ ArtShader::ArtShader() {
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, sizeof(float), 0);
 
-	//ÇØÁ¦
+	//ï¿½ï¿½ï¿½ï¿½
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }
@@ -58,7 +58,11 @@ bool ArtShader::compileShader(std::string tempVS)
 	GLint success;
 	glGetShaderiv(artVertexShader, GL_COMPILE_STATUS, &success);
 	if (!success) {
-		glDeleteShader(artVertexShader);
+		char infoLog[1024];
+		glGetShaderInfoLog(artVertexShader, 1024, NULL, infoLog);
+		m_lastVSCompileError = infoLog;
+		
+		glDeleteShader(artVertexShader);		
 		return false;
 	}
 	GLuint artFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);

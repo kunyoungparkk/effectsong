@@ -327,6 +327,7 @@ export interface ArtShader extends ClassHandle {
   setPrimitiveMode(_0: number): void;
   getVertexCount(): number;
   setVertexCount(_0: number): void;
+  getLastCompileError(): string;
 }
 
 export interface vec2 extends ClassHandle {
