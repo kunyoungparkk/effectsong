@@ -63,25 +63,20 @@ Please implement the visual goals with the following characteristics at the high
   - Ideal for continuous patterns or trajectories.  
   - Connects each vertex sequentially.  
 •	**Triangles (Realistic 3D Mesh Optimization):**  
-  - Generate smooth **3D meshes with vertex sharing and indexed drawing**.  
-  - **Ensure the final output of gl_Position is in NDC space, not view coordinates.**  
-  - Implement **normal vector calculations** for shading and lighting (Phong, Lambert, PBR).  
-  - Apply **UV mapping** for natural texture representation.  
-  - **Optimize depth sorting and culling** for correct occlusion.  
-  - **Ensure the mesh forms a continuous surface rather than disconnected triangles.**  
-
----
-
-### **3D Mesh Guidelines (Optimized for Triangles Mode)**
-•	**Vertex Connectivity:**  
-  - **Share vertices** between adjacent triangles for a seamless surface.  
-  - Use **indexed drawing** for efficient rendering.  
-  - Compute **UV coordinates** for texture mapping.  
-•	**Advanced 3D Shapes:**  
-  - **Spherical projection** for realistic curved surfaces.  
-  - **Polar coordinates** for radial symmetry.  
-  - **Sinusoidal deformations** for organic effects.  
-  - **Fractal recursion** for complex structures.  
+  - Create continuous 3D surfaces by ensuring vertex connectivity.
+  - Utilize spherical projection, polar coordinates, sinusoidal deformations, and fractal recursion for advanced shape generation.
+  - Optimize vertex processing by efficiently reusing vertex buffers and sharing vertices between adjacent triangles.
+  - Use indexed drawing and strip structures to enhance rendering performance.
+  - Compute vertex indices efficiently to ensure structured quad-based triangulation:
+  cols = floor(sqrt(vertexCount / 6.0)) // A quad consists of two triangles.
+  rows = cols
+  quadId = floor(vertexId / 6.0)
+  vertexInQuad = mod(vertexId, 6.0)
+  quadRow = floor(quadId / (cols - 1))
+  quadCol = mod(quadId, cols - 1) 
+  - Ensure the final output of gl_Position is in NDC space by normalizing quad positions:
+  position = vec2((quadCol + offset.x) / (cols - 1.0), (quadRow + offset.y) / (rows - 1.0)) * 2.0 - 1.0;
+  - Guarantee smooth, connected surfaces by preventing gaps between triangles.
 
 ---
 
@@ -115,13 +110,12 @@ Please implement the visual goals with the following characteristics at the high
    - Gradients and brightness variation.  
    - Time-dependent transitions.  
 4. **Music Responsiveness:**  
-   - Dynamic effects based on volume.  
-   - Handle stereo/mono sound variations.  
+   - Dynamic effects based on sound texture.  
+   - Handle stereo/mono sound variations. 
+   - Use FFT-based frequency bands from sound and sound2 to influence animation over time, ensuring smooth transitions and avoiding abrupt changes.
 5. **GLSL ES 3.0 Compliance:**  
    - Use precise float literals (e.g., 1.0, 0.5).  
-   - Ensure correct type casting and operations.  
-6. **Primitive Mode-Specific Optimizations:**  
-   - **Triangles:** Must render as **continuous surfaces, not disjointed polygons**.  
+   - Ensure correct type casting and operations. 
 
 ---
 
@@ -143,16 +137,9 @@ Please implement the visual goals with the following characteristics at the high
 ### **Final Request**
 Based on your request **${req.query.request}**, please **creatively interpret** the above structure to generate an optimized **${req.query.primitiveMode}** primitive mode Vertex Shader.
 
-For **Triangles mode**, ensure that:  
-✅ **The mesh is a continuous, smooth 3D surface with shared vertices.**  
-✅ **gl_Position is always output in NDC space, not view coordinates.**  
-✅ **Proper vertex indexing and normal calculations enhance realism.**  
-✅ **Texture mapping is applied correctly using UV coordinates.**  
-✅ **The rendering process is optimized using indexed drawing.**  
-
 Assume the header information is already implemented, so exclude it from the response.
 
-The response should contain only the code without any explanation or Markdown code blocks.
+The response should contain only the raw GLSL code with no additional comments, explanations, or formatting.
         `;
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');

@@ -68,9 +68,6 @@ void main() {
             texture(sound, vec2(off + spread * 2., speed)).r) / 3.;
     }
     
-    float leftTarget =  texture(sound, vec2(off, 0.0)).r;
-    float rightTarget =  texture(sound2, vec2(off, 0.0)).r;
-    
     float rPulse = pow(snd, 5.0);
     float radius = count * 0.02 + rPulse * 0.4; 
 
@@ -118,9 +115,13 @@ void main() {
   v_color = vec4(s, s, s, 1.0);
 }
 `;
-  const [scriptOpacity, setScriptOpacity] = useState(0.2);
   const primitiveTypes = ['POINTS', 'LINES', 'LINE_LOOP', 'LINE_STRIP', 'TRIANGLES', 'TRI_STRIP', 'TRI_FAN'];
+
+  const [scriptOpacity, setScriptOpacity] = useState(0.2);
+
   const [primitiveMode, setPrimitiveMode] = useState(0);
+  const [reqPrimitiveMode, setReqPrimitiveMode] = useState<0 | 1 | 4>(0);
+
   const [scriptVisible, setScriptVisible] = useState(true);
   const [vertexCount, setVertexCount] = useState<string>('0');
   const [diffuseIBLIntensity, setDiffuseIBLIntensity] = useState<string>('0');
@@ -168,9 +169,13 @@ void main() {
     }
   };
 
-  const generateAIShader = (mode: string, request: string) => {
+  const generateAIShader = (mode: number, request: string) => {
+    setLoading(true);
+    setVertexShader("");
+    setScriptVisible(true);
+
     // Initialize the EventSource, listening for server updates
-    const url = `http://localhost:7777/stream?primitiveMode=${mode}&request=${request}`;
+    const url = `http://localhost:7777/stream?primitiveMode=${primitiveTypes[mode]}&request=${request}`;
     const eventSource = new EventSource(url);
     let code = '';
 
@@ -193,13 +198,15 @@ void main() {
     eventSource.onerror = function (event) {
       console.log('SSE closed:  ', event);
       eventSource.close();
+      // setScriptVisible(false);
 
       setVertexShader(code);
+      setPrimitiveMode(mode);
+      coreManager.getArtShader().setPrimitiveMode(mode);
       compileShader(code);
 
       setReceivingCode(false);
       setLoading(false);
-      eventSource.close();
       return;
     };
   };
@@ -210,10 +217,10 @@ void main() {
         container
         sx={{
           width: 'calc(100% -  650px)',
-          height: '80px',
+          height: '40px',
           backgroundColor: 'white',
           textAlign: 'center',
-          paddingLeft: '15px',
+          paddingLeft: '10px',
           paddingTop: '3px',
           float: 'left',
         }}>
@@ -351,7 +358,6 @@ void main() {
             inputProps={{ style: { color: '#868686' } }}
           />
         </Grid>
-
         <Grid item xs={0.5} key="height-icon">
           <HeightIcon sx={{ fontSize: '20px', paddingTop: '7px', color: '#868686' }} />
         </Grid>
@@ -394,9 +400,48 @@ void main() {
         </Grid>
         <Grid item xs={0.25} key="space6"></Grid>
 
+      </Grid>
+
+      <Grid
+        container
+        sx={{
+          width: 'calc(100% -  650px)',
+          height: '40px',
+          backgroundColor: '#eeeeee',
+          textAlign: 'center',
+          float: 'left',
+        }}>
         {/* another line */}
-        <Grid item xs={0.5} key="space7"></Grid>
-        <Grid item xs={7.5}>
+        <Grid item xs={0.1} sx={{ backgroundColor: "#000027" }}>
+        </Grid>
+        <Grid item xs={0.1} key="space12" />
+        <Grid item xs={1.2}>
+          <NativeSelect
+            value={reqPrimitiveMode}
+            inputProps={{
+              name: 'Primitive',
+              id: 'primitive-select',
+            }}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+              setReqPrimitiveMode(parseInt(e.target.value) as typeof reqPrimitiveMode);
+            }}
+            style={{
+              color: '#868686',
+              paddingTop: '4px'
+            }}>
+            <option value={0} key={0}>
+              {primitiveTypes[0]}
+            </option>
+            <option value={1} key={1}>
+              {primitiveTypes[1]}
+            </option>
+            <option value={4} key={4}>
+              {primitiveTypes[4]}
+            </option>
+          </NativeSelect>
+        </Grid>
+        <Grid item xs={0.1} key="space11" />
+        <Grid item xs={6.8}>
           <TextField
             id="standard-basic"
             variant="standard"
@@ -405,18 +450,23 @@ void main() {
             onChange={(e) => {
               setAIRequest(e.target.value);
             }}
-            sx={{ width: '100%', height: '50%' }}
+            sx={{ width: '100%', height: '50%', 
+              paddingTop: '4px' }}
           />
         </Grid>
-        <Grid item xs={0.5} key="space8" />
+        <Grid item xs={0.2} key="space8" />
         <Grid item xs={2}>
           <Button
             size="small"
             variant="contained"
             startIcon={<AutoAwesomeIcon />}
-            sx={{ width: '100%', color: 'white' }}
+            sx={{
+              width: '100%', color: 'white', marginTop: 0.4
+            }}
             onClick={() => {
-              generateAIShader(primitiveTypes[primitiveMode], aiRequest);
+              if (aiRequest.length > 0) {
+                generateAIShader(reqPrimitiveMode, aiRequest);
+              }
             }}>
             Generate
           </Button>
@@ -428,7 +478,7 @@ void main() {
             size="small"
             variant="outlined"
             startIcon={<DeveloperModeIcon />}
-            sx={{ width: '100%', color: '#868686' }}
+            sx={{ width: '100%', color: '#868686', marginTop: 0.4 }}
             onClick={(event) => {
               setMenuAnchorElement(event.currentTarget);
             }}>
@@ -573,10 +623,10 @@ void main() {
           setVertexShader={setVertexShader}
           opacity={scriptOpacity}
           receivingCode={receivingCode}
-          //setPrimitiveMode={setPrimitiveMode}
-          //setVertexCount={setVertexCount}
-          //targetShaderIndex={targetShaderIndex}
-          //setTargetShaderIndex={setTargetShaderIndex}
+        //setPrimitiveMode={setPrimitiveMode}
+        //setVertexCount={setVertexCount}
+        //targetShaderIndex={targetShaderIndex}
+        //setTargetShaderIndex={setTargetShaderIndex}
         ></ScriptEditor>
       ) : (
         <></>
