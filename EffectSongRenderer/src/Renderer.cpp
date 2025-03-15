@@ -527,9 +527,6 @@ void Renderer::render() {
 						GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5 };
 	glDrawBuffers(6, drawBuffers);
 
-	//if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-	//	std::cerr << "Framebuffer is not complete!" << std::endl;
-	//}
 	glDisable(GL_CULL_FACE);
 	glViewport(0, 0, 2048, 2048);
 	glClearColor(m_backgroundColor.r, m_backgroundColor.g, m_backgroundColor.b, m_backgroundColor.a);

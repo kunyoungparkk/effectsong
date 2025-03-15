@@ -15,12 +15,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const sdk_1 = __importDefault(require("@anthropic-ai/sdk"));
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
+const https_1 = __importDefault(require("https"));
+const fs_1 = __importDefault(require("fs"));
+const port = 7443;
 const anthropic = new sdk_1.default();
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
-const port = 7777;
+const options = {
+    key: fs_1.default.readFileSync('/etc/letsencrypt/live/api.effectsong.com/privkey.pem'),
+    cert: fs_1.default.readFileSync('/etc/letsencrypt/live/api.effectsong.com/fullchain.pem'),
+};
 app.get("/stream", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(req);
+    console.log('요청 수신');
     let userRequest = `You are a professional Shader Artist and a creative technical expert highly proficient in OpenGL ES 3.0.
 
 Please implement the visual goals with the following characteristics at the highest level of visual effects:
@@ -186,6 +192,6 @@ The response should contain only the raw GLSL code with no additional comments, 
         res.end();
     });
 }));
-const server = app.listen(port, () => {
+const server = https_1.default.createServer(options, app).listen(port, () => {
     console.log('server on ', port);
 });

@@ -4,6 +4,8 @@
     "@anthropic-ai/sdk": "^0.36.3",
     "cors": "^2.8.5",
     "express": "^4.21.2",
+    "fs": "^0.0.1-security",
+    "https": "^1.0.0",
     "sse": "^0.0.8"
   },
   "devDependencies": {

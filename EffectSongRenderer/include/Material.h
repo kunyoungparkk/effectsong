@@ -1,24 +1,55 @@
 #pragma once
-#include "common.h"
 #include "Texture.h"
+#include "common.h"
 
 class Material {
  public:
   Material(cgltf_material* material, std::string& gltfPath);
   Material();
   void bind(GLuint shaderProgram);
+
  private:
+  Texture* m_baseColorTexture = nullptr;
+  Texture* m_metallicRoughnessTexture = nullptr;
   glm::vec4 m_baseColorFactor = glm::vec4(1.0f);
-  glm::vec3 m_specularColorFactor = glm::vec3(0.0f);
-  glm::vec3 m_emissiveFactor = glm::vec3(0.0f);
   float m_metallicFactor = 0.0f;
   float m_roughnessFactor = 1.0f;
 
-  Texture* m_baseColorTexture = nullptr;
-  Texture* m_emissiveTexture = nullptr;
-  Texture* m_metallicRoughnessTexture = nullptr;
+  //TODO: clearcoat
+
+  //TODO: ior
+
+  //TODO: specular
+  glm::vec3 m_specularColorFactor = glm::vec3(0.0f);
+
+  //TODO: sheen
+
+  //TODO: transmission
+
+  //TODO: volume
+
+  //TODO: emissive strength
+
+  //TODO: iridescence
+
+  //TODO: anisotropy
+
+  //TODO: dispersion
+
+  //normal
   Texture* m_normalTexture = nullptr;
+  //occlusion
   Texture* m_occlusionTexture = nullptr;
+  //emissive
+  Texture* m_emissiveTexture = nullptr;
+  glm::vec3 m_emissiveFactor = glm::vec3(0.0f);
+
+  //TODO:
+  //alpha mode
+  //alpha cutoff
+  //doublesided
+  //unlit
+  //extras, extension count, extensions ...
 
   GLuint m_shaderProgram = -1;
 

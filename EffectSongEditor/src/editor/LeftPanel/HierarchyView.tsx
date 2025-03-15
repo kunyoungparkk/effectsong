@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useState } from 'react';
 import { SimpleTreeView } from '@mui/x-tree-view';
 import { useTreeItem2Utils } from '@mui/x-tree-view/hooks';
 import { TreeItem2, TreeItem2Props } from '@mui/x-tree-view/TreeItem2';
@@ -43,7 +42,6 @@ type hierarchyViewType = {
 };
 
 const HierarchyView = ({ expandIdList, setExpandIdList }: hierarchyViewType) => {
-  const [selectedItem, setSelectedItem] = useState<string>('');
   const [selectedNode, setSelectedNode] = useAtom(selectedNodeAtom);
   const hierarchyData = useAtomValue(hierarchyDataAtom);
 
@@ -103,9 +101,6 @@ const HierarchyView = ({ expandIdList, setExpandIdList }: hierarchyViewType) => 
       }}
       onExpandedItemsChange={(e, itemIds) => {
         setExpandIdList(itemIds);
-      }}
-      onSelectedItemsChange={(event: React.SyntheticEvent, id: string | null) => {
-        setSelectedItem(id as string);
       }}
       expandedItems={expandIdList}
       onKeyDown={e => handleKeyDown(e)}>

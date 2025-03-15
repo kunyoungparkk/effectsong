@@ -21,6 +21,7 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "@vreden/youtube_scraper": "^1.2.6",
     "cross-env": "^7.0.3",
     "file-saver": "^2.0.5",
     "jotai": "^2.12.1",

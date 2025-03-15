@@ -13,6 +13,8 @@ type musicImportType = {
 
 const MusicImport = ({ audioPlayerRef }: musicImportType) => {
   const [modalOpen, setModalOpen] = useState(false);
+  // const [youtubeLink, setYoutubeLink] = useState('');
+
   const setNotifyMessage = useSetAtom(notifyMessageAtom);
   const setLoading = useSetAtom(loadingAtom);
 
@@ -121,6 +123,31 @@ const MusicImport = ({ audioPlayerRef }: musicImportType) => {
             hoverLabel="Click or drag to upload file (*.mp3, *.wav, *.flac)"
             dropLabel="Drop file here (*.mp3, *.wav, *.flac)"
           />
+          {/* TODO: get audio file from streaming website link 
+          <TextField
+            id="youtube-link-text"
+            variant="standard"
+            value={youtubeLink}
+            placeholder="Youtube Link"
+            onChange={(e) => {
+              setYoutubeLink(e.target.value);
+            }}
+            sx={{ width: '80%', height: '20%'}}
+          />
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<CloudUploadIcon />}
+            sx={{
+              width: '20%',
+              color: 'white',
+              marginTop: 0.4,
+            }}
+            onClick={() => {
+              if (youtubeLink.length > 0) {
+              }
+            }}>
+          </Button> */}
         </Box>
       </Modal>
     </div>

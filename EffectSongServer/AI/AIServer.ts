@@ -1,15 +1,22 @@
 import Anthropic from "@anthropic-ai/sdk";
 import express from "express";
 import cors from 'cors';
+import https from 'https';
+import fs from 'fs';
 
+const port = 7443;
 const anthropic = new Anthropic();
 
 const app = express();
 app.use(cors());
 
-const port = 7777;
+const options = {
+  key: fs.readFileSync('/etc/letsencrypt/live/api.effectsong.com/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/api.effectsong.com/fullchain.pem'),
+};
+
 app.get("/stream", async (req, res) => {
-  console.log(req);
+  console.log('요청 수신');
 
   //•	uniform vec4 background: Background color (RGBA, values in the range 0.0–1.0).
   let userRequest = `You are a professional Shader Artist and a creative technical expert highly proficient in OpenGL ES 3.0.
@@ -181,6 +188,6 @@ The response should contain only the raw GLSL code with no additional comments, 
     });
 });
 
-const server = app.listen(port, ()=>{
-    console.log('server on ', port);
+const server = https.createServer(options, app).listen(port, ()=>{
+  console.log('server on ', port);
 })

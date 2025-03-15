@@ -192,7 +192,7 @@ void main() {
     setScriptVisible(true);
 
     // Initialize the EventSource, listening for server updates
-    const url = `http://localhost:7777/stream?primitiveMode=${primitiveTypes[mode]}&request=${request}`;
+    const url = `https://api.effectsong.com:7443/stream?primitiveMode=${primitiveTypes[mode]}&request=${request}`;
     const eventSource = new EventSource(url);
     let code = '';
 

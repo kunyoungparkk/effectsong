@@ -10,11 +10,6 @@ Camera::Camera(Node* node, cgltf_camera* cgltf_camera)
 		// TODO: ERROR!
 		exit(0);
 	}
-	if (m_cgltf_camera->type != cgltf_camera_type_perspective &&
-		m_cgltf_camera->type != cgltf_camera_type_orthographic) {
-		// TODO: ERROR!
-		exit(0);
-	}
 
 	if (m_cgltf_camera->name) {
 		name = m_cgltf_camera->name;

@@ -200,7 +200,6 @@ void main() {
 				if (b_mouse_pressed)
 				{
 					cam_xRot += event.button.y - prev_mouse_coord[1];
-					// TODO: 45���� �Ѿ�� �̻��ϰ� ��鸮�� ���� �ذ�
 					cam_xRot = glm::clamp(cam_xRot, -40.0f, 40.0f);
 					cam_yRot -= event.button.x - prev_mouse_coord[0];
 					camNode->setRotation(glm::angleAxis(glm::radians(cam_xRot),
