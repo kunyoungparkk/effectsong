@@ -20,6 +20,7 @@ public:
 	std::string getFragmentShader(){ return fs_; }
 	std::string getVertexShaderHeader(){ return vsHeader_; }
 	std::string getVertexShader(){ return vsHeader_ + vs_; }
+	std::string getUserVertexShader(){ return vs_; }
 	bool setVertexShader(std::string vs){ 
 		if (compileShader(vs)) {
 			vs_ = vs;
@@ -57,7 +58,7 @@ private:
 	GLuint VAO, VBO;
 	GLenum m_primitiveMode = GL_POINTS;
 	std::vector<float> m_vertices;
-	int m_vertexCount = 10000;
+	int m_vertexCount = 30000;
 	GLuint m_artShaderProgram;
 
 	std::string m_lastVSCompileError = "";
@@ -99,28 +100,64 @@ private:
 	//uniform vec2 soundRes;
 	//uniform float _dontUseDirectly_pointSize; : multiflydevicePixelRatio
 	)";
-	std::string vs_ = R"(
-void main() {
-  float across = floor(sqrt(vertexCount));
-  float down = floor(vertexCount / across);
-  
-  float x = mod(vertexId, across);
-  float y = floor(vertexId / across);
-  
-  float u = x / across;
-  float v = y / across;
-  
-  vec2 xy = vec2(u * 2.0 - 1.0, v * 2.0 - 1.0);
-  gl_Position = vec4(xy, 0, 1);
-  gl_PointSize = max(0.1, ceil(resolution.x / across));
-  
-  float s;
-  if(!isStereo || u<0.5){
-    s = texture(sound, vec2(u * 2.0, v)).r;
-  }else{
-    s = texture(sound2, vec2((u - 0.5) * 2.0, v)).r;
-  }  
-  v_color = vec4(s, s, s, 1.0);
+	std::string vs_ = R"(//shader art sample
+#define PI 3.14159
+#define NUM_SEGMENTS 51.0
+#define NUM_POINTS (NUM_SEGMENTS * 2.0)
+#define STEP 5.0
+
+vec3 hsv2rgb(vec3 c) {
+    c = vec3(c.x, clamp(c.yz, 0.0, 1.0));
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
-	)";
+
+void main() {
+    float num = mod(vertexId, 2.0);
+    float point = mod(floor(vertexId / 2.0) + mod(vertexId, 2.0) * STEP, NUM_SEGMENTS);
+    float count = floor(vertexId / NUM_POINTS);
+    float offset = count * 0.02;
+    float angle = point * PI * 2.0 / NUM_SEGMENTS - offset;
+    float spread = 0.02;
+    float off = 0.01;
+    float speed = count * 0.004;
+    float snd = 1.0;
+
+    if (isStereo && num > 0.9) {
+        snd *= (
+            texture(sound2, vec2(off + spread * 0., speed)).r +
+            texture(sound2, vec2(off + spread * 1., speed)).r +
+            texture(sound2, vec2(off + spread * 2., speed)).r) / 3.;
+    } else {
+        snd *= (
+            texture(sound, vec2(off + spread * 0., speed)).r +
+            texture(sound, vec2(off + spread * 1., speed)).r +
+            texture(sound, vec2(off + spread * 2., speed)).r) / 3.;
+    }
+    
+    float rPulse = pow(snd, 5.0);
+    float radius = count * 0.02 + rPulse * 0.4; 
+
+    float rotationSpeed = num < 0.9 ? 1.0 : -1.0; 
+    float c = cos(angle + time * rotationSpeed) * radius;
+    float s = sin(angle + time * rotationSpeed) * radius;
+
+    vec2 aspect = vec2(1, resolution.x / resolution.y);
+    vec2 xy = vec2(c, s);
+
+    gl_Position = vec4(xy * aspect, 0, 1);
+    gl_Position.x = num < 0.9 
+        ? gl_Position.x * 0.5 - 0.4
+        : gl_Position.x * 0.5 + 0.4; 
+    
+    gl_PointSize = 2.0 + length(xy) * 20. * resolution.x / 1600.0;
+
+    float hue = time * 0.03 + count * 1.001 + (num < 0.9 ? 0.0 : 0.5);
+    float cPulse = pow(rPulse, 2.0);
+    float invCPulse = 1.0 - cPulse;
+    vec4 color = vec4(hsv2rgb(vec3(hue, invCPulse, 1.0)), 1.0);
+    v_color = mix(color, background, radius - cPulse);
+}
+)";
 };
